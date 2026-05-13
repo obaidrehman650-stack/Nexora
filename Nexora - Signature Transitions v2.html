@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f4ed">
+<title>Nexora — A supply chain for Sialkot</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/landing.css">
+<link rel="stylesheet" href="css/lifecycle.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body class="landing">
+
+<!-- Grain overlay — paper texture, fixed over everything -->
+<div id="grain" aria-hidden="true"></div>
+
+<!-- ════ INTRO ════ -->
+<div id="intro" aria-hidden="true">
+  <div class="intro-content">
+    <div class="i-mark">
+      <svg viewBox="0 0 52 52" aria-hidden="true">
+        <path class="i-hex-outer" d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z" fill="none" stroke="#c96442" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path class="i-hex-inner" d="M26 11 L40 19 L40 33 L26 41 L12 33 L12 19 Z" fill="none" stroke="#c96442" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path class="i-hex-fill"  d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z" fill="#c96442"></path>
+      </svg>
+    </div>
+    <div class="i-text">
+      <span class="i-word">Nexora</span>
+      <span class="i-tag">Sialkot Industrial Platform</span>
+    </div>
+  </div>
+</div>
+
+<!-- WhatsApp FAB -->
+<a href="https://wa.me/923000000000" id="fab-whatsapp" class="fab-whatsapp" aria-label="WhatsApp Nexora" target="_blank" rel="noopener">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+</a>
+
+<div id="page">
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo" aria-label="Nexora home">
+      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true"><path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"></path></svg>
+      Nexora
+    </a>
+    <div class="nav-right">
+      <a class="btn-ghost" href="Nexora - Dashboard.html">Platform</a>
+      <button class="btn-primary" data-scroll-to="lead-form">Partner Now</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="early-badge">Early Access · Sialkot</div>
+      <h1 class="hero-heading">A supply chain for <em>Sialkot</em>, built for who's already there.</h1>
+      <p class="hero-sub">Nexora is the first digital ecosystem made for Sialkot's exporters and manufacturers — quiet, precise, and designed to be the layer your business runs on.</p>
+
+      <div class="live-stats">
+        <div class="stat-item"><span class="stat-label">Active RFQs</span><span class="stat-value" data-target="142" data-suffix="">142</span></div>
+        <div class="stat-item"><span class="stat-label">Verified Units</span><span class="stat-value" data-target="89" data-suffix="">89</span></div>
+        <div class="stat-item"><span class="stat-label">Early Adopters</span><span class="stat-value" data-target="500" data-suffix="+">500+</span></div>
+        <div class="stat-item"><span class="stat-label">Export Markets</span><span class="stat-value" data-target="34" data-suffix="">34</span></div>
+      </div>
+
+      <div class="adopters">
+        <div class="avatar-stack">
+          <div class="avatar">SI</div>
+          <div class="avatar">EX</div>
+          <div class="avatar">MF</div>
+        </div>
+        <span class="adopters-text">500+ early adopters and counting</span>
+      </div>
+    </div>
+
+    <div class="form-wrap" id="lead-form">
+      <form class="form-card" id="lead-capture" novalidate autocomplete="on">
+        <h2>Join the beta</h2>
+        <p>Secure your spot for early access.</p>
+        <div class="field">
+          <label for="f-name">Full name</label>
+          <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Enter your name" required>
+          <div class="field-error">Please enter your name.</div>
+        </div>
+        <div class="field">
+          <label for="f-company">Company</label>
+          <input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Company name" required>
+          <div class="field-error">Please enter your company name.</div>
+        </div>
+        <div class="field">
+          <label for="f-role">Role</label>
+          <select id="f-role" name="role" required>
+            <option value="" disabled selected>Select role</option>
+            <option value="Exporter">Exporter</option>
+            <option value="Manufacturer">Manufacturer</option>
+            <option value="Supplier">Supplier</option>
+            <option value="Logistics">Logistics</option>
+          </select>
+          <div class="field-error">Please select your role.</div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-wa">WhatsApp</label>
+            <input id="f-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" pattern="[\d\s+\-()]{7,}" placeholder="+92…" required>
+            <div class="field-error">Please enter a valid WhatsApp number.</div>
+          </div>
+          <div class="field">
+            <label for="f-email">Email</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" placeholder="name@company.co" required>
+            <div class="field-error">Please enter a valid email.</div>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="submit-btn">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="label">Secure my spot</span>
+          <svg class="arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+        </button>
+      </form>
+      <div class="success-overlay" id="success-overlay" role="status" aria-live="polite">
+        <div class="success-check">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h3>Salam — you're on the list.</h3>
+        <p>We'll reach out via WhatsApp shortly.</p>
+        <button type="button" class="success-cta" id="success-close">Got it</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       ✦ INDUSTRIAL LIFECYCLE — Signature Transitions
+       Surgical ➜ Sports ➜ Leather
+       Three pinned stages with scissor-cut and ball-kick
+       transitions between them.
+  ════════════════════════════════════════ -->
+
+  <!-- Opener: tells the user what they're about to see -->
+  <section class="lc-opener" id="showcase">
+    <div class="section-label">What Sialkot makes</div>
+    <h2 class="section-heading">Three industries. <em>One handoff.</em></h2>
+    <div class="lc-opener-grid">
+      <p class="lc-opener-intro">Sialkot's 250,000+ skilled hands move between three trades — the surgeon's tool, the athlete's ball, the rider's hide. Scroll to walk the floor: the scissor that snips one industry into the next is the same hand that stitched the seam.</p>
+      <span class="lc-opener-cue">
+        Scroll to begin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"></path></svg>
+      </span>
+    </div>
+  </section>
+
+  <section class="lifecycle" id="lifecycle">
+    <div class="lc-pin">
+
+      <!-- Chapter rail -->
+      <aside class="lc-chapter" aria-hidden="true">
+        <span class="lc-step is-active" data-stage="surgical"><span class="lc-step-num">I</span><span class="lc-step-label">Surgical</span></span>
+        <span class="lc-step" data-stage="sports"><span class="lc-step-num">II</span><span class="lc-step-label">Sports</span></span>
+        <span class="lc-step" data-stage="leather"><span class="lc-step-num">III</span><span class="lc-step-label">Leather</span></span>
+      </aside>
+
+      <!-- "Now showing" caption -->
+      <aside class="lc-caption" aria-hidden="true">
+        <span class="lc-caption-dot"></span>
+        <span class="lc-caption-text">
+          <span class="lc-caption-eyebrow">Now on the bench</span>
+          <span class="lc-caption-name">Sialkot Forge · Mosquito forceps · AISI 410</span>
+        </span>
+      </aside>
+
+      <!-- ────── STAGE C: LEATHER (bottom layer, revealed last) ────── -->
+      <div class="lc-stage lc-stage--leather" aria-hidden="false">
+        <div class="lc-bg lc-bg--hide"></div>
+        <img class="lc-photo" alt="" loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=2400&q=82&fit=crop&auto=format"
+             srcset="https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=1400&q=82&fit=crop&auto=format 1400w,
+                     https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=2000&q=82&fit=crop&auto=format 2000w,
+                     https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=2500&q=82&fit=crop&auto=format 2500w"
+             sizes="100vw"
+             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=2400&q=82&fit=crop&auto=format';this.srcset='';">
+        <div class="lc-tint"></div>
+        <div class="lc-paper-filter"></div>
+        <div class="lc-content">
+          <span class="lc-roman">III</span>
+          <span class="lc-eyebrow">Chapter III · Leather &amp; goods</span>
+          <span class="lc-stat">$1.2<sub>B</sub></span>
+          <h3 class="lc-title">Of <em>full-grain leather</em> shipped, every year.</h3>
+          <p class="lc-body">Motorcycle gear, equestrian gloves, premium wallets — finished by craftspeople with decades on the bench. The same hands that stitched the ball above stitched this hide.</p>
+          <div class="lc-meta">
+            <span class="lc-tag">Vegetable-tanned hides</span>
+            <span class="lc-tag">CE-Level motorcycle gear</span>
+            <span class="lc-tag">OEM &amp; private-label ready</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────── STAGE B: SPORTS (middle layer) ────── -->
+      <div class="lc-stage lc-stage--sports">
+        <div class="lc-bg lc-bg--turf"></div>
+        <img class="lc-photo" alt="" loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1556124047-5ad95d2b97b3?w=2400&q=82&fit=crop&auto=format"
+             srcset="https://images.unsplash.com/photo-1556124047-5ad95d2b97b3?w=1400&q=82&fit=crop&auto=format 1400w,
+                     https://images.unsplash.com/photo-1556124047-5ad95d2b97b3?w=2000&q=82&fit=crop&auto=format 2000w,
+                     https://images.unsplash.com/photo-1556124047-5ad95d2b97b3?w=2500&q=82&fit=crop&auto=format 2500w"
+             sizes="100vw"
+             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=2400&q=82&fit=crop&auto=format';this.srcset='';">
+        <div class="lc-tint"></div>
+        <div class="lc-paper-filter"></div>
+        <div class="lc-content">
+          <span class="lc-roman">II</span>
+          <span class="lc-eyebrow">Chapter II · Sports goods</span>
+          <span class="lc-stat">70<sub>%</sub></span>
+          <h3 class="lc-title">Of the world's <em>match-day footballs</em>, stitched here.</h3>
+          <p class="lc-body">Hand-stitched footballs, boxing gloves, cricket gear. 2,400+ verified workshops, the quiet capital of professional sports manufacturing.</p>
+          <div class="lc-meta">
+            <span class="lc-tag">FIFA / World Rugby / IBA certified</span>
+            <span class="lc-tag">Thermal-bonded panels</span>
+            <span class="lc-tag">2,400+ workshops on Nexora</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────── STAGE A: SURGICAL (top layer, peels apart) ────── -->
+      <div class="lc-stage lc-stage--surgical">
+        <!-- Top half -->
+        <div class="lc-half lc-half--top">
+          <div class="lc-half-inner">
+            <div class="lc-bg lc-bg--steel"></div>
+            <img class="lc-photo" alt="" loading="lazy" decoding="async"
+                 src="https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=2400&q=82&fit=crop&auto=format"
+                 srcset="https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=1400&q=82&fit=crop&auto=format 1400w,
+                         https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=2000&q=82&fit=crop&auto=format 2000w,
+                         https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=2500&q=82&fit=crop&auto=format 2500w"
+                 sizes="100vw">
+            <div class="lc-tint"></div>
+            <div class="lc-paper-filter"></div>
+            <div class="lc-content">
+              <span class="lc-roman">I</span>
+              <span class="lc-eyebrow">Chapter I · Surgical instruments</span>
+              <span class="lc-stat">50<sub>%</sub></span>
+              <h3 class="lc-title">Of the world's <em>surgical instruments</em>, forged in Sialkot.</h3>
+              <p class="lc-body">Forceps, scissors, orthopedic tools — CE-marked precision shipping to clinics and hospitals across 60+ markets.</p>
+              <div class="lc-meta">
+                <span class="lc-tag">ISO 13485</span>
+                <span class="lc-tag">FDA-registered workshops</span>
+                <span class="lc-tag">Lead time from 30 days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Bottom half (mirrors the same scene; the cut bisects it) -->
+        <div class="lc-half lc-half--bottom">
+          <div class="lc-half-inner">
+            <div class="lc-bg lc-bg--steel"></div>
+            <img class="lc-photo" alt="" loading="lazy" decoding="async"
+                 src="https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=2400&q=82&fit=crop&auto=format"
+                 srcset="https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=1400&q=82&fit=crop&auto=format 1400w,
+                         https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=2000&q=82&fit=crop&auto=format 2000w,
+                         https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=2500&q=82&fit=crop&auto=format 2500w"
+                 sizes="100vw">
+            <div class="lc-tint"></div>
+            <div class="lc-paper-filter"></div>
+            <div class="lc-content">
+              <span class="lc-roman">I</span>
+              <span class="lc-eyebrow">Chapter I · Surgical instruments</span>
+              <span class="lc-stat">50<sub>%</sub></span>
+              <h3 class="lc-title">Of the world's <em>surgical instruments</em>, forged in Sialkot.</h3>
+              <p class="lc-body">Forceps, scissors, orthopedic tools — CE-marked precision shipping to clinics and hospitals across 60+ markets.</p>
+              <div class="lc-meta">
+                <span class="lc-tag">ISO 13485</span>
+                <span class="lc-tag">FDA-registered workshops</span>
+                <span class="lc-tag">Lead time from 30 days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────── TRANSITION B — Impact shockwave + shatter ────── -->
+      <div class="lc-shatter" aria-hidden="true">
+        <span class="lc-shard lc-shard--1"></span>
+        <span class="lc-shard lc-shard--2"></span>
+        <span class="lc-shard lc-shard--3"></span>
+        <span class="lc-shard lc-shard--4"></span>
+        <span class="lc-shard lc-shard--5"></span>
+        <span class="lc-shard lc-shard--6"></span>
+        <span class="lc-shard lc-shard--7"></span>
+        <span class="lc-shard lc-shard--8"></span>
+      </div>
+
+      <div class="lc-impact" aria-hidden="true">
+        <span class="lc-ripple lc-ripple--1"></span>
+        <span class="lc-ripple lc-ripple--2"></span>
+        <span class="lc-ripple lc-ripple--3"></span>
+      </div>
+
+      <!-- ────── TRANSITION A — Cut line + spark ────── -->
+      <div class="lc-cutline" aria-hidden="true"></div>
+      <div class="lc-spark" aria-hidden="true"></div>
+
+      <!-- ────── HERO ACTORS ────── -->
+
+      <!-- SCALPEL — clinical, cold-lit, #10 blade with terracotta collar -->
+      <div class="lc-actor lc-actor--scissor" aria-hidden="true">
+        <svg viewBox="0 0 820 160" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bladeGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"  stop-color="#fbfcff"></stop>
+              <stop offset="32%" stop-color="#d6dae1"></stop>
+              <stop offset="58%" stop-color="#8a93a0"></stop>
+              <stop offset="100%" stop-color="#b3bac4"></stop>
+            </linearGradient>
+            <linearGradient id="handleGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"  stop-color="#e8ecf1"></stop>
+              <stop offset="22%" stop-color="#b1b8c2"></stop>
+              <stop offset="50%" stop-color="#6f7682"></stop>
+              <stop offset="78%" stop-color="#9aa1ac"></stop>
+              <stop offset="100%" stop-color="#cdd2da"></stop>
+            </linearGradient>
+            <linearGradient id="bladeShine" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="rgba(255,255,255,0)"></stop>
+              <stop offset="50%"  stop-color="rgba(255,255,255,0.85)"></stop>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"></stop>
+            </linearGradient>
+            <linearGradient id="edgeGlint" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"  stop-color="rgba(255,255,255,0)"></stop>
+              <stop offset="60%" stop-color="rgba(255,255,255,0.95)"></stop>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"></stop>
+            </linearGradient>
+            <filter id="softShadow" x="-5%" y="-50%" width="110%" height="200%">
+              <feGaussianBlur stdDeviation="2.4"></feGaussianBlur>
+            </filter>
+          </defs>
+
+          <!-- Long cast shadow under whole instrument -->
+          <ellipse cx="410" cy="125" rx="380" ry="5" fill="rgba(0,0,0,0.32)" filter="url(#softShadow)"></ellipse>
+
+          <!-- HANDLE: long stainless body, slightly tapered at both ends -->
+          <path d="M 30 70
+                   L 30 90
+                   Q 30 96, 36 96
+                   L 600 96
+                   Q 612 96, 612 90
+                   L 612 70
+                   Q 612 64, 600 64
+                   L 36 64
+                   Q 30 64, 30 70 Z"
+                fill="url(#handleGrad)" stroke="#2a2e35" stroke-width="1.2"></path>
+
+          <!-- Handle top shine band -->
+          <rect x="40" y="67" width="565" height="3" fill="url(#bladeShine)" opacity="0.85"></rect>
+          <!-- Handle subtle lower band -->
+          <rect x="40" y="88" width="565" height="2" fill="rgba(0,0,0,0.25)" opacity="0.6"></rect>
+
+          <!-- Grippy knurled section (center of handle) -->
+          <g opacity="0.55">
+            <pattern id="knurl" x="0" y="0" width="6" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
+              <line x1="0" y1="0" x2="0" y2="14" stroke="#1a1612" stroke-width="0.6"></line>
+            </pattern>
+            <rect x="170" y="70" width="280" height="20" fill="url(#knurl)"></rect>
+          </g>
+
+          <!-- Engraved brand mark on handle -->
+          <text x="100" y="83" font-family="Inter, sans-serif" font-size="7.5"
+                fill="rgba(20,22,28,0.7)" letter-spacing="0.22em" font-weight="600">SIALKOT · #10 · CE</text>
+
+          <!-- Pommel ring at left -->
+          <g>
+            <circle cx="30" cy="80" r="14" fill="url(#handleGrad)" stroke="#2a2e35" stroke-width="1.2"></circle>
+            <circle cx="30" cy="80" r="5" fill="#1a1612"></circle>
+            <circle cx="28" cy="78" r="1.5" fill="rgba(255,255,255,0.4)"></circle>
+          </g>
+
+          <!-- Terracotta collar where blade meets handle (brand cue) -->
+          <g>
+            <rect x="612" y="60" width="18" height="40" fill="#c96442" stroke="#2a2e35" stroke-width="1"></rect>
+            <rect x="612" y="60" width="18" height="3" fill="rgba(255,255,255,0.45)"></rect>
+            <rect x="612" y="96" width="18" height="3" fill="rgba(0,0,0,0.30)"></rect>
+            <line x1="617" y1="65" x2="617" y2="95" stroke="rgba(255,255,255,0.35)" stroke-width="0.6"></line>
+            <line x1="624" y1="65" x2="624" y2="95" stroke="rgba(0,0,0,0.30)" stroke-width="0.6"></line>
+          </g>
+
+          <!-- BLADE: classic #10 curve, mounted to the right of the collar -->
+          <g>
+            <!-- Blade body — curved cutting edge on top, flat mount edge bottom -->
+            <path d="M 630 64
+                     L 760 60
+                     Q 800 58, 800 70
+                     Q 800 78, 770 82
+                     L 630 96
+                     Z"
+                  fill="url(#bladeGrad)" stroke="#1a1f28" stroke-width="1.1"></path>
+            <!-- Sharp cutting-edge highlight (cold clinical glint) -->
+            <path d="M 633 65 L 758 61 Q 798 60, 798 70"
+                  fill="none" stroke="url(#edgeGlint)" stroke-width="1.2" stroke-linecap="round"></path>
+            <!-- Inner shine on blade face -->
+            <path d="M 640 78 Q 720 76, 790 76"
+                  fill="none" stroke="url(#bladeShine)" stroke-width="1.5" opacity="0.7"></path>
+            <!-- Bevel line where blade thins toward tip -->
+            <path d="M 645 84 Q 720 82, 795 73"
+                  fill="none" stroke="rgba(20,22,28,0.45)" stroke-width="0.6"></path>
+            <!-- Tip glow point -->
+            <circle cx="799" cy="70" r="2" fill="#fff" opacity="0.9"></circle>
+          </g>
+        </svg>
+      </div>
+
+      <!-- BALL — hand-stitched football, leather brown to bridge to leather chapter -->
+      <div class="lc-actor lc-actor--ball" aria-hidden="true">
+        <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="ballSphere" cx="0.35" cy="0.32" r="0.85">
+              <stop offset="0%"  stop-color="#fffbef"></stop>
+              <stop offset="30%" stop-color="#f0e5cf"></stop>
+              <stop offset="65%" stop-color="#a87c4a"></stop>
+              <stop offset="100%" stop-color="#3a2614"></stop>
+            </radialGradient>
+            <radialGradient id="ballGloss" cx="0.32" cy="0.25" r="0.5">
+              <stop offset="0%"  stop-color="rgba(255,255,255,0.7)"></stop>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"></stop>
+            </radialGradient>
+          </defs>
+
+          <!-- Shadow ground -->
+          <ellipse cx="150" cy="280" rx="90" ry="8" fill="rgba(0,0,0,0.35)"></ellipse>
+
+          <!-- Ball sphere -->
+          <circle cx="150" cy="150" r="130" fill="url(#ballSphere)" stroke="#1a1612" stroke-width="1.5"></circle>
+
+          <!-- Hex/Pent panels — stylized stitching pattern -->
+          <g fill="none" stroke="#1a1612" stroke-width="1.6" stroke-linejoin="round" opacity="0.78">
+            <!-- Center pentagon -->
+            <polygon points="150,90 196,124 178,178 122,178 104,124"></polygon>
+            <!-- Surrounding hexagon fragments -->
+            <polyline points="150,90 150,55 122,40"></polyline>
+            <polyline points="196,124 232,108 245,140"></polyline>
+            <polyline points="178,178 210,210 200,242"></polyline>
+            <polyline points="122,178 100,212 110,243"></polyline>
+            <polyline points="104,124 70,108 56,142"></polyline>
+            <!-- Outer pentagon hints -->
+            <polyline points="232,108 250,80 220,52"></polyline>
+            <polyline points="245,140 274,160 255,200"></polyline>
+            <polyline points="200,242 175,265 145,260"></polyline>
+            <polyline points="56,142 26,160 45,200"></polyline>
+            <polyline points="70,108 50,80 80,52"></polyline>
+            <polyline points="122,40 175,30 220,52"></polyline>
+          </g>
+
+          <!-- Terracotta stitches — small dashes along panel seams -->
+          <g stroke="#c96442" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="2 4" opacity="0.85">
+            <polygon points="150,90 196,124 178,178 122,178 104,124" fill="none"></polygon>
+          </g>
+
+          <!-- Gloss highlight -->
+          <ellipse cx="115" cy="105" rx="55" ry="35" fill="url(#ballGloss)"></ellipse>
+
+          <!-- Tiny brand mark -->
+          <text x="150" y="208" text-anchor="middle"
+                font-family="Fraunces, serif" font-style="italic" font-size="11"
+                fill="rgba(26,22,18,0.6)" letter-spacing="0.05em">Sialkot</text>
+        </svg>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════ PULL QUOTE ════ -->
+  <section class="pull-quote">
+    <div class="pull-quote-inner reveal">
+      <span class="pull-quote-mark">“</span>
+      <blockquote>Sialkot's factories make the world's match-day footballs. Nexora makes the people who make them <em>visible</em>.</blockquote>
+      <cite>
+        <strong>Industry Brief, 2026</strong>
+        <span>Pakistan Bureau of Statistics</span>
+      </cite>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="benefits">
+    <div class="section-label reveal">The advantage</div>
+    <h2 class="section-heading reveal">Benefits for early partners.</h2>
+    <div class="cards">
+      <div class="card-wrap">
+        <div class="card">
+          <span class="card-num">01</span>
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h3>Priority verification</h3>
+          <p>Skip the waitlist and get your business profile verified and visible to global partners instantly.</p>
+        </div>
+      </div>
+      <div class="card-wrap">
+        <div class="card">
+          <span class="card-num">02</span>
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h3>Zero fees</h3>
+          <p>Six months of zero transaction or subscription fees on the platform.</p>
+        </div>
+      </div>
+      <div class="card-wrap">
+        <div class="card">
+          <span class="card-num">03</span>
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+          </div>
+          <h3>Founding member status</h3>
+          <p>Exclusive profile badge and early access to every beta feature before public release.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUSTED -->
+  <div class="trusted">
+    <div class="trusted-label">Trusted by industry leaders</div>
+    <div class="logos">
+      <span class="logo-item">SCCI</span>
+      <span class="logo-item">SIMAP</span>
+      <span class="logo-item">PSGMEA</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div>
+        <a href="#" class="nav-logo" aria-label="Nexora home">
+          <svg width="18" height="18" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true"><path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"></path></svg>
+          Nexora
+        </a>
+        <p class="footer-tagline">Building the future of Sialkot, one connection at a time.</p>
+      </div>
+      <div class="footer-right">
+        <div class="footer-links">
+          <a href="#">Infrastructure</a>
+          <a href="#">Export Policy</a>
+          <a href="#">Privacy Protocol</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Sialkot Industrial Platform. All rights reserved.</div>
+  </footer>
+
+</div><!-- /page -->
+
+<!-- Minimal page wiring: dismiss intro, reveal page, basic scroll reveals -->
+<script>
+(function () {
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const intro = document.getElementById('intro');
+  const page  = document.getElementById('page');
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+
+  function showPage() {
+    page && page.classList.add('show');
+    if (intro) {
+      intro.style.transition = 'opacity 0.6s ease';
+      intro.style.opacity = '0';
+      setTimeout(() => intro.style.display = 'none', 700);
+    }
+  }
+  if (REDUCED) { showPage(); }
+  else { setTimeout(showPage, 2400); }
+
+  // Reveal-on-scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Smooth scroll for [data-scroll-to]
+  document.querySelectorAll('[data-scroll-to]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      const el = document.getElementById(b.dataset.scrollTo);
+      el && el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Form: visual-only submit
+  const form = document.getElementById('lead-capture');
+  const overlay = document.getElementById('success-overlay');
+  const closeBtn = document.getElementById('success-close');
+  form && form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      [...form.querySelectorAll('.field')].forEach(f => {
+        const i = f.querySelector('input, select');
+        f.classList.toggle('invalid', i && !i.checkValidity());
+      });
+      return;
+    }
+    const btn = document.getElementById('submit-btn');
+    btn.classList.add('loading');
+    setTimeout(() => { btn.classList.remove('loading'); overlay.classList.add('show'); }, 700);
+  });
+  closeBtn && closeBtn.addEventListener('click', () => overlay.classList.remove('show'));
+})();
+</script>
+
+<!-- Lifecycle (Signature Transitions) -->
+<script src="js/lifecycle.js" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f4ed">
+<title>Nexora — Beta Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="dashboard">
+
+<!-- Grain overlay — paper texture, fixed over everything -->
+<div id="grain" aria-hidden="true"></div>
+
+<div class="app">
+
+  <!-- ════ SIDEBAR ════ -->
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="nexora-v3.html">
+      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true">
+        <path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"/>
+      </svg>
+      Nexora
+    </a>
+
+    <div class="sidebar-section-label">Workspace</div>
+    <nav class="sidebar-nav" aria-label="Primary">
+      <a class="nav-item active" data-section="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <rect x="3" y="3"  width="7" height="9"  rx="1"/>
+          <rect x="14" y="3" width="7" height="5"  rx="1"/>
+          <rect x="14" y="12" width="7" height="9" rx="1"/>
+          <rect x="3" y="16" width="7" height="5"  rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+      <a class="nav-item" data-section="rfqs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="9" y1="13" x2="15" y2="13"/>
+          <line x1="9" y1="17" x2="13" y2="17"/>
+        </svg>
+        RFQs
+        <span class="badge">16</span>
+      </a>
+      <a class="nav-item" data-section="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        </svg>
+        My Profile
+      </a>
+      <a class="nav-item" data-section="messages">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        Messages
+        <span class="badge">3</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-pill" role="button" tabindex="0" aria-label="Account">
+        <div class="user-avatar">OI</div>
+        <div class="user-meta">
+          <div class="user-name">Obur Industries</div>
+          <div class="user-role">Manufacturer</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color: var(--text-muted)">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-scrim" aria-hidden="true"></div>
+
+  <!-- ════ MAIN ════ -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="menu-toggle" aria-label="Open menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <line x1="4" y1="6"  x2="20" y2="6"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="18" x2="20" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" id="search-input" placeholder="Search leads, buyers, products…" aria-label="Search">
+        <button class="search-clear" id="search-clear" aria-label="Clear search" type="button">×</button>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" id="btn-notifs" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.7 21a2 2 0 01-3.4 0"/>
+          </svg>
+          <span class="notif-dot" id="notif-dot" aria-hidden="true"></span>
+        </button>
+        <button class="icon-btn" id="btn-settings" aria-label="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8v.1a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>
+          </svg>
+        </button>
+
+        <!-- Notifications popover -->
+        <div class="popover" id="popover-notifs" role="dialog" aria-label="Notifications">
+          <div class="popover-header">
+            <h4>Notifications</h4>
+            <span class="pop-action" id="notif-clear">Mark all read</span>
+          </div>
+          <div class="popover-list" id="notif-list"></div>
+        </div>
+
+        <!-- Settings popover -->
+        <div class="popover menu-popover" id="popover-settings" role="dialog" aria-label="Settings">
+          <div class="menu-item" data-action="account">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+            Account settings
+          </div>
+          <div class="menu-item" data-action="theme">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            Appearance
+          </div>
+          <div class="menu-item" data-action="help">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h0"/></svg>
+            Help & support
+          </div>
+          <div class="menu-divider"></div>
+          <div class="menu-item" data-action="logout" style="color: var(--danger);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Log out
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-wrap">
+
+      <!-- ═══════ DASHBOARD VIEW ═══════ -->
+      <section class="view active" data-view="dashboard">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1 class="page-title">
+              <span class="live-dot" aria-hidden="true"></span>
+              Live Leads Feed
+            </h1>
+            <p class="page-subtitle">
+              <strong id="live-count">10</strong> open RFQs from verified global buyers — updated in real time.
+            </p>
+          </div>
+          <div class="filter-pills" role="tablist" aria-label="Filter by industry">
+            <button class="pill active" data-filter="all"      role="tab">All <span class="count">10</span></button>
+            <button class="pill"        data-filter="sports"   role="tab">Sports <span class="count">4</span></button>
+            <button class="pill"        data-filter="surgical" role="tab">Surgical <span class="count">3</span></button>
+            <button class="pill"        data-filter="leather"  role="tab">Leather <span class="count">3</span></button>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-label">Active Leads</div>
+            <div class="stat-card-value" id="stat-total">10</div>
+            <div class="stat-card-delta">+2 today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">New This Hour</div>
+            <div class="stat-card-value" id="stat-new">2</div>
+            <div class="stat-card-delta neutral">Live</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Quotes Sent</div>
+            <div class="stat-card-value" id="stat-quoted">0</div>
+            <div class="stat-card-delta neutral">This week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Markets Reached</div>
+            <div class="stat-card-value" id="stat-markets">10</div>
+            <div class="stat-card-delta">+1 this month</div>
+          </div>
+        </div>
+
+        <section class="leads-grid" id="leads-grid" aria-live="polite"></section>
+      </section>
+
+      <!-- ═══════ RFQs VIEW ═══════ -->
+      <section class="view" data-view="rfqs">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1 class="page-title">All RFQs</h1>
+            <p class="page-subtitle">Open, quoted, won, and lost — your full RFQ ledger.</p>
+          </div>
+          <div class="filter-pills">
+            <button class="pill active" data-rfq-filter="all">All <span class="count" id="rfq-stat-all">0</span></button>
+            <button class="pill" data-rfq-filter="open">Open <span class="count" id="rfq-stat-open">0</span></button>
+            <button class="pill" data-rfq-filter="quoted">Quoted <span class="count" id="rfq-stat-quoted">0</span></button>
+            <button class="pill" data-rfq-filter="won">Won <span class="count" id="rfq-stat-won">0</span></button>
+            <button class="pill" data-rfq-filter="lost">Lost <span class="count" id="rfq-stat-lost">0</span></button>
+          </div>
+        </div>
+
+        <div class="rfq-table-wrap">
+          <div class="rfq-table-header">
+            <h3>RFQ Ledger</h3>
+            <span style="font-size: 0.84rem; color: var(--text-muted);">Click any row for details</span>
+          </div>
+          <table class="rfq-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Destination</th>
+                <th>Quantity</th>
+                <th>Quoted Price</th>
+                <th>Status</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody id="rfq-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════ PROFILE VIEW ═══════ -->
+      <section class="view" data-view="profile">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1 class="page-title">My Profile</h1>
+            <p class="page-subtitle">Your public business profile — visible to verified buyers across Nexora.</p>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <aside class="profile-card">
+            <div class="profile-avatar-big" id="p-avatar">OI</div>
+            <div class="profile-name" id="p-name">Obur Industries</div>
+            <div class="profile-role" id="p-role">Manufacturer</div>
+            <div class="profile-verified">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+              Verified by Nexora
+            </div>
+            <div class="profile-meta">
+              <div class="profile-meta-row"><span class="lbl">Status</span> <span class="val" id="p-joined">Founding member · 2026</span></div>
+              <div class="profile-meta-row"><span class="lbl">City</span>     <span class="val" id="p-city">Sialkot, Punjab</span></div>
+              <div class="profile-meta-row"><span class="lbl">Employees</span><span class="val" id="p-employees">180–220</span></div>
+              <div class="profile-meta-row"><span class="lbl">Capacity</span> <span class="val" id="p-capacity">24,000 units / month</span></div>
+              <div class="profile-meta-row"><span class="lbl">Founded</span>  <span class="val" id="p-founded">1998</span></div>
+            </div>
+          </aside>
+
+          <form class="profile-form" id="profile-form" onsubmit="return false;">
+            <h3>Edit business profile</h3>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="pf-name">Company name</label>
+                <input id="pf-name" type="text" required>
+              </div>
+              <div class="field">
+                <label for="pf-type">Business type</label>
+                <select id="pf-type">
+                  <option>Manufacturer</option>
+                  <option>Exporter</option>
+                  <option>Supplier</option>
+                  <option>Logistics</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pf-city">City</label>
+                <input id="pf-city" type="text">
+              </div>
+              <div class="field">
+                <label for="pf-founded">Founded</label>
+                <input id="pf-founded" type="number" min="1900" max="2026">
+              </div>
+              <div class="field">
+                <label for="pf-employees">Employees</label>
+                <input id="pf-employees" type="text">
+              </div>
+              <div class="field full">
+                <label for="pf-capacity">Monthly capacity</label>
+                <input id="pf-capacity" type="text">
+              </div>
+              <div class="field full">
+                <label for="pf-about">About</label>
+                <textarea id="pf-about" rows="4"></textarea>
+              </div>
+            </div>
+
+            <h3 style="margin-top: 28px;">Certifications</h3>
+            <div class="cert-grid" id="p-cert-grid"></div>
+
+            <div class="form-footer">
+              <button class="btn-ghost" id="profile-cancel">Cancel</button>
+              <button class="btn-primary" id="profile-save">Save profile</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ═══════ MESSAGES VIEW ═══════ -->
+      <section class="view" data-view="messages">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1 class="page-title">Messages</h1>
+            <p class="page-subtitle">Conversations with verified buyers on active RFQs.</p>
+          </div>
+        </div>
+
+        <div class="messages-grid">
+          <aside class="thread-list" id="thread-list-wrap">
+            <div class="thread-list-header">Inbox</div>
+            <div id="thread-list"></div>
+          </aside>
+
+          <section class="thread-pane">
+            <header class="thread-pane-header">
+              <div class="thread-avatar" id="thread-avatar">KM</div>
+              <div>
+                <div class="thread-pane-name" id="thread-name">Klaus Müller — Sport DE</div>
+                <div class="thread-pane-sub" id="thread-sub">Re: L-2038 · Pro Series Boxing Gloves</div>
+              </div>
+            </header>
+            <div class="thread-messages" id="thread-messages"></div>
+            <form class="thread-composer" id="thread-composer-form">
+              <input type="text" id="thread-composer-input" placeholder="Type a message…" autocomplete="off">
+              <button type="submit" class="thread-send" aria-label="Send">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ════ QUOTE MODAL ════ -->
+<div class="modal-backdrop" id="modal-quote" role="dialog" aria-modal="true">
+  <div class="modal">
+    <header class="modal-header">
+      <div>
+        <div class="modal-eyebrow" id="q-eyebrow">New Quote · L-2041</div>
+        <h2 class="modal-title" id="q-title">Hand-Stitched Match Football</h2>
+        <p class="modal-sub" id="q-sub">12,000 units · Germany</p>
+      </div>
+      <button class="modal-close" data-close-modal aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <line x1="18" y1="6"  x2="6"  y2="18"/>
+          <line x1="6"  y1="6"  x2="18" y2="18"/>
+        </svg>
+      </button>
+    </header>
+    <div class="modal-body">
+      <div class="modal-summary">
+        <div class="sum-item"><div class="lbl">Quantity</div><div class="val" id="q-sum-qty">—</div></div>
+        <div class="sum-item"><div class="lbl">Target price</div><div class="val" id="q-sum-target">—</div></div>
+        <div class="sum-item"><div class="lbl">Destination</div><div class="val" id="q-sum-dest">—</div></div>
+      </div>
+
+      <div class="modal-grid">
+        <div class="field">
+          <label for="q-price">Unit price (USD)</label>
+          <input id="q-price" type="number" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="q-moq">Your MOQ</label>
+          <input id="q-moq" type="number" min="1">
+        </div>
+        <div class="field">
+          <label for="q-lead-time">Lead time</label>
+          <select id="q-lead-time">
+            <option>30 days</option>
+            <option>40 days</option>
+            <option>45 days</option>
+            <option>60 days</option>
+            <option>75 days</option>
+            <option>90 days</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="q-incoterm">Incoterm</label>
+          <select id="q-incoterm">
+            <option>EXW Sialkot</option>
+            <option>FOB Karachi</option>
+            <option>CIF Buyer Port</option>
+            <option>DDP Buyer Door</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="q-payment">Payment terms</label>
+          <input id="q-payment" type="text" placeholder="e.g. 30% deposit, 70% on B/L">
+        </div>
+        <div class="field full">
+          <label for="q-notes">Notes for buyer</label>
+          <textarea id="q-notes" rows="3" placeholder="Sample availability, packaging notes, certifications attached…"></textarea>
+        </div>
+      </div>
+    </div>
+    <footer class="modal-footer">
+      <span class="hint">Buyer sees this within seconds.</span>
+      <div class="modal-footer-actions">
+        <button class="btn-ghost" data-close-modal>Cancel</button>
+        <button class="btn-primary" id="q-submit">
+          Send Quote
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- ════ DETAILS MODAL ════ -->
+<div class="modal-backdrop" id="modal-details" role="dialog" aria-modal="true">
+  <div class="modal modal-large">
+    <header class="modal-header">
+      <div>
+        <div class="modal-eyebrow" id="d-eyebrow">Lead detail · L-2041</div>
+        <h2 class="modal-title" id="d-title">Hand-Stitched Match Football</h2>
+        <p class="modal-sub" id="d-sub">12,000 units · Germany</p>
+      </div>
+      <button class="modal-close" data-close-modal aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <line x1="18" y1="6"  x2="6"  y2="18"/>
+          <line x1="6"  y1="6"  x2="18" y2="18"/>
+        </svg>
+      </button>
+    </header>
+    <div class="modal-body" id="d-body"></div>
+    <footer class="modal-footer">
+      <span class="hint">All buyer data is verified by Nexora.</span>
+      <div class="modal-footer-actions">
+        <button class="btn-ghost" data-close-modal>Close</button>
+        <button class="btn-primary" id="d-cta">Send Quote</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- Toast stack -->
+<div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<script src="js/dashboard.js" defer></script>
+</body>
+</html>

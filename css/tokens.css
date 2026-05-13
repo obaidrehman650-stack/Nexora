@@ -1,0 +1,90 @@
+/* ════════════════════════════════════════
+   NEXORA — Design tokens
+   Claude-inspired palette: warm cream paper,
+   terracotta accent, editorial typography.
+════════════════════════════════════════ */
+:root {
+  /* ── Surfaces (warm "book paper") ───── */
+  --bg:           #f5f4ed;   /* primary page bg */
+  --bg-elevated:  #faf9f5;   /* slightly lighter sections */
+  --bg-deep:      #ebe8de;   /* footer / sidebar inset */
+  --surface:      #ffffff;   /* cards */
+  --surface-soft: #fbfaf4;   /* subtly-tinted card */
+
+  /* ── Borders ──────────────────────── */
+  --border:       #e8e6dc;
+  --border-mid:   #d4d0c0;
+  --border-strong:#bcb6a3;
+  --rule:         rgba(26,22,18,0.08);
+
+  /* ── Text (warm near-black) ───────── */
+  --text:         #1a1612;
+  --text-mid:     #5a554d;
+  --text-muted:   #8a8478;
+  --text-dim:     #b8b2a4;
+  --text-on-dark: #f5f4ed;
+
+  /* ── Brand (Claude terracotta) ────── */
+  --accent:       #c96442;
+  --accent-dark:  #a04a30;
+  --accent-soft:  #f4e0d6;
+  --accent-tint:  rgba(201,100,66,0.08);
+  --accent-glow:  rgba(201,100,66,0.16);
+
+  /* ── Industry hues (dashboard) ────── */
+  --ind-sports:      #6b8a5a;
+  --ind-sports-bg:   #e8eee0;
+  --ind-surgical:    #3d6b7c;
+  --ind-surgical-bg: #dde8ec;
+  --ind-leather:     #8b5e3c;
+  --ind-leather-bg:  #ede0d3;
+
+  /* ── Status ───────────────────────── */
+  --danger:       #b8473a;
+  --warning:      #c47b2e;
+  --success:      #5a7d4f;
+
+  /* ── Radii ────────────────────────── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ── Shadows (double-stack: sharp 1px edge + soft depth) ─── */
+  --shadow-xs:
+    0 0 0 1px rgba(26,22,18,0.05),
+    0 1px 2px rgba(26,22,18,0.04);
+  --shadow-sm:
+    0 0 0 1px rgba(26,22,18,0.06),
+    0 1px 0 rgba(26,22,18,0.03),
+    0 4px 12px rgba(26,22,18,0.06);
+  --shadow-md:
+    0 0 0 1px rgba(26,22,18,0.06),
+    0 1px 0 rgba(26,22,18,0.03),
+    0 8px 22px rgba(26,22,18,0.08),
+    0 2px 4px rgba(26,22,18,0.04);
+  --shadow-lg:
+    0 0 0 1px rgba(26,22,18,0.06),
+    0 1px 0 rgba(26,22,18,0.04),
+    0 18px 48px rgba(26,22,18,0.12),
+    0 6px 12px rgba(26,22,18,0.06);
+
+  /* Grain texture (SVG fractalNoise, base64-quoted) */
+  --grain-url: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* ── Type ─────────────────────────── */
+  --font-display: "Fraunces", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body:    "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-urdu:    "Noto Naskh Arabic", "Noto Nastaliq Urdu", system-ui, sans-serif;
+
+  /* Fraunces variable axes — soft, slightly idiosyncratic */
+  --fraunces-soft: "opsz" 96, "SOFT" 30, "WONK" 0;
+  --fraunces-display: "opsz" 144, "SOFT" 30, "WONK" 1;
+
+  /* ── Layout ───────────────────────── */
+  --max-w: 1180px;
+  --gutter: 28px;
+}

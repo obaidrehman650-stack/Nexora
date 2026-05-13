@@ -1,0 +1,648 @@
+/* ════════════════════════════════════════
+   NEXORA — Industrial Lifecycle Transitions
+   Surgical ➜ Sports ➜ Leather
+   "The tool as the transition" — pinned scroll
+   narrative driven by scissor cut + ball kick.
+════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+   Section frame — long scrolled length, pinned content
+─────────────────────────────────────────── */
+.lifecycle {
+  position: relative;
+  background: var(--bg);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.lifecycle.is-ready { /* visible flag for JS */ }
+
+/* The pin wrapper is the viewport-sized canvas */
+.lc-pin {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0d0c0a;
+  color: var(--text-on-dark);
+}
+
+/* ──────────────────────────────────────────
+   Chapter rail — fixed left rail
+─────────────────────────────────────────── */
+.lc-chapter {
+  position: absolute;
+  top: 50%; left: 32px;
+  transform: translateY(-50%);
+  z-index: 60;
+  display: flex; flex-direction: column;
+  gap: 22px;
+  padding: 22px 14px;
+  border-left: 1px solid rgba(255,255,255,0.18);
+  font-family: var(--font-body);
+  pointer-events: none;
+}
+.lc-step {
+  display: flex; align-items: center; gap: 14px;
+  opacity: 0.35;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateX(-4px);
+}
+.lc-step.is-active { opacity: 1; transform: translateX(0); }
+.lc-step-num {
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-soft);
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  width: 22px;
+}
+.lc-step-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,244,237,0.92);
+  font-weight: 500;
+}
+
+/* ──────────────────────────────────────────
+   Chapter caption — fixed bottom right
+─────────────────────────────────────────── */
+.lc-caption {
+  position: absolute;
+  right: 32px; bottom: 32px;
+  z-index: 60;
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 14px 10px 12px;
+  background: rgba(13,12,10,0.55);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(245,244,237,0.14);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  color: var(--text-on-dark);
+}
+.lc-caption-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(201,100,66,0.22);
+}
+.lc-caption-text {
+  display: flex; flex-direction: column; line-height: 1.1;
+}
+.lc-caption-eyebrow {
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,244,237,0.55);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.lc-caption-name {
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-soft);
+  font-size: 0.92rem;
+  font-weight: 450;
+}
+
+/* ──────────────────────────────────────────
+   Stages — each is a full-bleed layer.
+   They are stacked in source order;
+   z-index is set so:
+     - leather sits at the bottom (revealed last)
+     - sports sits in the middle
+     - surgical sits on top (it peels away first)
+─────────────────────────────────────────── */
+.lc-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+.lc-stage--leather  { z-index: 1; }
+.lc-stage--sports   { z-index: 2; }
+.lc-stage--surgical { z-index: 3; }
+
+/* Surgical stage is split into two horizontal halves
+   that peel apart during transition A.
+   Each half clips its own copy of the SAME content,
+   so the cut looks like a single layer being slit. */
+.lc-stage--surgical {
+  background: transparent;
+}
+.lc-half {
+  position: absolute;
+  left: 0; right: 0;
+  overflow: hidden;
+  will-change: transform, clip-path;
+}
+.lc-half--top {
+  top: 0; height: 50%;
+  clip-path: inset(0 0 0 0);
+}
+.lc-half--bottom {
+  bottom: 0; height: 50%;
+  clip-path: inset(0 0 0 0);
+}
+.lc-half-inner {
+  position: absolute;
+  left: 0; right: 0;
+  width: 100%;
+  height: 200%;
+  display: grid;
+  place-items: center;
+}
+.lc-half--top .lc-half-inner { top: 0; }
+.lc-half--bottom .lc-half-inner { bottom: 0; }
+
+/* ──────────────────────────────────────────
+   TEXTURE A — Brushed steel (surgical)
+   Cool, vertical-grain, mirror-polish hint.
+─────────────────────────────────────────── */
+.lc-bg--steel {
+  position: absolute; inset: 0;
+  background:
+    /* fine vertical grain */
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,0.045) 0px,
+      rgba(255,255,255,0.045) 1px,
+      transparent 1px,
+      transparent 3px),
+    /* coarser banding */
+    repeating-linear-gradient(90deg,
+      rgba(0,0,0,0.06) 0px,
+      rgba(0,0,0,0.06) 2px,
+      transparent 2px,
+      transparent 11px),
+    /* polish gradient */
+    linear-gradient(180deg,
+      #d9dde2 0%,
+      #b5bbc2 30%,
+      #8c93a0 55%,
+      #b1b8c2 80%,
+      #cdd2da 100%);
+  z-index: 0;
+}
+.lc-bg--steel::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.18), transparent 70%),
+    radial-gradient(ellipse 90% 60% at 50% 100%, rgba(0,0,0,0.20), transparent 70%);
+  pointer-events: none;
+}
+/* Subtle paper-grain to keep texture editorial */
+.lc-bg--steel::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: var(--grain-url);
+  background-size: 220px 220px;
+  mix-blend-mode: overlay;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────────
+   TEXTURE B — Synthetic turf (sports)
+   Deep field green with diagonal blade hatching.
+─────────────────────────────────────────── */
+.lc-bg--turf {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(82deg,
+      rgba(0,0,0,0.18) 0px,
+      rgba(0,0,0,0.18) 1px,
+      transparent 1px,
+      transparent 4px),
+    repeating-linear-gradient(98deg,
+      rgba(255,255,255,0.04) 0px,
+      rgba(255,255,255,0.04) 1px,
+      transparent 1px,
+      transparent 5px),
+    /* mowing stripes */
+    repeating-linear-gradient(180deg,
+      rgba(0,0,0,0.05) 0px,
+      rgba(0,0,0,0.05) 60px,
+      rgba(255,255,255,0.03) 60px,
+      rgba(255,255,255,0.03) 120px),
+    linear-gradient(160deg, #3f5a30 0%, #2e4424 50%, #3a5430 100%);
+}
+.lc-bg--turf::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.06), transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(0,0,0,0.30), transparent 70%);
+}
+.lc-bg--turf::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: var(--grain-url);
+  background-size: 200px 200px;
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+}
+
+/* ──────────────────────────────────────────
+   TEXTURE C — Grainy tanned hide (leather)
+   Warm cognac with mottled darkening and grain.
+─────────────────────────────────────────── */
+.lc-bg--hide {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(40,18,8,0.45), transparent 38%),
+    radial-gradient(circle at 78% 68%, rgba(40,18,8,0.40), transparent 42%),
+    radial-gradient(circle at 50% 50%, rgba(255,200,150,0.18), transparent 55%),
+    linear-gradient(135deg, #7a4a26 0%, #5b3416 45%, #6f3f1f 80%, #4b2a10 100%);
+}
+.lc-bg--hide::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: var(--grain-url);
+  background-size: 180px 180px;
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+}
+/* Pebbled leather pattern via overlapping radial dots */
+.lc-bg--hide::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(0,0,0,0.18) 0%, transparent 8%),
+    radial-gradient(circle at 28% 38%, rgba(0,0,0,0.14) 0%, transparent 9%),
+    radial-gradient(circle at 60% 18%, rgba(0,0,0,0.20) 0%, transparent 7%),
+    radial-gradient(circle at 82% 46%, rgba(0,0,0,0.15) 0%, transparent 8%),
+    radial-gradient(circle at 42% 72%, rgba(0,0,0,0.18) 0%, transparent 9%),
+    radial-gradient(circle at 76% 88%, rgba(0,0,0,0.16) 0%, transparent 7%);
+  background-size: 220px 220px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.45;
+}
+
+/* ──────────────────────────────────────────
+   Stage content — editorial composition
+─────────────────────────────────────────── */
+.lc-content {
+  position: relative;
+  z-index: 5;
+  max-width: 880px;
+  padding: 0 64px 0 110px;
+  display: grid;
+  gap: 18px;
+  color: var(--text-on-dark);
+  text-shadow: 0 1px 24px rgba(0,0,0,0.35);
+}
+.lc-eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: none;
+}
+.lc-eyebrow::before {
+  content: "";
+  width: 32px; height: 1px;
+  background: var(--accent);
+}
+.lc-roman {
+  position: absolute;
+  top: -14px; right: 8px;
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-display);
+  font-style: italic;
+  font-size: 6.5rem;
+  line-height: 1;
+  color: rgba(245,244,237,0.06);
+  letter-spacing: -0.04em;
+  pointer-events: none;
+}
+.lc-stat {
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-display);
+  font-size: clamp(4rem, 9vw, 8rem);
+  font-weight: 380;
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+  color: var(--text-on-dark);
+  margin: 4px 0 6px;
+  display: flex; align-items: baseline; gap: 6px;
+}
+.lc-stat em {
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  color: var(--accent);
+}
+.lc-stat sub {
+  font-size: 0.22em;
+  color: rgba(245,244,237,0.6);
+  letter-spacing: 0;
+  vertical-align: baseline;
+  font-variation-settings: var(--fraunces-soft);
+  font-style: normal;
+}
+.lc-title {
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-display);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  max-width: 22ch;
+  color: var(--text-on-dark);
+}
+.lc-title em {
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 80, "WONK" 1;
+  color: var(--accent);
+}
+.lc-body {
+  font-size: 1.04rem;
+  line-height: 1.55;
+  color: rgba(245,244,237,0.86);
+  max-width: 48ch;
+  margin-top: 6px;
+}
+
+.lc-meta {
+  display: flex; flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.lc-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid rgba(245,244,237,0.18);
+  border-radius: var(--radius-pill);
+  background: rgba(13,12,10,0.32);
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: rgba(245,244,237,0.92);
+  text-shadow: none;
+}
+.lc-tag::before {
+  content: ""; width: 5px; height: 5px;
+  background: var(--accent); border-radius: 50%;
+}
+
+/* ──────────────────────────────────────────
+   The hero actors (scissor + ball)
+   Positioned over everything. JS drives their
+   x/y/scale/rotate via GSAP scroll timeline.
+─────────────────────────────────────────── */
+.lc-actor {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: 40;
+}
+.lc-actor--scissor {
+  width: clamp(420px, 60vw, 820px);
+  opacity: 0;
+  transform-origin: 50% 50%;
+}
+.lc-actor--scissor svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+.lc-actor--ball {
+  width: clamp(180px, 26vw, 320px);
+  opacity: 0;
+  transform-origin: 50% 50%;
+}
+.lc-actor--ball svg { display: block; width: 100%; height: auto; }
+
+/* Tiny motion-blur halo behind the ball during flight */
+.lc-actor--ball::after {
+  content: "";
+  position: absolute;
+  inset: -8% -8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,244,237,0.18) 0%, transparent 65%);
+  opacity: var(--ball-blur, 0);
+  filter: blur(20px);
+  z-index: -1;
+}
+
+/* ──────────────────────────────────────────
+   Transition A — the cut line that strokes
+   left as the scissor traverses, then becomes
+   the visible separation between the halves.
+─────────────────────────────────────────── */
+.lc-cutline {
+  position: absolute;
+  top: 50%; right: 0;
+  width: 100%; height: 0;
+  border-top: 1px solid rgba(245,244,237,0.95);
+  box-shadow:
+    0 0 12px rgba(245,244,237,0.6),
+    0 0 2px var(--accent);
+  transform-origin: 100% 50%;
+  transform: scaleX(0);
+  z-index: 35;
+  pointer-events: none;
+}
+/* A faint spark trail riding with the scissor tip */
+.lc-spark {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 14px; height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe9d3 0%, var(--accent) 45%, transparent 70%);
+  filter: blur(2px);
+  opacity: 0;
+  z-index: 36;
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────────
+   Transition B — impact shockwave + shatter shards.
+   Triggered when ball "hits the screen".
+─────────────────────────────────────────── */
+.lc-impact {
+  position: absolute;
+  inset: 0;
+  z-index: 38;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+.lc-ripple {
+  position: absolute;
+  width: 32vmin; height: 32vmin;
+  border-radius: 50%;
+  border: 2px solid rgba(245,244,237,0.85);
+  opacity: 0;
+  will-change: transform, opacity;
+  box-shadow: 0 0 24px rgba(245,244,237,0.4);
+}
+.lc-ripple--2 { border-color: rgba(201,100,66,0.85); }
+.lc-ripple--3 { border-color: rgba(245,244,237,0.55); }
+
+/* Shatter shards — radial polygons fanning outward */
+.lc-shatter {
+  position: absolute; inset: 0;
+  z-index: 37;
+  pointer-events: none;
+}
+.lc-shard {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 26vmin; height: 26vmin;
+  margin: -13vmin 0 0 -13vmin;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%),
+    /* inherit turf-ish texture */
+    repeating-linear-gradient(82deg,
+      rgba(0,0,0,0.18) 0px,
+      rgba(0,0,0,0.18) 1px,
+      transparent 1px, transparent 4px),
+    linear-gradient(160deg, #3f5a30 0%, #2e4424 100%);
+  opacity: 0;
+  will-change: transform, opacity;
+  transform-origin: 50% 50%;
+}
+.lc-shard--1 { clip-path: polygon(50% 50%, 80% 12%, 28% 0%); }
+.lc-shard--2 { clip-path: polygon(50% 50%, 100% 32%, 88% 0%); }
+.lc-shard--3 { clip-path: polygon(50% 50%, 100% 78%, 100% 22%); }
+.lc-shard--4 { clip-path: polygon(50% 50%, 76% 100%, 100% 80%); }
+.lc-shard--5 { clip-path: polygon(50% 50%, 22% 100%, 78% 100%); }
+.lc-shard--6 { clip-path: polygon(50% 50%, 0% 78%, 24% 100%); }
+.lc-shard--7 { clip-path: polygon(50% 50%, 0% 24%, 0% 76%); }
+.lc-shard--8 { clip-path: polygon(50% 50%, 22% 0%, 0% 22%); }
+
+/* ──────────────────────────────────────────
+   Outro vignette — ties leather stage to next section
+─────────────────────────────────────────── */
+.lc-pin::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(13,12,10,0.30) 0%,
+    transparent 18%,
+    transparent 82%,
+    rgba(13,12,10,0.40) 100%);
+  z-index: 5;
+}
+
+/* ──────────────────────────────────────────
+   Section opener (above lifecycle in the page)
+   Tells the user what's about to happen.
+─────────────────────────────────────────── */
+.lc-opener {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 110px 32px 64px;
+}
+.lc-opener .section-heading { margin-bottom: 20px; }
+.lc-opener-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: end;
+}
+.lc-opener-intro {
+  font-size: 1.06rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+  max-width: 52ch;
+}
+.lc-opener-cue {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: inline-flex; align-items: center; gap: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+  width: max-content;
+}
+.lc-opener-cue svg {
+  width: 14px; height: 14px;
+  animation: lcCueBob 1.8s ease-in-out infinite;
+}
+@keyframes lcCueBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+/* ──────────────────────────────────────────
+   Photo layer + "Paper filter" treatment
+   Real photography sits behind the texture
+   fallback; a 5% mono noise + warm tint
+   keeps everything in the editorial palette.
+─────────────────────────────────────────── */
+.lc-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  filter: saturate(0.78) contrast(1.06) brightness(0.86) sepia(0.08);
+}
+.lc-tint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.lc-stage--surgical .lc-tint {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(13,15,20,0.05) 0%, rgba(13,15,20,0.60) 100%),
+    linear-gradient(180deg, rgba(20,30,38,0.35) 0%, rgba(20,30,38,0.55) 100%);
+}
+.lc-stage--sports .lc-tint {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(10,20,12,0.05) 0%, rgba(10,20,12,0.55) 100%),
+    linear-gradient(180deg, rgba(15,30,18,0.40) 0%, rgba(8,18,10,0.65) 100%);
+}
+.lc-stage--leather .lc-tint {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(30,15,5,0.05) 0%, rgba(30,15,5,0.50) 100%),
+    linear-gradient(180deg, rgba(45,22,10,0.35) 0%, rgba(20,10,4,0.65) 100%);
+}
+.lc-paper-filter {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image: var(--grain-url);
+  background-size: 240px 240px;
+  mix-blend-mode: overlay;
+  opacity: 0.22;
+}
+.lc-paper-filter::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: rgba(245,244,237,0.04);
+  mix-blend-mode: soft-light;
+}
+/* Push content above the photo + tint + paper stack */
+.lc-stage .lc-content { z-index: 5; }
+
+/* ──────────────────────────────────────────
+   Responsive
+─────────────────────────────────────────── */
+@media (max-width: 880px) {
+  .lc-chapter { left: 18px; gap: 14px; padding: 14px 10px; }
+  .lc-step-label { display: none; }
+  .lc-content { padding: 0 24px 0 70px; }
+  .lc-caption { right: 18px; bottom: 18px; }
+  .lc-opener { padding: 70px 24px 40px; }
+  .lc-opener-grid { grid-template-columns: 1fr; gap: 32px; }
+  .lc-roman { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lc-actor, .lc-ripple, .lc-shard, .lc-cutline, .lc-spark { display: none !important; }
+  .lc-stage { position: relative; height: 80vh; }
+  .lc-pin { height: auto; }
+}

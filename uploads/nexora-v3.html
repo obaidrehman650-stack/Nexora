@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f4ed">
+<title>Nexora — A supply chain for Sialkot</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/landing.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body class="landing">
+
+<!-- Grain overlay — paper texture, fixed over everything -->
+<div id="grain" aria-hidden="true"></div>
+
+<!-- ════ INTRO ════ -->
+<div id="intro" aria-hidden="true">
+  <div class="intro-content">
+    <div class="i-mark">
+      <svg viewBox="0 0 52 52" aria-hidden="true">
+        <!-- Outer hexagon — strokes itself first -->
+        <path class="i-hex-outer"
+              d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"
+              fill="none" stroke="#c96442" stroke-width="1.4"
+              stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Inner hexagon — strokes during the second half of the outer -->
+        <path class="i-hex-inner"
+              d="M26 11 L40 19 L40 33 L26 41 L12 33 L12 19 Z"
+              fill="none" stroke="#c96442" stroke-width="1"
+              stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Solid fill scales in once both strokes have drawn -->
+        <path class="i-hex-fill"
+              d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"
+              fill="#c96442"/>
+      </svg>
+    </div>
+    <div class="i-text">
+      <span class="i-word">Nexora</span>
+      <span class="i-tag">Sialkot Industrial Platform</span>
+    </div>
+  </div>
+</div>
+
+<!-- WhatsApp FAB -->
+<a href="https://wa.me/923000000000" id="fab-whatsapp" class="fab-whatsapp" aria-label="WhatsApp Nexora" target="_blank" rel="noopener">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<div id="page">
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo" aria-label="Nexora home">
+      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true">
+        <path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"/>
+      </svg>
+      Nexora
+    </a>
+    <div class="nav-right">
+      <a class="btn-ghost" href="dashboard.html" data-i18n="nav.platform">Platform</a>
+      <button class="btn-primary" data-scroll-to="lead-form" data-i18n="nav.partner">Partner Now</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="early-badge" data-i18n="hero.badge">Early Access · Sialkot</div>
+      <h1 class="hero-heading" data-i18n="hero.heading" data-i18n-html="true">
+        A supply chain for <em>Sialkot</em>, built for who's already there.
+      </h1>
+      <p class="hero-sub" data-i18n="hero.sub">
+        Nexora is the first digital ecosystem made for Sialkot's exporters and manufacturers — quiet, precise, and designed to be the layer your business runs on.
+      </p>
+
+      <div class="live-stats">
+        <div class="stat-item">
+          <span class="stat-label" data-i18n="stat.rfqs">Active RFQs</span>
+          <span class="stat-value" data-target="142" data-suffix="">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label" data-i18n="stat.units">Verified Units</span>
+          <span class="stat-value" data-target="89" data-suffix="">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label" data-i18n="stat.adopters">Early Adopters</span>
+          <span class="stat-value" data-target="500" data-suffix="+">0+</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label" data-i18n="stat.markets">Export Markets</span>
+          <span class="stat-value" data-target="34" data-suffix="">0</span>
+        </div>
+      </div>
+
+      <div class="adopters">
+        <div class="avatar-stack">
+          <div class="avatar">SI</div>
+          <div class="avatar">EX</div>
+          <div class="avatar">MF</div>
+        </div>
+        <span class="adopters-text" data-i18n="adopters.text">500+ early adopters and counting</span>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-wrap" id="lead-form">
+      <form class="form-card" id="lead-capture" novalidate autocomplete="on">
+        <h2 data-i18n="form.title">Join the beta</h2>
+        <p data-i18n="form.subtitle">Secure your spot for early access.</p>
+
+        <div class="field">
+          <label for="f-name" data-i18n="form.name">Full name</label>
+          <input id="f-name" name="name" type="text" autocomplete="name"
+                 data-i18n-attr="placeholder" data-i18n="form.name.ph" placeholder="Enter your name" required>
+          <div class="field-error" data-i18n="form.err.name">Please enter your name.</div>
+        </div>
+
+        <div class="field">
+          <label for="f-company" data-i18n="form.company">Company</label>
+          <input id="f-company" name="company" type="text" autocomplete="organization"
+                 data-i18n-attr="placeholder" data-i18n="form.company.ph" placeholder="Company name" required>
+          <div class="field-error" data-i18n="form.err.company">Please enter your company name.</div>
+        </div>
+
+        <div class="field">
+          <label for="f-role" data-i18n="form.role">Role</label>
+          <select id="f-role" name="role" required>
+            <option value="" disabled selected data-i18n="form.role.select">Select role</option>
+            <option value="Exporter" data-i18n="form.role.exporter">Exporter</option>
+            <option value="Manufacturer" data-i18n="form.role.manufacturer">Manufacturer</option>
+            <option value="Supplier" data-i18n="form.role.supplier">Supplier</option>
+            <option value="Logistics" data-i18n="form.role.logistics">Logistics</option>
+          </select>
+          <div class="field-error" data-i18n="form.err.role">Please select your role.</div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="f-wa" data-i18n="form.whatsapp">WhatsApp</label>
+            <input id="f-wa" name="whatsapp" type="tel" inputmode="tel"
+                   autocomplete="tel" pattern="[\d\s+\-()]{7,}"
+                   placeholder="+92…" required>
+            <div class="field-error" data-i18n="form.err.whatsapp">Please enter a valid WhatsApp number.</div>
+          </div>
+          <div class="field">
+            <label for="f-email" data-i18n="form.email">Email</label>
+            <input id="f-email" name="email" type="email"
+                   autocomplete="email"
+                   data-i18n-attr="placeholder" data-i18n="form.email.ph" placeholder="name@company.co" required>
+            <div class="field-error" data-i18n="form.err.email">Please enter a valid email.</div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="label" data-i18n="form.submit">Secure my spot</span>
+          <svg class="arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <div class="success-overlay" id="success-overlay" role="status" aria-live="polite">
+        <div class="success-check">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h3 data-i18n="form.success.title">Salam — you're on the list.</h3>
+        <p data-i18n="form.success.body">We'll reach out via WhatsApp shortly.</p>
+        <button type="button" class="success-cta" id="success-close" data-i18n="form.success.cta">Got it</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRIDGE -->
+  <section class="bridge-section" id="bridge">
+    <div class="bridge-node reveal" id="bridge-left">
+      <div class="bridge-node-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <h3 data-i18n="bridge.left.title">Export House</h3>
+      <p data-i18n="bridge.left.body">Connect directly with global buyers. List, negotiate and confirm orders on one platform.</p>
+    </div>
+
+    <div class="circuit-svg-wrap" aria-hidden="true">
+      <svg viewBox="0 0 180 60" preserveAspectRatio="xMidYMid meet">
+        <path id="circuit-path"
+          d="M0 30 H40 L52 12 H92 L100 48 H140 L152 30 H180"
+          fill="none" stroke="#c96442" stroke-width="1.2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+        <circle id="circuit-dot" cx="90" cy="30" r="4" fill="#c96442"/>
+        <circle cx="0"   cy="30" r="2.5"/>
+        <circle cx="180" cy="30" r="2.5"/>
+        <circle cx="52"  cy="12" r="2"/>
+        <circle cx="140" cy="48" r="2"/>
+      </svg>
+    </div>
+
+    <div class="bridge-node reveal" id="bridge-right">
+      <div class="bridge-node-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+      </div>
+      <h3 data-i18n="bridge.right.title">Manufacturer</h3>
+      <p data-i18n="bridge.right.body">Showcase your production capacity, receive RFQs and build verified supply relationships.</p>
+    </div>
+  </section>
+
+  <!-- ════ INDUSTRIES — Pinned scrolling showcase ════ -->
+  <section class="industries" id="showcase">
+    <div class="industries-header reveal">
+      <div class="section-label" data-i18n="industries.label">What Sialkot makes</div>
+      <h2 class="section-heading" data-i18n="industries.heading" data-i18n-html="true">
+        Three industries. <em>One network.</em>
+      </h2>
+      <p class="industries-intro" data-i18n="industries.intro">
+        Sialkot's 250,000+ skilled hands produce 70% of the world's high-grade sports goods, half of its surgical instruments, and some of its finest leather. Nexora is the layer that connects the people behind those numbers.
+      </p>
+    </div>
+
+    <div class="showcase-grid">
+
+      <!-- LEFT — Scrolling text panels -->
+      <div class="showcase-text">
+
+        <article class="showcase-panel" data-industry="sports">
+          <div class="showcase-tag" data-i18n="industry.sports.tag">Sports goods</div>
+          <span class="showcase-stat">70<sub>%</sub></span>
+          <h3>World's match-day footballs, cricket bats &amp; boxing gloves.</h3>
+          <p data-i18n="industry.sports.body">
+            Hand-stitched footballs, boxing gloves, cricket gear — Sialkot is the world's quiet capital of professional sports manufacturing.
+          </p>
+          <ul class="showcase-bullets">
+            <li>Hand-stitched &amp; thermal-bonded panels</li>
+            <li>FIFA, World Rugby, IBA-certified suppliers</li>
+            <li>2,400+ verified workshops on the platform</li>
+          </ul>
+          <a href="dashboard.html" class="btn-link" data-i18n="industries.cta.sports">
+            Explore the sports network <span class="arrow">→</span>
+          </a>
+        </article>
+
+        <article class="showcase-panel" data-industry="surgical">
+          <div class="showcase-tag" data-i18n="industry.surgical.tag">Surgical instruments</div>
+          <span class="showcase-stat">50<sub>%</sub></span>
+          <h3>Of the world's surgical instruments.</h3>
+          <p data-i18n="industry.surgical.body">
+            Forceps, scissors, orthopedic tools — CE-marked precision that ships to clinics and hospitals across 60+ markets.
+          </p>
+          <ul class="showcase-bullets">
+            <li>ISO 13485 and FDA-registered workshops</li>
+            <li>Dental, ortho, ENT, veterinary specializations</li>
+            <li>Lead times from 30 days, samples within 7</li>
+          </ul>
+          <a href="dashboard.html" class="btn-link" data-i18n="industries.cta.surgical">
+            Explore the surgical network <span class="arrow">→</span>
+          </a>
+        </article>
+
+        <article class="showcase-panel" data-industry="leather">
+          <div class="showcase-tag" data-i18n="industry.leather.tag">Leather &amp; goods</div>
+          <span class="showcase-stat">$1.2<sub>B</sub></span>
+          <h3>Of leather goods, exported every year.</h3>
+          <p data-i18n="industry.leather.body">
+            Full-grain motorcycle gear, premium wallets, equestrian gloves — finished by craftspeople with decades on the bench.
+          </p>
+          <ul class="showcase-bullets">
+            <li>Vegetable-tanned and chrome-finished hides</li>
+            <li>CE-Level motorcycle, equestrian &amp; welding gear</li>
+            <li>Private-label and OEM-ready capacity</li>
+          </ul>
+          <a href="dashboard.html" class="btn-link" data-i18n="industries.cta.leather">
+            Explore the leather network <span class="arrow">→</span>
+          </a>
+        </article>
+
+      </div>
+
+      <!-- RIGHT — Sticky product stage -->
+      <div class="showcase-stage-wrap">
+        <div class="showcase-stage">
+          <div class="showcase-frame">
+
+            <!-- Hexagon watermark, always on top -->
+            <span class="showcase-watermark" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 52 52" fill="currentColor">
+                <path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"/>
+              </svg>
+            </span>
+
+            <!-- SPORTS — soccer ball -->
+            <figure class="product-layer is-active" data-industry="sports">
+              <img
+                src="https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=900&q=85&fit=crop&auto=format"
+                srcset="
+                  https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=600&q=85&fit=crop&auto=format 600w,
+                  https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=900&q=85&fit=crop&auto=format 900w,
+                  https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=1300&q=85&fit=crop&auto=format 1300w"
+                sizes="(max-width: 880px) 320px, 520px"
+                alt="Hand-stitched leather football on grass"
+                loading="lazy">
+              <figcaption class="product-cap">
+                <span class="cap-dot" aria-hidden="true"></span>
+                <span class="cap-text">
+                  <span class="cap-label">Now showing</span>
+                  <span class="cap-name">Hand-stitched football · Size 5</span>
+                </span>
+              </figcaption>
+            </figure>
+
+            <!-- SURGICAL — instruments tray -->
+            <figure class="product-layer" data-industry="surgical">
+              <img
+                src="https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=900&q=85&fit=crop&auto=format"
+                srcset="
+                  https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=600&q=85&fit=crop&auto=format 600w,
+                  https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=900&q=85&fit=crop&auto=format 900w,
+                  https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=1300&q=85&fit=crop&auto=format 1300w"
+                sizes="(max-width: 880px) 320px, 520px"
+                alt="Polished stainless-steel surgical instruments"
+                loading="lazy">
+              <figcaption class="product-cap">
+                <span class="cap-dot" aria-hidden="true"></span>
+                <span class="cap-text">
+                  <span class="cap-label">Now showing</span>
+                  <span class="cap-name">Mosquito forceps · AISI 410</span>
+                </span>
+              </figcaption>
+            </figure>
+
+            <!-- LEATHER — full-grain leather goods -->
+            <figure class="product-layer" data-industry="leather">
+              <img
+                src="https://images.unsplash.com/photo-1559563458-527698bf5295?w=900&q=85&fit=crop&auto=format"
+                srcset="
+                  https://images.unsplash.com/photo-1559563458-527698bf5295?w=600&q=85&fit=crop&auto=format 600w,
+                  https://images.unsplash.com/photo-1559563458-527698bf5295?w=900&q=85&fit=crop&auto=format 900w,
+                  https://images.unsplash.com/photo-1559563458-527698bf5295?w=1300&q=85&fit=crop&auto=format 1300w"
+                sizes="(max-width: 880px) 320px, 520px"
+                alt="Full-grain leather bag, hand-finished"
+                loading="lazy"
+                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1547949003-9792a18a2601?w=900&q=85&fit=crop&auto=format'; this.srcset='';">
+              <figcaption class="product-cap">
+                <span class="cap-dot" aria-hidden="true"></span>
+                <span class="cap-text">
+                  <span class="cap-label">Now showing</span>
+                  <span class="cap-name">Full-grain motorcycle glove</span>
+                </span>
+              </figcaption>
+            </figure>
+
+          </div>
+
+          <!-- Progress indicator below the frame -->
+          <div class="showcase-progress" aria-hidden="true">
+            <span class="dot is-active" data-industry="sports"></span>
+            <span class="dot" data-industry="surgical"></span>
+            <span class="dot" data-industry="leather"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════ PULL QUOTE ════ -->
+  <section class="pull-quote">
+    <div class="pull-quote-inner reveal">
+      <span class="pull-quote-mark">“</span>
+      <blockquote data-i18n="quote.body" data-i18n-html="true">
+        Sialkot's factories make the world's match-day footballs. Nexora makes the people who make them <em>visible</em>.
+      </blockquote>
+      <cite>
+        <strong data-i18n="quote.author">Industry Brief, 2026</strong>
+        <span data-i18n="quote.role">Pakistan Bureau of Statistics</span>
+      </cite>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="benefits">
+    <div class="section-label reveal" data-i18n="benefits.label">The advantage</div>
+    <h2 class="section-heading reveal" data-i18n="benefits.heading">Benefits for early partners.</h2>
+    <div class="cards">
+      <div class="card-wrap">
+        <div class="card">
+          <span class="card-num">01</span>
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 data-i18n="benefit.1.title">Priority verification</h3>
+          <p data-i18n="benefit.1.body">Skip the waitlist and get your business profile verified and visible to global partners instantly.</p>
+        </div>
+      </div>
+      <div class="card-wrap">
+        <div class="card">
+          <span class="card-num">02</span>
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 data-i18n="benefit.2.title">Zero fees</h3>
+          <p data-i18n="benefit.2.body">Six months of zero transaction or subscription fees on the platform.</p>
+        </div>
+      </div>
+      <div class="card-wrap">
+        <div class="card">
+          <span class="card-num">03</span>
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+            </svg>
+          </div>
+          <h3 data-i18n="benefit.3.title">Founding member status</h3>
+          <p data-i18n="benefit.3.body">Exclusive profile badge and early access to every beta feature before public release.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="process" id="process-section">
+    <div class="process-left">
+      <div class="section-label" data-i18n="process.label">How it works</div>
+      <h2 class="section-heading" data-i18n="process.heading">From registration to first deal.</h2>
+      <p data-i18n="process.intro">Four steps to turn your Sialkot business into a globally connected operation. Each step is verified, tracked, and supported by the Nexora team.</p>
+    </div>
+    <div class="stepper" id="stepper">
+      <div class="stepper-line"><div class="stepper-progress" id="stepper-progress"></div></div>
+      <div class="step active" data-step="1">
+        <div class="step-dot"></div>
+        <div class="step-num" data-i18n="step.1.num">Step 01</div>
+        <h3 data-i18n="step.1.title">Create your profile</h3>
+        <p data-i18n="step.1.body">Register your export house or manufacturing unit. Our verification team reviews your documentation within 48 hours.</p>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-dot"></div>
+        <div class="step-num" data-i18n="step.2.num">Step 02</div>
+        <h3 data-i18n="step.2.title">List products & capacity</h3>
+        <p data-i18n="step.2.body">Upload your product catalogue with specifications, MOQs and production timelines. Buyers search and find you.</p>
+      </div>
+      <div class="step" data-step="3">
+        <div class="step-dot"></div>
+        <div class="step-num" data-i18n="step.3.num">Step 03</div>
+        <h3 data-i18n="step.3.title">Receive RFQs</h3>
+        <p data-i18n="step.3.body">Qualified buyers from 34+ markets send verified requests for quotation directly to your dashboard.</p>
+      </div>
+      <div class="step" data-step="4">
+        <div class="step-dot"></div>
+        <div class="step-num" data-i18n="step.4.num">Step 04</div>
+        <h3 data-i18n="step.4.title">Close the deal</h3>
+        <p data-i18n="step.4.body">Negotiate, confirm samples and finalize orders — all within Nexora's secure, traceable transaction layer.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUSTED -->
+  <div class="trusted">
+    <div class="trusted-label" data-i18n="trusted.label">Trusted by industry leaders</div>
+    <div class="logos">
+      <span class="logo-item">SCCI</span>
+      <span class="logo-item">SIMAP</span>
+      <span class="logo-item">PSGMEA</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div>
+        <a href="#" class="nav-logo" aria-label="Nexora home">
+          <svg width="18" height="18" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true">
+            <path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"/>
+          </svg>
+          Nexora
+        </a>
+        <p class="footer-tagline" data-i18n="footer.tagline">Building the future of Sialkot, one connection at a time.</p>
+      </div>
+      <div class="footer-right">
+        <div class="footer-links">
+          <a href="#" data-i18n="footer.links.1">Infrastructure</a>
+          <a href="#" data-i18n="footer.links.2">Export Policy</a>
+          <a href="#" data-i18n="footer.links.3">Privacy Protocol</a>
+        </div>
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button class="lang-btn active" data-lang="en" aria-pressed="true">EN</button>
+          <button class="lang-btn" data-lang="ur" aria-pressed="false">UR</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom" data-i18n="footer.copyright">© 2026 Sialkot Industrial Platform. All rights reserved.</div>
+  </footer>
+
+</div><!-- /page -->
+
+<script src="js/landing.js" defer></script>
+</body>
+</html>
