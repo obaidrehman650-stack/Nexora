@@ -258,6 +258,12 @@
     </nav>
 
     <div class="sidebar-foot-nav">
+      <a class="nav-item nx-admin-only" href="admin.html" hidden style="color: var(--accent);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/>
+        </svg>
+        Admin portal
+      </a>
       <a class="nav-item" href="index.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
           <path d="M19 12H5M12 19l-7-7 7-7"></path>
@@ -480,6 +486,10 @@
     });
 
     window.NEXORA_USER = me;
+    /* Reveal the Admin portal link in the sidebar for admins */
+    if (p.is_admin) {
+      document.querySelectorAll('.nx-admin-only').forEach(el => el.hidden = false);
+    }
     document.body.classList.remove('auth-pending');
   });
 })();

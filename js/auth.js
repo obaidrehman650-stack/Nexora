@@ -490,6 +490,35 @@
     return requireAuth([role]);
   }
 
+  /**
+   * Admin-only gate. Used by admin.html. Redirects to the user's
+   * proper dashboard (or login) if they aren't flagged is_admin.
+   */
+  async function requireAdmin() {
+    const me = await getCurrentUser();
+    if (!me || !me.user) {
+      try {
+        sessionStorage.setItem('nexora-flash', JSON.stringify({
+          type: 'error',
+          message: 'Please sign in to continue.'
+        }));
+      } catch {}
+      window.location.replace(LOGIN_URL);
+      return null;
+    }
+    if (!me.profile || !me.profile.is_admin) {
+      try {
+        sessionStorage.setItem('nexora-flash', JSON.stringify({
+          type: 'error',
+          message: 'This area is for admins only.'
+        }));
+      } catch {}
+      redirectForRole((me.profile && me.profile.role) || 'manufacturer');
+      return null;
+    }
+    return me;
+  }
+
   /* Display any flash message left by the previous page (after redirect). */
   function consumeFlash() {
     try {
@@ -581,7 +610,7 @@
   window.NexoraAuth = {
     signUp, signIn, signOut, deleteAccount,
     getSession, getCurrentUser,
-    requireAuth, requireRole,
+    requireAuth, requireRole, requireAdmin,
     passwordStrength,
     sanitize, sanitizeAlpha, sanitizeEmail,
     toast, redirectForRole,

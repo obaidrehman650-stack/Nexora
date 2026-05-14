@@ -1,0 +1,292 @@
+/* ════════════════════════════════════════
+   NEXORA — Admin portal
+   Layered on top of dashboard.css. Adds:
+   • dense data tables
+   • destructive action buttons
+   • the "Admin · root access" sidebar chip
+   • overview stat grid
+════════════════════════════════════════ */
+
+body.admin-portal { background: var(--bg); }
+
+/* ── Sidebar admin chip ─── */
+.admin-rail {
+  margin: -10px 8px 18px;
+}
+.admin-rail-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+  color: #fff;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.04),
+    0 4px 12px rgba(201,100,66,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+/* ── Topbar ─── */
+.admin-topbar-title {
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-soft);
+  font-weight: 460;
+  font-size: 1.15rem;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--text);
+  display: flex; align-items: baseline; gap: 14px;
+}
+.admin-topbar-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px;
+}
+.admin-search {
+  width: 320px;
+  flex: none;
+}
+
+/* ── Overview ─── */
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 30px;
+}
+.admin-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px 14px;
+  box-shadow: var(--shadow-xs);
+  display: flex; flex-direction: column; gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.admin-stat-label {
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.admin-stat-value {
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-soft);
+  font-weight: 460;
+  font-size: 1.85rem;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  line-height: 1.1;
+}
+.admin-stat-sub {
+  font-size: 0.78rem;
+  color: var(--text-mid);
+}
+.admin-stat.danger .admin-stat-value { color: var(--danger); }
+.admin-stat.success .admin-stat-value { color: var(--success); }
+.admin-stat::after {
+  /* Subtle terracotta tick in the corner of admin stats */
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 3px; height: 28px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.admin-section-title {
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-soft);
+  font-size: 1.05rem;
+  font-weight: 460;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.admin-activity {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+.admin-activity-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.9rem;
+}
+.admin-activity-row:last-child { border-bottom: 0; }
+.admin-activity-row .dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-left: 10px;
+}
+.admin-activity-row .when {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.admin-activity-empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ── Filter bar above tables ─── */
+.admin-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* ── Data tables ─── */
+.admin-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+}
+.admin-table th {
+  text-align: left;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 12px 18px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.admin-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.92rem;
+  color: var(--text);
+  vertical-align: middle;
+}
+.admin-table tbody tr:last-child td { border-bottom: 0; }
+.admin-table tbody tr:hover { background: var(--bg-elevated); }
+.admin-table .ta-right { text-align: right; }
+
+.admin-table .empty-row {
+  padding: 36px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Cell styles */
+.cell-id {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+.cell-name {
+  font-weight: 500;
+  color: var(--text);
+}
+.cell-sub {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.role-pill, .status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.role-pill::before, .status-pill::before {
+  content: "";
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.role-pill.manufacturer { color: #6b8a5a; background: rgba(107,138,90,0.10); }
+.role-pill.exporter     { color: #3d6b7c; background: rgba(61,107,124,0.10); }
+.role-pill.logistics    { color: #8b5e3c; background: rgba(139,94,60,0.10); }
+.role-pill.admin        { color: var(--accent-dark); background: var(--accent-tint); }
+.status-pill.open       { color: var(--accent);  background: var(--accent-tint); }
+.status-pill.quoted     { color: #3d6b7c; background: rgba(61,107,124,0.10); }
+.status-pill.won, .status-pill.accepted, .status-pill.verified
+                        { color: var(--success); background: rgba(90,125,79,0.10); }
+.status-pill.lost, .status-pill.rejected, .status-pill.closed, .status-pill.withdrawn
+                        { color: var(--text-muted); background: rgba(184,178,164,0.18); }
+.status-pill.sent       { color: var(--text-mid); background: rgba(90,85,77,0.08); }
+.status-pill.pending    { color: var(--warning); background: rgba(196,123,46,0.10); }
+
+/* ── Row action buttons ─── */
+.row-actions {
+  display: inline-flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.row-action {
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  color: var(--text-mid);
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+.row-action:hover { background: var(--bg-elevated); color: var(--text); border-color: var(--border-strong); }
+.row-action.is-primary { color: var(--accent-dark); border-color: rgba(201,100,66,0.30); }
+.row-action.is-primary:hover { background: var(--accent-tint); border-color: var(--accent); }
+.row-action.is-danger { color: var(--danger); border-color: rgba(184,71,58,0.30); }
+.row-action.is-danger:hover { background: rgba(184,71,58,0.08); border-color: var(--danger); }
+.row-action:disabled {
+  opacity: 0.5; cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Truncate long text cells */
+.truncate {
+  display: inline-block;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+
+/* Responsive — horizontal scroll for tables on small screens */
+@media (max-width: 880px) {
+  .admin-table-wrap { overflow-x: auto; }
+  .admin-table { min-width: 760px; }
+  .admin-search { width: 100%; }
+  .admin-topbar-right { width: 100%; flex-direction: column; align-items: stretch; }
+}
