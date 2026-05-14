@@ -17,6 +17,9 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- Supabase — used to pull live hero stats (anonymous, count-only) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
 </head>
 <body class="landing">
 
@@ -67,19 +70,19 @@
       <p class="hero-sub">Nexora is the first digital ecosystem made for Sialkot's exporters and manufacturers — quiet, precise, and designed to be the layer your business runs on.</p>
 
       <div class="live-stats">
-        <div class="stat-item"><span class="stat-label">Active RFQs</span><span class="stat-value" data-target="142" data-suffix="">142</span></div>
-        <div class="stat-item"><span class="stat-label">Verified Units</span><span class="stat-value" data-target="89" data-suffix="">89</span></div>
-        <div class="stat-item"><span class="stat-label">Early Adopters</span><span class="stat-value" data-target="500" data-suffix="+">500+</span></div>
-        <div class="stat-item"><span class="stat-label">Export Markets</span><span class="stat-value" data-target="34" data-suffix="">34</span></div>
+        <div class="stat-item"><span class="stat-label">Active RFQs</span><span class="stat-value" data-target="0" data-suffix="">0</span></div>
+        <div class="stat-item"><span class="stat-label">Verified Units</span><span class="stat-value" data-target="0" data-suffix="">0</span></div>
+        <div class="stat-item"><span class="stat-label">Early Adopters</span><span class="stat-value" data-target="0" data-suffix="">0</span></div>
+        <div class="stat-item"><span class="stat-label">Export Markets</span><span class="stat-value" data-target="0" data-suffix="">0</span></div>
       </div>
 
       <div class="adopters">
-        <div class="avatar-stack">
-          <div class="avatar">SI</div>
-          <div class="avatar">EX</div>
-          <div class="avatar">MF</div>
+        <div class="avatar-stack" aria-hidden="true">
+          <div class="avatar">N</div>
+          <div class="avatar">X</div>
+          <div class="avatar">·</div>
         </div>
-        <span class="adopters-text">500+ early adopters and counting</span>
+        <span class="adopters-text">Be one of the first to join.</span>
       </div>
     </div>
 

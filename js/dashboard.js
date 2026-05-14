@@ -1,1078 +1,930 @@
 /* ════════════════════════════════════════
-   NEXORA — Dashboard JS
-   Views · Modals · Search · Notifications
-════════════════════════════════════════ */
+   NEXORA — Dashboard
+   100% Supabase-backed. No hardcoded sample data.
+   Realtime subscriptions keep the UI in sync.
+═══════════════════════════════════════════ */
+(function () {
+  const Auth = window.NexoraAuth;
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-/* ════════════════════════════════════════
-   DATA
-════════════════════════════════════════ */
-const LEADS_SOURCE = [
-  {
-    id: 'L-2041',
-    industry: 'sports',
-    product: 'Hand-Stitched Match Football',
-    desc: 'Size 5, FIFA Quality Pro spec, custom branding required.',
-    fullDesc: 'Buyer is sourcing official match-day footballs for a regional league. Requires 32-panel hand-stitched construction, butyl bladder, embossed branding on 4 panels. Sample approval required before bulk PO.',
-    quantity: 12000, unit: 'units',
-    destination: 'Germany',
-    moq: 500,
-    targetPrice: 8.50,
-    buyer: 'Verified Buyer · DE-22',
-    buyerSince: '2024',
-    deals: 14,
-    leadTime: '45 days',
-    isNew: true,
-    minutesAgo: 2,
-    status: 'open'
-  },
-  {
-    id: 'L-2040',
-    industry: 'surgical',
-    product: 'Stainless Steel Mosquito Forceps',
-    desc: 'AISI 410 grade, 5" curved, CE-marked. Sample required.',
-    fullDesc: 'Hospital procurement group ordering replacement instruments across 12 facilities. Need ISO 13485 and EU MDR compliance documentation upfront. Mirror polish, laser-etched lot numbers.',
-    quantity: 5000, unit: 'pcs',
-    destination: 'USA',
-    moq: 1000,
-    targetPrice: 3.20,
-    buyer: 'Verified Buyer · US-FL',
-    buyerSince: '2023',
-    deals: 28,
-    leadTime: '30 days',
-    isNew: true,
-    minutesAgo: 6,
-    status: 'open'
-  },
-  {
-    id: 'L-2039',
-    industry: 'leather',
-    product: 'Premium Motorcycle Gloves',
-    desc: 'Full-grain cowhide, knuckle protection, CE Level 1.',
-    fullDesc: 'European retailer expanding their riding gear line. Full-grain Pakistani cowhide, TPU knuckle, Kevlar lining at palm. Three sizes, two colorways. EN 13594 certification required.',
-    quantity: 2500, unit: 'pairs',
-    destination: 'Italy',
-    moq: 250,
-    targetPrice: 24.00,
-    buyer: 'Verified Buyer · IT-MI',
-    buyerSince: '2024',
-    deals: 7,
-    leadTime: '60 days',
-    isNew: false,
-    minutesAgo: 14,
-    status: 'open'
-  },
-  {
-    id: 'L-2038',
-    industry: 'sports',
-    product: 'Pro Series Boxing Gloves 16oz',
-    desc: 'Synthetic leather, dual Velcro, private label OK.',
-    fullDesc: 'Boxing equipment brand launching a new pro line. PU leather, IMF foam construction, mesh palm, custom logo and packaging. 4 colorways. Looking for OEM partner.',
-    quantity: 3000, unit: 'pairs',
-    destination: 'United Kingdom',
-    moq: 300,
-    targetPrice: 18.00,
-    buyer: 'Verified Buyer · UK-LDN',
-    buyerSince: '2022',
-    deals: 41,
-    leadTime: '45 days',
-    isNew: false,
-    minutesAgo: 22,
-    status: 'open'
-  },
-  {
-    id: 'L-2037',
-    industry: 'surgical',
-    product: 'Dental Extraction Forceps Set',
-    desc: '12-piece set, English pattern, mirror polish.',
-    fullDesc: '12-piece extraction set, English pattern, anatomical handles. Velvet-lined presentation case. Each instrument individually laser-etched. ISO 7153-1 compliant materials.',
-    quantity: 800, unit: 'sets',
-    destination: 'France',
-    moq: 100,
-    targetPrice: 145.00,
-    buyer: 'Verified Buyer · FR-LY',
-    buyerSince: '2023',
-    deals: 12,
-    leadTime: '40 days',
-    isNew: false,
-    minutesAgo: 41,
-    status: 'open'
-  },
-  {
-    id: 'L-2036',
-    industry: 'leather',
-    product: 'Aniline Leather Bifold Wallets',
-    desc: 'Vegetable-tanned, RFID lining, embossed logo.',
-    fullDesc: 'Premium leather brand launching travel collection. Vegetable-tanned aniline, RFID-shielded card slots, gold foil interior stamp. 3 colorways. Custom packaging required.',
-    quantity: 6000, unit: 'units',
-    destination: 'Netherlands',
-    moq: 500,
-    targetPrice: 14.50,
-    buyer: 'Verified Buyer · NL-AMS',
-    buyerSince: '2024',
-    deals: 5,
-    leadTime: '45 days',
-    isNew: false,
-    minutesAgo: 58,
-    status: 'open'
-  },
-  {
-    id: 'L-2035',
-    industry: 'sports',
-    product: 'Cricket Batting Gloves',
-    desc: 'Pittard leather palm, HDF cane insert, men\'s sizing.',
-    fullDesc: 'Cricket gear retailer ordering for upcoming season. Pittard leather palm, high-density foam fingers, cane insert, sweat band. Right and left-hand variants.',
-    quantity: 1500, unit: 'pairs',
-    destination: 'Australia',
-    moq: 200,
-    targetPrice: 32.00,
-    buyer: 'Verified Buyer · AU-SYD',
-    buyerSince: '2023',
-    deals: 18,
-    leadTime: '50 days',
-    isNew: false,
-    minutesAgo: 73,
-    status: 'open'
-  },
-  {
-    id: 'L-2034',
-    industry: 'surgical',
-    product: 'Orthopedic Bone Cutters',
-    desc: 'Liston pattern, 7", titanium-coated. ISO 13485 docs.',
-    fullDesc: 'Orthopedic distributor for South-East Asian hospitals. Liston pattern bone cutters, 7-inch, titanium-nitride coating. Tungsten carbide inserts.',
-    quantity: 600, unit: 'pcs',
-    destination: 'Japan',
-    moq: 50,
-    targetPrice: 78.00,
-    buyer: 'Verified Buyer · JP-OSK',
-    buyerSince: '2022',
-    deals: 22,
-    leadTime: '35 days',
-    isNew: false,
-    minutesAgo: 95,
-    status: 'open'
-  },
-  {
-    id: 'L-2033',
-    industry: 'leather',
-    product: 'Industrial Welding Aprons',
-    desc: 'Split cowhide, 24"x36", reinforced strap.',
-    fullDesc: 'Industrial safety distributor. Split cowhide, 24"x36" coverage, reinforced cross-back strap, brass grommets. EN ISO 11611 Class 1 compliance.',
-    quantity: 4000, unit: 'units',
-    destination: 'UAE',
-    moq: 500,
-    targetPrice: 19.00,
-    buyer: 'Verified Buyer · AE-DXB',
-    buyerSince: '2024',
-    deals: 9,
-    leadTime: '40 days',
-    isNew: false,
-    minutesAgo: 118,
-    status: 'open'
-  },
-  {
-    id: 'L-2032',
-    industry: 'sports',
-    product: 'Goalkeeper Gloves — Adult',
-    desc: '4mm German latex, finger spines, negative cut.',
-    fullDesc: 'Football gear retailer in Spain. 4mm German latex palm, finger spine protection, negative cut wrist closure. Sizes 8-11. Two colorways.',
-    quantity: 2000, unit: 'pairs',
-    destination: 'Spain',
-    moq: 200,
-    targetPrice: 22.50,
-    buyer: 'Verified Buyer · ES-BCN',
-    buyerSince: '2023',
-    deals: 16,
-    leadTime: '45 days',
-    isNew: false,
-    minutesAgo: 142,
-    status: 'open'
+  /* Wait for the Nexora Guard to verify auth + hydrate the user pill. */
+  function onReady(fn) {
+    if (!document.body.classList.contains('auth-pending')) return fn();
+    const obs = new MutationObserver(() => {
+      if (!document.body.classList.contains('auth-pending')) {
+        obs.disconnect();
+        fn();
+      }
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
   }
-];
+  onReady(boot);
 
-/* Past RFQ history for RFQs view */
-const HISTORY_LEADS = [
-  { id: 'L-1998', industry: 'sports',   product: 'Training Footballs Size 4',     destination: 'Brazil',    quantity: 8000, status: 'quoted', minutesAgo: 1440, sentPrice: 5.20 },
-  { id: 'L-1991', industry: 'surgical', product: 'Surgical Scissors (Mayo) Set',  destination: 'Canada',    quantity: 2000, status: 'won',    minutesAgo: 2880, sentPrice: 12.40 },
-  { id: 'L-1985', industry: 'leather',  product: 'Equestrian Riding Gloves',      destination: 'Germany',   quantity: 1200, status: 'quoted', minutesAgo: 4320, sentPrice: 18.00 },
-  { id: 'L-1972', industry: 'sports',   product: 'Boxing Hand Wraps 180"',        destination: 'USA',       quantity: 12000,status: 'lost',   minutesAgo: 7200, sentPrice: 1.80 },
-  { id: 'L-1968', industry: 'leather',  product: 'Bifold Wallets, Embossed',      destination: 'Sweden',    quantity: 3000, status: 'won',    minutesAgo: 10080, sentPrice: 13.50 },
-  { id: 'L-1955', industry: 'surgical', product: 'Dental Mirrors, Size 5',        destination: 'Australia', quantity: 5000, status: 'won',    minutesAgo: 14400, sentPrice: 2.10 }
-];
-
-/* Notifications */
-const NOTIF_DATA = [
-  { id: 1, unread: true,  text: '<strong>New RFQ</strong> — Hand-Stitched Match Football (Germany)',     time: '2m ago' },
-  { id: 2, unread: true,  text: '<strong>L-1991</strong> moved to <strong>Won</strong>. Congrats.',     time: '14m ago' },
-  { id: 3, unread: true,  text: '<strong>Klaus Müller</strong> replied on L-2038 — Boxing Gloves',       time: '38m ago' },
-  { id: 4, unread: false, text: '<strong>New buyer</strong> verified in your network — IT-MI',           time: '2h ago' },
-  { id: 5, unread: false, text: 'Your profile was viewed <strong>12 times</strong> this week',           time: '1d ago' }
-];
-
-/* Message threads */
-const THREADS = [
-  {
-    id: 't1', name: 'Klaus Müller — Sport DE', initials: 'KM',
-    preview: 'Confirmed the sample order, sending PO by Friday.',
-    time: '2m', unread: true,
-    sub: 'Re: L-2038 · Pro Series Boxing Gloves',
-    messages: [
-      { from: 'them', text: 'Hi — we received your quote, all looks good.', time: '10:24' },
-      { from: 'them', text: 'One question: can you adjust palm padding to 12mm instead of 10mm?', time: '10:25' },
-      { from: 'me',   text: 'Salam Klaus, yes 12mm is no problem. Sample lead time stays at 7 days.', time: '10:31' },
-      { from: 'them', text: 'Perfect. Confirmed the sample order, sending PO by Friday.', time: '10:42' }
-    ]
-  },
-  {
-    id: 't2', name: 'Hiroshi Tanaka — OrthoJP', initials: 'HT',
-    preview: 'Need ISO certificates and lot tracking specs.',
-    time: '38m', unread: true,
-    sub: 'Re: L-2034 · Orthopedic Bone Cutters',
-    messages: [
-      { from: 'them', text: 'Konnichiwa. Can you share your ISO 13485 documentation?', time: 'Yesterday' },
-      { from: 'me',   text: 'Sending now — also includes our latest audit report from March.', time: 'Yesterday' },
-      { from: 'them', text: 'Need ISO certificates and lot tracking specs.', time: '38m' }
-    ]
-  },
-  {
-    id: 't3', name: 'Anna Larsen — NordicWallet', initials: 'AL',
-    preview: 'Great. Looking forward to the proto samples.',
-    time: '2h', unread: false,
-    sub: 'Re: L-1968 · Bifold Wallets',
-    messages: [
-      { from: 'them', text: 'Loved the leather grain on the prototype.', time: 'Mon' },
-      { from: 'me',   text: 'Glad to hear it. Production starts next week — we\'ll ship 100 units first.', time: 'Mon' },
-      { from: 'them', text: 'Great. Looking forward to the proto samples.', time: '2h' }
-    ]
-  },
-  {
-    id: 't4', name: 'Sara Conti — RidersIT', initials: 'SC',
-    preview: 'Can we move to titanium hardware? Quote difference?',
-    time: '1d', unread: false,
-    sub: 'Re: L-2039 · Motorcycle Gloves',
-    messages: [
-      { from: 'them', text: 'Quick spec question.', time: '1d' },
-      { from: 'them', text: 'Can we move to titanium hardware? Quote difference?', time: '1d' }
-    ]
+  /* ════════════════════════════════════════
+     UTILITIES
+  ════════════════════════════════════════ */
+  function fmtNum(n)   { return Number(n ?? 0).toLocaleString('en-US'); }
+  function fmtMoney(n) { return '$' + Number(n ?? 0).toFixed(2); }
+  function fmtAgo(iso) {
+    if (!iso) return '—';
+    const min = Math.max(0, (Date.now() - new Date(iso).getTime()) / 60000);
+    if (min < 1)   return 'Just now';
+    if (min < 60)  return Math.floor(min) + 'm ago';
+    const h = min / 60;
+    if (h < 24)    return Math.floor(h) + 'h ago';
+    const d = h / 24;
+    if (d < 30)    return Math.floor(d) + 'd ago';
+    return Math.floor(d / 30) + 'mo ago';
   }
-];
+  function fmtClock(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Date.now() - d.getTime() < 86_400_000) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+  function initials(name) {
+    return (name || '··').split(/\s+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  }
+  function cap(s) { return String(s || '').replace(/^./, c => c.toUpperCase()); }
 
-/* Sialkot profile (current user) */
-const PROFILE = {
-  company: 'Obur Industries',
-  type: 'Manufacturer',
-  initials: 'OI',
-  verified: true,
-  joined: 'Founding member · 2026',
-  city: 'Sialkot, Punjab',
-  employees: '180–220',
-  capacity: '24,000 units / month',
-  founded: 1998,
-  industries: ['Sports goods', 'Leather'],
-  certifications: [
-    { name: 'ISO 9001:2015',  body: 'Quality Management',     year: '2024' },
-    { name: 'FIFA Quality Pro', body: 'Sports Goods',         year: '2023' },
-    { name: 'WFSGI Member',   body: 'Sports Industry',        year: '2022' },
-    { name: 'SEDEX 4-Pillar', body: 'Ethical Audit',          year: '2024' }
-  ]
-};
+  /* ════════════════════════════════════════
+     BOOT
+  ════════════════════════════════════════ */
+  let sb, me, state;
 
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-const state = {
-  view: 'dashboard',
-  filter: 'all',
-  search: '',
-  leads: [...LEADS_SOURCE],
-  quoted: new Set(),
-  quotes: {},                    // { leadId: { price, leadTime, ... } }
-  notifs: [...NOTIF_DATA],
-  threads: [...THREADS],
-  activeThread: 't1',
-  openPopover: null
-};
+  async function boot() {
+    sb = Auth.client();
+    me = window.NEXORA_USER || (await Auth.getCurrentUser());
 
-/* ════════════════════════════════════════
-   UTILS
-════════════════════════════════════════ */
-const $  = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+    if (!me || !me.user) {
+      // Guard should have redirected already; defensive bail-out.
+      Auth.toast('Session expired. Please sign in again.', 'error');
+      setTimeout(() => location.replace('auth.html'), 600);
+      return;
+    }
 
-function fmtNum(n) { return Number(n).toLocaleString('en-US'); }
-function fmtMoney(n) { return '$' + Number(n).toFixed(2); }
-function fmtAgo(min) {
-  if (min < 1)  return 'Just now';
-  if (min < 60) return `${min}m ago`;
-  const h = Math.floor(min / 60);
-  if (h < 24)   return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  if (d < 30)   return `${d}d ago`;
-  const mo = Math.floor(d / 30);
-  return `${mo}mo ago`;
-}
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-/* ════════════════════════════════════════
-   VIEW SWITCHING
-════════════════════════════════════════ */
-function setView(name) {
-  state.view = name;
-  $$('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
-  $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === name));
-  closeAllPopovers();
-  closeSidebar();
-  // Adjust topbar search placeholder per view
-  const search = $('#search-input');
-  if (search) {
-    const ph = {
-      dashboard: 'Search leads, buyers, products…',
-      rfqs:      'Search RFQ history…',
-      profile:   'Search profile fields…',
-      messages:  'Search conversations…'
+    state = {
+      view: 'dashboard',
+      filter: 'all',
+      search: '',
+      leads: [],
+      quotedIds: new Set(),
+      quoteByLead: {},
+      myQuotes: [],
+      notifs: [],
+      threads: [],
+      activeThreadId: null,
+      activeThreadMessages: [],
+      openPopover: null,
+      profile: me.profile || {}
     };
-    search.placeholder = ph[name] || ph.dashboard;
-  }
-  if (name === 'rfqs')     renderRfqs();
-  if (name === 'messages') renderThreads();
-}
 
-$$('.nav-item[data-section]').forEach(n => {
-  n.addEventListener('click', e => { e.preventDefault(); setView(n.dataset.section); });
-});
+    wireUI();
+    closeSidebar();
 
-/* ════════════════════════════════════════
-   SIDEBAR (mobile)
-════════════════════════════════════════ */
-const sidebar = $('.sidebar');
-const scrim   = $('.sidebar-scrim');
-const menuBtn = $('.menu-toggle');
-function openSidebar()  { sidebar.classList.add('open');    scrim.classList.add('show'); }
-function closeSidebar() { sidebar.classList.remove('open'); scrim.classList.remove('show'); }
-if (menuBtn) menuBtn.addEventListener('click', openSidebar);
-if (scrim)   scrim.addEventListener('click', closeSidebar);
-window.addEventListener('resize', () => { if (window.innerWidth > 880) closeSidebar(); });
+    if (sb) {
+      await Promise.all([
+        loadLeads(),
+        loadMyQuotes(),
+        loadNotifications(),
+        loadThreads()
+      ]);
+      subscribeRealtime();
+    } else {
+      // Demo mode (no Supabase configured) — everything stays empty.
+      Auth.toast('Connect Supabase in js/config.js to load live data.', 'warn', { timeout: 6000 });
+    }
 
-/* ════════════════════════════════════════
-   POPOVERS — notifications / settings
-════════════════════════════════════════ */
-function togglePopover(name, anchorBtn) {
-  if (state.openPopover === name) { closeAllPopovers(); return; }
-  closeAllPopovers();
-  state.openPopover = name;
-  $(`#popover-${name}`).classList.add('show');
-  anchorBtn.classList.add('open');
-}
-function closeAllPopovers() {
-  $$('.popover').forEach(p => p.classList.remove('show'));
-  $$('.icon-btn').forEach(b => b.classList.remove('open'));
-  state.openPopover = null;
-}
-$('#btn-notifs').addEventListener('click', e => {
-  e.stopPropagation();
-  togglePopover('notifs', e.currentTarget);
-});
-$('#btn-settings').addEventListener('click', e => {
-  e.stopPropagation();
-  togglePopover('settings', e.currentTarget);
-});
-$$('.popover').forEach(p => p.addEventListener('click', e => e.stopPropagation()));
-document.addEventListener('click', closeAllPopovers);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAllPopovers(); closeModals(); } });
-
-function renderNotifs() {
-  const list = $('#notif-list');
-  const dot  = $('#notif-dot');
-  const unread = state.notifs.filter(n => n.unread).length;
-  if (dot) dot.style.display = unread ? 'block' : 'none';
-  if (!list) return;
-  if (!state.notifs.length) {
-    list.innerHTML = '<div class="popover-empty">You\'re all caught up.</div>';
-    return;
-  }
-  list.innerHTML = state.notifs.map((n, i) => `
-    <div class="notif-item${n.unread ? ' unread' : ''}" data-id="${n.id}" style="--i:${i}">
-      <span class="notif-dot-static"></span>
-      <div class="notif-content">${n.text}</div>
-      <span class="notif-time">${escapeHtml(n.time)}</span>
-    </div>`).join('');
-  list.querySelectorAll('.notif-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const id = +item.dataset.id;
-      const n = state.notifs.find(x => x.id === id);
-      if (n) n.unread = false;
-      renderNotifs();
-    });
-  });
-}
-$('#notif-clear').addEventListener('click', () => {
-  state.notifs.forEach(n => n.unread = false);
-  renderNotifs();
-  toast('All notifications marked as read.');
-});
-
-/* Settings menu items */
-$$('#popover-settings .menu-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const action = item.dataset.action;
-    closeAllPopovers();
-    if (action === 'logout')  toast('Logged out — redirecting…');
-    else if (action === 'help')    toast('Help center opened in new tab.');
-    else if (action === 'theme')   toast('Theme settings coming in v0.4.');
-    else if (action === 'account') toast('Account settings coming in v0.4.');
-  });
-});
-
-/* ════════════════════════════════════════
-   SEARCH
-════════════════════════════════════════ */
-const searchInput = $('#search-input');
-const searchClear = $('#search-clear');
-searchInput.addEventListener('input', e => {
-  state.search = e.target.value.trim().toLowerCase();
-  searchInput.parentElement.classList.toggle('has-value', !!state.search);
-  if (state.view === 'dashboard') renderLeads();
-  if (state.view === 'rfqs')      renderRfqs();
-  if (state.view === 'messages')  renderThreads();
-});
-searchClear.addEventListener('click', () => {
-  searchInput.value = '';
-  state.search = '';
-  searchInput.parentElement.classList.remove('has-value');
-  searchInput.focus();
-  if (state.view === 'dashboard') renderLeads();
-  if (state.view === 'rfqs')      renderRfqs();
-  if (state.view === 'messages')  renderThreads();
-});
-
-/* ════════════════════════════════════════
-   DASHBOARD VIEW — lead cards
-════════════════════════════════════════ */
-const grid    = $('#leads-grid');
-const liveCt  = $('#live-count');
-
-function filteredLeads() {
-  let leads = state.filter === 'all'
-    ? state.leads
-    : state.leads.filter(l => l.industry === state.filter);
-  if (state.search) {
-    const q = state.search;
-    leads = leads.filter(l =>
-      l.product.toLowerCase().includes(q) ||
-      l.destination.toLowerCase().includes(q) ||
-      l.id.toLowerCase().includes(q) ||
-      l.industry.toLowerCase().includes(q) ||
-      l.buyer.toLowerCase().includes(q)
-    );
-  }
-  return leads;
-}
-
-function renderLeads() {
-  const leads = filteredLeads();
-  if (!leads.length) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.3-4.3"/>
-        </svg>
-        <h3>${state.search ? 'No leads match your search' : 'No matching leads'}</h3>
-        <p>${state.search ? 'Try different keywords or clear the search.' : 'Try a different industry filter — new leads arrive every few minutes.'}</p>
-      </div>`;
-    return;
-  }
-  grid.innerHTML = leads.map((l, i) => leadCardHTML(l, i)).join('');
-  attachLeadHandlers();
-}
-
-function leadCardHTML(l, i = 0) {
-  const isQuoted = state.quoted.has(l.id);
-  const industryLabel = l.industry.charAt(0).toUpperCase() + l.industry.slice(1);
-  return `
-    <article class="lead-card${l.isNew ? ' new' : ''}" data-lead-id="${l.id}" style="--i:${i}">
-      <div class="lead-top">
-        <span class="industry-badge ${l.industry}">${industryLabel}</span>
-        <span class="lead-time" data-min="${l.minutesAgo}">${fmtAgo(l.minutesAgo)}</span>
-      </div>
-      <div>
-        <h3 class="lead-product">${escapeHtml(l.product)}</h3>
-        <p class="lead-desc">${escapeHtml(l.desc)}</p>
-      </div>
-      <div class="lead-meta">
-        <div class="meta-item">
-          <span class="meta-label">Quantity</span>
-          <span class="meta-value"><strong>${fmtNum(l.quantity)}</strong> ${l.unit}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Destination</span>
-          <span class="meta-value">${escapeHtml(l.destination)}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">MOQ</span>
-          <span class="meta-value">${fmtNum(l.moq)} ${l.unit}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Ref</span>
-          <span class="meta-value">${l.id}</span>
-        </div>
-      </div>
-      <div class="lead-buyer">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 12l2 2 4-4"/>
-          <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <span>${escapeHtml(l.buyer)}</span>
-      </div>
-      <div class="lead-actions">
-        <button class="btn-quote${isQuoted ? ' sent' : ''}" data-action="quote" data-id="${l.id}" ${isQuoted ? 'disabled' : ''}>
-          ${isQuoted
-            ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Quote Sent`
-            : `Send Quote
-               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`}
-        </button>
-        <button class="btn-details" data-action="details" data-id="${l.id}">Details</button>
-      </div>
-    </article>`;
-}
-
-function attachLeadHandlers() {
-  grid.querySelectorAll('[data-action="quote"]').forEach(btn => {
-    btn.addEventListener('click', () => openQuoteModal(btn.dataset.id));
-  });
-  grid.querySelectorAll('[data-action="details"]').forEach(btn => {
-    btn.addEventListener('click', () => openDetailsModal(btn.dataset.id));
-  });
-}
-
-/* ════════════════════════════════════════
-   FILTER PILLS
-════════════════════════════════════════ */
-$$('.pill').forEach(pill => {
-  pill.addEventListener('click', () => {
-    $$('.pill').forEach(p => p.classList.remove('active'));
-    pill.classList.add('active');
-    state.filter = pill.dataset.filter;
     renderLeads();
-  });
-});
-
-/* ════════════════════════════════════════
-   STATS / COUNTS
-════════════════════════════════════════ */
-function updateLiveCount() {
-  const total = state.leads.length;
-  const open  = state.leads.filter(l => !state.quoted.has(l.id)).length;
-  if (liveCt) liveCt.textContent = open;
-
-  const rfqBadge = $('.nav-item[data-section="rfqs"] .badge');
-  if (rfqBadge) rfqBadge.textContent = open + HISTORY_LEADS.length;
-
-  ['all','sports','surgical','leather'].forEach(k => {
-    const c = $(`.pill[data-filter="${k}"] .count`);
-    if (!c) return;
-    c.textContent = k === 'all'
-      ? total
-      : state.leads.filter(l => l.industry === k).length;
-  });
-
-  const elTotal   = $('#stat-total');
-  const elNew     = $('#stat-new');
-  const elQuoted  = $('#stat-quoted');
-  const elMarkets = $('#stat-markets');
-  if (elTotal)   elTotal.textContent   = total;
-  if (elNew)     elNew.textContent     = state.leads.filter(l => l.isNew).length;
-  if (elQuoted)  elQuoted.textContent  = state.quoted.size;
-  if (elMarkets) elMarkets.textContent = new Set(state.leads.map(l => l.destination)).size;
-}
-
-/* ════════════════════════════════════════
-   ✦ QUOTE MODAL ✦
-════════════════════════════════════════ */
-const quoteModal      = $('#modal-quote');
-const detailsModal    = $('#modal-details');
-let currentQuoteLead  = null;
-
-function openQuoteModal(id) {
-  const lead = state.leads.find(l => l.id === id);
-  if (!lead) return;
-  currentQuoteLead = lead;
-
-  $('#q-eyebrow').textContent = `New Quote · ${lead.id}`;
-  $('#q-title').textContent = lead.product;
-  $('#q-sub').textContent = `${fmtNum(lead.quantity)} ${lead.unit} · ${lead.destination}`;
-
-  $('#q-sum-qty').textContent      = `${fmtNum(lead.quantity)} ${lead.unit}`;
-  $('#q-sum-target').textContent   = fmtMoney(lead.targetPrice);
-  $('#q-sum-dest').textContent     = lead.destination;
-
-  // Reset fields with smart defaults
-  $('#q-price').value         = lead.targetPrice.toFixed(2);
-  $('#q-moq').value           = lead.moq;
-  $('#q-lead-time').value     = lead.leadTime;
-  $('#q-payment').value       = '50% deposit, 50% on B/L';
-  $('#q-incoterm').value      = 'FOB Karachi';
-  $('#q-notes').value         = '';
-
-  openModal(quoteModal);
-  setTimeout(() => $('#q-price').focus(), 200);
-}
-
-$('#q-submit').addEventListener('click', () => {
-  if (!currentQuoteLead) return;
-  const price = parseFloat($('#q-price').value);
-  if (!price || price <= 0) {
-    $('#q-price').focus();
-    toast('Please enter a valid unit price.');
-    return;
+    renderNotifs();
+    renderThreads();
+    renderRfqs();
+    bootProfile();
+    updateLiveCount();
   }
-  state.quoted.add(currentQuoteLead.id);
-  state.quotes[currentQuoteLead.id] = {
-    price,
-    moq:       $('#q-moq').value,
-    leadTime:  $('#q-lead-time').value,
-    payment:   $('#q-payment').value,
-    incoterm:  $('#q-incoterm').value,
-    notes:     $('#q-notes').value,
-    sentAt:    new Date().toISOString()
-  };
-  toast(`Quote sent for ${currentQuoteLead.product} → ${currentQuoteLead.destination}.`);
 
-  // Add a notification
-  state.notifs.unshift({
-    id: Date.now(),
-    unread: true,
-    text: `<strong>Quote sent</strong> — ${currentQuoteLead.product} (${currentQuoteLead.destination})`,
-    time: 'Just now'
-  });
-  renderNotifs();
+  /* ════════════════════════════════════════
+     DATA LAYER
+     Every fetch returns plain arrays / objects.
+     RLS policies on Supabase do the access control.
+  ════════════════════════════════════════ */
+  async function loadLeads() {
+    const industry = state.profile.industry;
+    /* For un-industry-assigned profiles (mixed / null) we still show
+       everything they're allowed to see by RLS. */
+    let q = sb.from('rfqs').select('*').in('status', ['open', 'quoted']).order('created_at', { ascending: false });
+    if (industry && industry !== 'mixed') q = q.eq('industry', industry);
+    const { data, error } = await q;
+    if (error) { console.warn('loadLeads', error); Auth.toast('Could not load the leads feed.', 'error'); return; }
+    state.leads = data || [];
+  }
 
-  closeModals();
-  renderLeads();
-  updateLiveCount();
-});
+  async function loadMyQuotes() {
+    const { data, error } = await sb.from('quotes')
+      .select('*, rfqs(*)')
+      .eq('manufacturer_id', me.user.id)
+      .order('created_at', { ascending: false });
+    if (error) { console.warn('loadMyQuotes', error); return; }
+    state.myQuotes = data || [];
+    state.quotedIds = new Set(state.myQuotes.map(q => q.rfq_id));
+    state.quoteByLead = Object.fromEntries(state.myQuotes.map(q => [q.rfq_id, q]));
+  }
 
-/* ════════════════════════════════════════
-   ✦ DETAILS MODAL ✦
-════════════════════════════════════════ */
-function openDetailsModal(id) {
-  const lead = state.leads.find(l => l.id === id);
-  if (!lead) return;
-  const isQuoted = state.quoted.has(lead.id);
-  const industryLabel = lead.industry.charAt(0).toUpperCase() + lead.industry.slice(1);
+  async function loadNotifications() {
+    const { data, error } = await sb.from('notifications')
+      .select('*').eq('user_id', me.user.id)
+      .order('created_at', { ascending: false }).limit(50);
+    if (error) { console.warn('loadNotifications', error); return; }
+    state.notifs = data || [];
+  }
 
-  $('#d-eyebrow').textContent = `Lead detail · ${lead.id}`;
-  $('#d-title').textContent = lead.product;
-  $('#d-sub').textContent = `${fmtNum(lead.quantity)} ${lead.unit} · ${lead.destination}`;
+  async function loadThreads() {
+    const { data, error } = await sb.from('threads')
+      .select('*')
+      .eq('manufacturer_id', me.user.id)
+      .order('last_at', { ascending: false });
+    if (error) { console.warn('loadThreads', error); return; }
+    state.threads = data || [];
+  }
 
-  $('#d-body').innerHTML = `
-    <div class="detail-section">
-      <h4>About this lead</h4>
-      <div style="display:flex; gap:10px; align-items:center; margin-bottom: 12px;">
-        <span class="industry-badge ${lead.industry}">${industryLabel}</span>
-        <span class="lead-time">${fmtAgo(lead.minutesAgo)}</span>
-      </div>
-      <p>${escapeHtml(lead.fullDesc || lead.desc)}</p>
-    </div>
+  async function loadThreadMessages(threadId) {
+    const { data, error } = await sb.from('messages')
+      .select('*').eq('thread_id', threadId)
+      .order('created_at', { ascending: true });
+    if (error) { console.warn('loadThreadMessages', error); return; }
+    state.activeThreadMessages = data || [];
+  }
 
-    <div class="detail-section">
-      <h4>Specifications</h4>
-      <div class="detail-grid">
-        <div class="meta-item">
-          <span class="meta-label">Quantity</span>
-          <span class="meta-value"><strong>${fmtNum(lead.quantity)}</strong> ${lead.unit}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">MOQ</span>
-          <span class="meta-value">${fmtNum(lead.moq)} ${lead.unit}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Destination</span>
-          <span class="meta-value">${escapeHtml(lead.destination)}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Lead time</span>
-          <span class="meta-value">${escapeHtml(lead.leadTime)}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Target price</span>
-          <span class="meta-value">${fmtMoney(lead.targetPrice)} / ${lead.unit.slice(0,-1)}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Reference</span>
-          <span class="meta-value">${lead.id}</span>
-        </div>
-      </div>
-    </div>
+  /* ════════════════════════════════════════
+     REALTIME — postgres_changes
+     ─ rfqs: new lead in my industry appears live
+     ─ quotes: my quote status changes live
+     ─ notifications: bell updates live
+     ─ messages: open thread updates live
+  ════════════════════════════════════════ */
+  function subscribeRealtime() {
+    sb.channel('nx-rfqs')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rfqs' }, p => {
+        const r = p.new;
+        if (state.profile.industry && state.profile.industry !== 'mixed' && r.industry !== state.profile.industry) return;
+        state.leads.unshift(r);
+        if (state.view === 'dashboard') renderLeads();
+        if (state.view === 'rfqs')      renderRfqs();
+        updateLiveCount();
+        toast(`New ${cap(r.industry)} lead · ${r.product}`);
+      })
+      .subscribe();
 
-    <div class="detail-section">
-      <h4>Buyer</h4>
-      <div class="detail-grid">
-        <div class="meta-item">
-          <span class="meta-label">Identity</span>
-          <span class="meta-value">${escapeHtml(lead.buyer)}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">On Nexora since</span>
-          <span class="meta-value">${escapeHtml(lead.buyerSince)}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Closed deals</span>
-          <span class="meta-value">${lead.deals}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Status</span>
-          <span class="meta-value"><span class="status-chip ${isQuoted ? 'quoted' : 'open'}">${isQuoted ? 'Quoted' : 'Open'}</span></span>
-        </div>
-      </div>
-    </div>
+    sb.channel('nx-notif').on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${me.user.id}` },
+      p => { state.notifs.unshift(p.new); renderNotifs(); }
+    ).subscribe();
 
-    <div class="detail-section">
-      <h4>Activity</h4>
-      <ul class="timeline">
-        <li class="now">
-          <strong>RFQ received</strong>
-          <span class="time">${fmtAgo(lead.minutesAgo)}</span>
-        </li>
-        <li>
-          <strong>Buyer verified by Nexora</strong>
-          <span class="time">Member since ${lead.buyerSince}</span>
-        </li>
-        <li>
-          <strong>${lead.deals} prior deals closed via platform</strong>
-          <span class="time">Across ${Math.max(2, Math.floor(lead.deals/4))} suppliers</span>
-        </li>
-      </ul>
-    </div>
-  `;
+    sb.channel('nx-msgs').on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'messages' },
+      p => {
+        const m = p.new;
+        if (state.activeThreadId && m.thread_id === state.activeThreadId) {
+          state.activeThreadMessages.push(m);
+          if (state.view === 'messages') renderActiveThread();
+        }
+        const t = state.threads.find(x => x.id === m.thread_id);
+        if (t) {
+          t.last_preview = m.body;
+          t.last_at = m.created_at;
+          if (state.view === 'messages') renderThreads();
+        }
+      }
+    ).subscribe();
+  }
 
-  $('#d-cta').textContent = isQuoted ? 'View Sent Quote' : 'Send Quote';
-  $('#d-cta').onclick = () => {
+  /* ════════════════════════════════════════
+     UI WIRING
+  ════════════════════════════════════════ */
+  function wireUI() {
+    /* View nav */
+    $$('.nav-item[data-section]').forEach(n =>
+      n.addEventListener('click', e => { e.preventDefault(); setView(n.dataset.section); })
+    );
+    /* Filter pills */
+    $$('.pill[data-filter]').forEach(pill =>
+      pill.addEventListener('click', () => {
+        $$('.pill[data-filter]').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        state.filter = pill.dataset.filter;
+        renderLeads();
+      })
+    );
+    /* Search */
+    const searchInput = $('#search-input');
+    const searchClear = $('#search-clear');
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        state.search = e.target.value.trim().toLowerCase();
+        searchInput.parentElement.classList.toggle('has-value', !!state.search);
+        rerenderActiveView();
+      });
+    }
+    if (searchClear) {
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        state.search = '';
+        searchInput.parentElement.classList.remove('has-value');
+        searchInput.focus();
+        rerenderActiveView();
+      });
+    }
+
+    /* Sidebar (mobile) */
+    const scrim = $('.sidebar-scrim');
+    const menuBtn = $('.menu-toggle');
+    if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+    if (scrim)   scrim.addEventListener('click', closeSidebar);
+    window.addEventListener('resize', () => { if (window.innerWidth > 880) closeSidebar(); });
+
+    /* Popovers */
+    const notifBtn = $('#btn-notifs');
+    if (notifBtn) notifBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      togglePopover('notifs', e.currentTarget);
+    });
+    const settingsBtn = $('#btn-settings');
+    if (settingsBtn) settingsBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      togglePopover('settings', e.currentTarget);
+    });
+    $$('.popover').forEach(p => p.addEventListener('click', e => e.stopPropagation()));
+    document.addEventListener('click', closeAllPopovers);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAllPopovers(); closeModals(); } });
+
+    const clearBtn = $('#notif-clear');
+    if (clearBtn) clearBtn.addEventListener('click', markAllRead);
+
+    /* Settings menu */
+    $$('#popover-settings .menu-item').forEach(item =>
+      item.addEventListener('click', async () => {
+        const action = item.dataset.action;
+        closeAllPopovers();
+        if (action === 'logout') {
+          await Auth.signOut();
+          location.replace('auth.html');
+        }
+      })
+    );
+
+    /* Modals */
+    $$('[data-close-modal]').forEach(b => b.addEventListener('click', closeModals));
+    $$('.modal-backdrop').forEach(bd =>
+      bd.addEventListener('click', e => { if (e.target === bd) closeModals(); })
+    );
+
+    /* Quote submit */
+    const qSubmit = $('#q-submit');
+    if (qSubmit) qSubmit.addEventListener('click', submitQuote);
+
+    /* Profile form */
+    const pSave = $('#profile-save');
+    const pCancel = $('#profile-cancel');
+    if (pSave)   pSave.addEventListener('click', saveProfile);
+    if (pCancel) pCancel.addEventListener('click', e => { e.preventDefault(); bootProfile(); toast('Changes discarded.'); });
+
+    /* Composer */
+    const composer = $('#thread-composer-form');
+    if (composer) composer.addEventListener('submit', sendMessage);
+
+    /* User pill → profile view */
+    const pill = $('.user-pill');
+    if (pill) pill.addEventListener('click', () => setView('profile'));
+  }
+
+  function rerenderActiveView() {
+    if (state.view === 'dashboard') renderLeads();
+    if (state.view === 'rfqs')      renderRfqs();
+    if (state.view === 'messages')  renderThreads();
+  }
+
+  /* ════════════════════════════════════════
+     VIEW SWITCHING
+  ════════════════════════════════════════ */
+  function setView(name) {
+    state.view = name;
+    $$('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
+    $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === name));
+    closeAllPopovers();
+    closeSidebar();
+    const search = $('#search-input');
+    if (search) {
+      search.placeholder = {
+        dashboard: 'Search leads, buyers, products…',
+        rfqs:      'Search RFQ history…',
+        profile:   'Search profile fields…',
+        messages:  'Search conversations…'
+      }[name] || 'Search…';
+    }
+    if (name === 'rfqs')     renderRfqs();
+    if (name === 'messages') renderThreads();
+  }
+
+  function openSidebar()  { $('.sidebar').classList.add('open');    $('.sidebar-scrim').classList.add('show'); }
+  function closeSidebar() { const s = $('.sidebar'); if (!s) return; s.classList.remove('open'); $('.sidebar-scrim') && $('.sidebar-scrim').classList.remove('show'); }
+
+  /* ════════════════════════════════════════
+     LEADS VIEW
+  ════════════════════════════════════════ */
+  const grid   = $('#leads-grid');
+  const liveCt = $('#live-count');
+
+  function filteredLeads() {
+    let leads = state.filter === 'all'
+      ? state.leads
+      : state.leads.filter(l => l.industry === state.filter);
+    if (state.search) {
+      const q = state.search;
+      leads = leads.filter(l =>
+        (l.product || '').toLowerCase().includes(q) ||
+        (l.destination || '').toLowerCase().includes(q) ||
+        (l.id || '').toLowerCase().includes(q) ||
+        (l.industry || '').toLowerCase().includes(q)
+      );
+    }
+    return leads;
+  }
+
+  function renderLeads() {
+    if (!grid) return;
+    const leads = filteredLeads();
+    if (!leads.length) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>
+          </svg>
+          <h3>${state.search ? 'No leads match your search' : 'No live RFQs yet'}</h3>
+          <p>${state.search
+            ? 'Try different keywords or clear the search.'
+            : state.profile.verified_status
+              ? 'New requirements posted by verified exporters will appear here in real time.'
+              : 'Your account is awaiting verification — once approved, leads in your industry will appear here.'}
+          </p>
+        </div>`;
+      return;
+    }
+    grid.innerHTML = leads.map((l, i) => leadCardHTML(l, i)).join('');
+    grid.querySelectorAll('[data-action="quote"]').forEach(b =>
+      b.addEventListener('click', () => openQuoteModal(b.dataset.id))
+    );
+    grid.querySelectorAll('[data-action="details"]').forEach(b =>
+      b.addEventListener('click', () => openDetailsModal(b.dataset.id))
+    );
+  }
+
+  function leadCardHTML(l, i = 0) {
+    const isQuoted   = state.quotedIds.has(l.id);
+    const isNew      = (Date.now() - new Date(l.created_at).getTime()) < 15 * 60_000;
+    const industryLabel = cap(l.industry);
+    return `
+      <article class="lead-card${isNew ? ' new' : ''}" data-lead-id="${escapeHtml(l.id)}" style="--i:${i}">
+        <div class="lead-top">
+          <span class="industry-badge ${escapeHtml(l.industry)}">${escapeHtml(industryLabel)}</span>
+          <span class="lead-time">${fmtAgo(l.created_at)}</span>
+        </div>
+        <div>
+          <h3 class="lead-product">${escapeHtml(l.product)}</h3>
+          ${l.specs ? `<p class="lead-desc">${escapeHtml(l.specs.slice(0, 140))}${l.specs.length > 140 ? '…' : ''}</p>` : ''}
+        </div>
+        <div class="lead-meta">
+          <div class="meta-item">
+            <span class="meta-label">Quantity</span>
+            <span class="meta-value"><strong>${fmtNum(l.quantity)}</strong> ${escapeHtml(l.unit)}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Destination</span>
+            <span class="meta-value">${escapeHtml(l.destination)}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Target</span>
+            <span class="meta-value">${l.target_price != null ? fmtMoney(l.target_price) : '—'}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Ref</span>
+            <span class="meta-value">${escapeHtml((l.id || '').slice(0, 8))}</span>
+          </div>
+        </div>
+        <div class="lead-actions">
+          <button class="btn-quote${isQuoted ? ' sent' : ''}" data-action="quote" data-id="${escapeHtml(l.id)}" ${isQuoted ? 'disabled' : ''}>
+            ${isQuoted
+              ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Quote Sent`
+              : `Send Quote <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`}
+          </button>
+          <button class="btn-details" data-action="details" data-id="${escapeHtml(l.id)}">Details</button>
+        </div>
+      </article>`;
+  }
+
+  function updateLiveCount() {
+    const open = state.leads.length;
+    if (liveCt) liveCt.textContent = open;
+
+    const rfqBadge = $('.nav-item[data-section="rfqs"] .badge');
+    if (rfqBadge) rfqBadge.textContent = state.myQuotes.length;
+
+    const msgBadge = $('.nav-item[data-section="messages"] .badge');
+    if (msgBadge) msgBadge.textContent = state.threads.filter(t =>
+      !t.read_by_manufacturer_at  // placeholder until we track read state per thread
+    ).length || state.threads.length;
+
+    ['all','sports','surgical','leather'].forEach(k => {
+      const c = $(`.pill[data-filter="${k}"] .count`);
+      if (!c) return;
+      c.textContent = k === 'all'
+        ? state.leads.length
+        : state.leads.filter(l => l.industry === k).length;
+    });
+
+    const elTotal   = $('#stat-total');
+    const elTotal2  = $('#stat-total-2');
+    const elNew     = $('#stat-new');
+    const elQuoted  = $('#stat-quoted');
+    const elMarkets = $('#stat-markets');
+    const elLeadsCt = $('#leads-section-count');
+    if (elTotal)   elTotal.textContent   = state.leads.length;
+    if (elTotal2)  elTotal2.textContent  = state.leads.length;
+    if (elNew)     elNew.textContent     = state.leads.filter(l =>
+      (Date.now() - new Date(l.created_at).getTime()) < 60 * 60_000).length;
+    if (elQuoted)  elQuoted.textContent  = state.myQuotes.length;
+    if (elMarkets) elMarkets.textContent = new Set(state.leads.map(l => l.destination)).size;
+    if (elLeadsCt) elLeadsCt.textContent = `${state.leads.length} open`;
+  }
+
+  /* ════════════════════════════════════════
+     QUOTE MODAL
+  ════════════════════════════════════════ */
+  let currentQuoteLead = null;
+
+  function openQuoteModal(id) {
+    const lead = state.leads.find(l => l.id === id);
+    if (!lead) return;
+    currentQuoteLead = lead;
+    $('#q-eyebrow').textContent = `New Quote · ${(lead.id || '').slice(0, 8)}`;
+    $('#q-title').textContent   = lead.product;
+    $('#q-sub').textContent     = `${fmtNum(lead.quantity)} ${lead.unit} · ${lead.destination}`;
+    $('#q-sum-qty').textContent    = `${fmtNum(lead.quantity)} ${lead.unit}`;
+    $('#q-sum-target').textContent = lead.target_price != null ? fmtMoney(lead.target_price) : '—';
+    $('#q-sum-dest').textContent   = lead.destination;
+    $('#q-price').value     = lead.target_price ? Number(lead.target_price).toFixed(2) : '';
+    $('#q-moq').value       = '';
+    $('#q-lead-time').value = lead.lead_time || '45 days';
+    $('#q-payment').value   = '';
+    $('#q-incoterm').value  = lead.incoterm || 'FOB Karachi';
+    $('#q-notes').value     = '';
+    openModal($('#modal-quote'));
+    setTimeout(() => $('#q-price').focus(), 200);
+  }
+
+  async function submitQuote() {
+    if (!currentQuoteLead) return;
+    const price = parseFloat($('#q-price').value);
+    if (!price || price <= 0) {
+      $('#q-price').focus();
+      toast('Please enter a valid unit price.');
+      return;
+    }
+    if (!sb) {
+      toast('Connect Supabase to send real quotes.');
+      return;
+    }
+    const payload = {
+      rfq_id:          currentQuoteLead.id,
+      manufacturer_id: me.user.id,
+      unit_price:      price,
+      lead_time:       $('#q-lead-time').value,
+      payment_terms:   Auth.sanitize($('#q-payment').value),
+      incoterm:        $('#q-incoterm').value,
+      notes:           Auth.sanitize($('#q-notes').value)
+    };
+    const { data, error } = await sb.from('quotes').insert(payload).select('*, rfqs(*)').single();
+    if (error) {
+      console.warn('quote insert', error);
+      toast(error.message || 'Could not send quote.');
+      return;
+    }
+    state.myQuotes.unshift(data);
+    state.quotedIds.add(data.rfq_id);
+    state.quoteByLead[data.rfq_id] = data;
+    toast(`Quote sent for ${currentQuoteLead.product} → ${currentQuoteLead.destination}.`);
     closeModals();
-    if (!isQuoted) setTimeout(() => openQuoteModal(lead.id), 280);
-    else toast(`Quote for ${lead.id}: ${fmtMoney(state.quotes[lead.id].price)} / unit`);
-  };
+    renderLeads();
+    renderRfqs();
+    updateLiveCount();
+  }
 
-  openModal(detailsModal);
-}
+  /* ════════════════════════════════════════
+     DETAILS MODAL
+  ════════════════════════════════════════ */
+  function openDetailsModal(id) {
+    const lead = state.leads.find(l => l.id === id);
+    if (!lead) return;
+    const isQuoted = state.quotedIds.has(lead.id);
+    const industryLabel = cap(lead.industry);
 
-/* ════════════════════════════════════════
-   MODAL CORE
-════════════════════════════════════════ */
-function openModal(m) {
-  m.classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
-function closeModals() {
-  $$('.modal-backdrop').forEach(m => m.classList.remove('show'));
-  document.body.style.overflow = '';
-  currentQuoteLead = null;
-}
-$$('[data-close-modal]').forEach(b => b.addEventListener('click', closeModals));
-$$('.modal-backdrop').forEach(bd => {
-  bd.addEventListener('click', e => { if (e.target === bd) closeModals(); });
-});
+    $('#d-eyebrow').textContent = `Lead detail · ${(lead.id || '').slice(0, 8)}`;
+    $('#d-title').textContent   = lead.product;
+    $('#d-sub').textContent     = `${fmtNum(lead.quantity)} ${lead.unit} · ${lead.destination}`;
 
-/* ════════════════════════════════════════
-   ✦ RFQs VIEW
-════════════════════════════════════════ */
-function renderRfqs() {
-  const tbody = $('#rfq-tbody');
-  if (!tbody) return;
+    $('#d-body').innerHTML = `
+      <div class="detail-section">
+        <h4>About this lead</h4>
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom: 12px;">
+          <span class="industry-badge ${escapeHtml(lead.industry)}">${escapeHtml(industryLabel)}</span>
+          <span class="lead-time">${fmtAgo(lead.created_at)}</span>
+        </div>
+        <p>${escapeHtml(lead.specs || '— no additional specifications provided —')}</p>
+      </div>
+      <div class="detail-section">
+        <h4>Specifications</h4>
+        <div class="detail-grid">
+          <div class="meta-item"><span class="meta-label">Quantity</span><span class="meta-value"><strong>${fmtNum(lead.quantity)}</strong> ${escapeHtml(lead.unit)}</span></div>
+          <div class="meta-item"><span class="meta-label">Destination</span><span class="meta-value">${escapeHtml(lead.destination)}</span></div>
+          <div class="meta-item"><span class="meta-label">Lead time</span><span class="meta-value">${escapeHtml(lead.lead_time || '—')}</span></div>
+          <div class="meta-item"><span class="meta-label">Incoterm</span><span class="meta-value">${escapeHtml(lead.incoterm || '—')}</span></div>
+          <div class="meta-item"><span class="meta-label">Target price</span><span class="meta-value">${lead.target_price != null ? fmtMoney(lead.target_price) : '—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Reference</span><span class="meta-value">${escapeHtml(lead.id)}</span></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h4>Status</h4>
+        <p><span class="status-chip ${isQuoted ? 'quoted' : 'open'}">${isQuoted ? 'Quoted' : 'Open'}</span></p>
+      </div>
+    `;
+    $('#d-cta').textContent = isQuoted ? 'Quote sent' : 'Send Quote';
+    $('#d-cta').onclick = () => {
+      closeModals();
+      if (!isQuoted) setTimeout(() => openQuoteModal(lead.id), 280);
+    };
+    openModal($('#modal-details'));
+  }
 
-  const openLeads = state.leads.map(l => ({
-    id: l.id, industry: l.industry, product: l.product, destination: l.destination,
-    quantity: l.quantity, status: state.quoted.has(l.id) ? 'quoted' : 'open',
-    minutesAgo: l.minutesAgo,
-    sentPrice: state.quotes[l.id] ? state.quotes[l.id].price : null
-  }));
-  let rows = [...openLeads, ...HISTORY_LEADS];
+  /* ════════════════════════════════════════
+     POPOVERS
+  ════════════════════════════════════════ */
+  function togglePopover(name, anchorBtn) {
+    if (state.openPopover === name) { closeAllPopovers(); return; }
+    closeAllPopovers();
+    state.openPopover = name;
+    const pop = $(`#popover-${name}`);
+    if (pop) pop.classList.add('show');
+    anchorBtn.classList.add('open');
+  }
+  function closeAllPopovers() {
+    $$('.popover').forEach(p => p.classList.remove('show'));
+    $$('.icon-btn').forEach(b => b.classList.remove('open'));
+    state.openPopover = null;
+  }
 
-  if (state.search) {
-    const q = state.search;
-    rows = rows.filter(r =>
-      r.product.toLowerCase().includes(q) ||
-      r.destination.toLowerCase().includes(q) ||
-      r.id.toLowerCase().includes(q)
+  function renderNotifs() {
+    const list = $('#notif-list');
+    const dot  = $('#notif-dot');
+    const unread = state.notifs.filter(n => !n.read_at).length;
+    if (dot) dot.style.display = unread ? 'block' : 'none';
+    if (!list) return;
+    if (!state.notifs.length) {
+      list.innerHTML = '<div class="popover-empty">You\'re all caught up.</div>';
+      return;
+    }
+    list.innerHTML = state.notifs.map((n, i) => `
+      <div class="notif-item${!n.read_at ? ' unread' : ''}" data-id="${escapeHtml(n.id)}" style="--i:${i}">
+        <span class="notif-dot-static"></span>
+        <div class="notif-content">${n.body_html /* trusted DB-rendered HTML */ || escapeHtml(n.body || '')}</div>
+        <span class="notif-time">${fmtAgo(n.created_at)}</span>
+      </div>`).join('');
+    list.querySelectorAll('.notif-item').forEach(item => {
+      item.addEventListener('click', async () => {
+        const id = item.dataset.id;
+        const n = state.notifs.find(x => x.id === id);
+        if (n && !n.read_at) {
+          n.read_at = new Date().toISOString();
+          renderNotifs();
+          if (sb) await sb.from('notifications').update({ read_at: n.read_at }).eq('id', id);
+        }
+      });
+    });
+  }
+
+  async function markAllRead() {
+    const unread = state.notifs.filter(n => !n.read_at);
+    if (!unread.length) return;
+    const now = new Date().toISOString();
+    unread.forEach(n => n.read_at = now);
+    renderNotifs();
+    if (sb) await sb.from('notifications').update({ read_at: now }).is('read_at', null).eq('user_id', me.user.id);
+    toast('All notifications marked as read.');
+  }
+
+  /* ════════════════════════════════════════
+     RFQs VIEW (the manufacturer's own quote history)
+  ════════════════════════════════════════ */
+  function renderRfqs() {
+    const tbody = $('#rfq-tbody');
+    if (!tbody) return;
+
+    // Combine: open leads I haven't quoted + my sent quotes
+    const openRows = state.leads
+      .filter(l => !state.quotedIds.has(l.id))
+      .map(l => ({
+        id: l.id,
+        product: l.product,
+        industry: l.industry,
+        destination: l.destination,
+        quantity: l.quantity,
+        unit: l.unit,
+        status: 'open',
+        created_at: l.created_at,
+        sent_price: null
+      }));
+    const myQuoteRows = state.myQuotes.map(q => ({
+      id: q.rfq_id,
+      product:     q.rfqs ? q.rfqs.product : '—',
+      industry:    q.rfqs ? q.rfqs.industry : '',
+      destination: q.rfqs ? q.rfqs.destination : '',
+      quantity:    q.rfqs ? q.rfqs.quantity : 0,
+      unit:        q.rfqs ? q.rfqs.unit : '',
+      status:      q.status === 'accepted' ? 'won'
+                 : q.status === 'rejected' ? 'lost'
+                 : 'quoted',
+      created_at:  q.created_at,
+      sent_price:  q.unit_price
+    }));
+
+    let rows = [...myQuoteRows, ...openRows];
+
+    if (state.search) {
+      const q = state.search;
+      rows = rows.filter(r =>
+        (r.product || '').toLowerCase().includes(q) ||
+        (r.destination || '').toLowerCase().includes(q) ||
+        (r.id || '').toLowerCase().includes(q)
+      );
+    }
+
+    const counts = { all: rows.length, open: 0, quoted: 0, won: 0, lost: 0 };
+    rows.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    const set = (id, v) => { const el = $('#' + id); if (el) el.textContent = v; };
+    set('rfq-stat-all', counts.all); set('rfq-stat-open', counts.open);
+    set('rfq-stat-quoted', counts.quoted); set('rfq-stat-won', counts.won);
+    set('rfq-stat-lost', counts.lost);
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--text-muted);">
+        ${state.search ? 'No RFQs match your search.' : 'No RFQs yet. They\'ll appear here as buyers post requirements.'}
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map((r, i) => `
+      <tr data-id="${escapeHtml(r.id)}" style="--i:${i}">
+        <td>
+          <span class="rfq-product">${escapeHtml(r.product)}</span>
+          <span class="rfq-meta">${escapeHtml((r.id || '').slice(0,8))} · ${escapeHtml(r.industry)}</span>
+        </td>
+        <td>${escapeHtml(r.destination)}</td>
+        <td>${fmtNum(r.quantity)}</td>
+        <td>${r.sent_price != null ? fmtMoney(r.sent_price) : '—'}</td>
+        <td><span class="status-chip ${r.status}">${cap(r.status)}</span></td>
+        <td>${fmtAgo(r.created_at)}</td>
+      </tr>`).join('');
+
+    tbody.querySelectorAll('tr').forEach(tr =>
+      tr.addEventListener('click', () => openDetailsModal(tr.dataset.id))
     );
   }
 
-  // Stat counts for the table
-  const counts = { all: rows.length, open: 0, quoted: 0, won: 0, lost: 0 };
-  rows.forEach(r => counts[r.status]++);
-  $('#rfq-stat-all').textContent    = counts.all;
-  $('#rfq-stat-open').textContent   = counts.open;
-  $('#rfq-stat-quoted').textContent = counts.quoted;
-  $('#rfq-stat-won').textContent    = counts.won;
-  $('#rfq-stat-lost').textContent   = counts.lost;
+  /* ════════════════════════════════════════
+     PROFILE VIEW
+  ════════════════════════════════════════ */
+  function bootProfile() {
+    const p = state.profile;
+    const company = p.company || p.full_name || (me.user && me.user.email) || 'Your shop';
+    const initialsTxt = initials(company);
+    const setText = (id, v) => { const el = $('#' + id); if (el) el.textContent = v ?? ''; };
+    const setVal  = (id, v) => { const el = $('#' + id); if (el) el.value = v ?? ''; };
 
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="padding: 40px; text-align: center; color: var(--text-muted);">No RFQs match your search.</td></tr>`;
-    return;
+    setText('p-avatar', initialsTxt);
+    setText('p-name', company);
+    setText('p-role', cap(p.role || 'Manufacturer'));
+    setText('p-joined', p.verified_status ? 'Verified' : 'Awaiting verification');
+    /* Verified badge — only shown for verified profiles */
+    const vBadge = $('#p-verified');
+    if (vBadge) vBadge.style.display = p.verified_status ? '' : 'none';
+    setText('p-city',      p.location  || '—');
+    setText('p-employees', p.employees || '—');
+    setText('p-capacity',  p.capacity  || '—');
+    setText('p-founded',   p.founded   || '—');
+
+    setVal('pf-name',      p.company   || '');
+    setVal('pf-type',      cap(p.role  || 'Manufacturer'));
+    setVal('pf-city',      p.location  || '');
+    setVal('pf-founded',   p.founded   || '');
+    setVal('pf-employees', p.employees || '');
+    setVal('pf-capacity',  p.capacity  || '');
+    setVal('pf-about',     p.about     || '');
+
+    /* Sidebar pill stays in sync (auth guard set it on first paint;
+       here we update after profile edits). */
+    const sideName = $('.user-pill .user-name');
+    const sideRole = $('.user-pill .user-role');
+    const sideAv   = $('.user-pill .user-avatar');
+    if (sideName) sideName.textContent = company;
+    if (sideRole) sideRole.textContent = cap(p.role || 'Manufacturer');
+    if (sideAv)   sideAv.textContent   = initialsTxt;
+
+    /* Certifications */
+    const certGrid = $('#p-cert-grid');
+    if (certGrid) {
+      const certs = Array.isArray(p.certifications) ? p.certifications : [];
+      if (!certs.length) {
+        certGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1; padding: 24px; text-align: center;">
+            <p style="font-size:0.88rem; color: var(--text-muted);">No certifications listed yet. Add ISO, FIFA Quality Pro, FDA, etc. once verified.</p>
+          </div>`;
+      } else {
+        certGrid.innerHTML = certs.map(c => `
+          <div class="cert-chip">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
+            </svg>
+            <div>
+              <strong>${escapeHtml(c.name || c)}</strong>
+              ${c.body ? `<span>${escapeHtml(c.body)}${c.year ? ' · ' + escapeHtml(c.year) : ''}</span>` : ''}
+            </div>
+          </div>`).join('');
+      }
+    }
   }
 
-  tbody.innerHTML = rows.map((r, i) => `
-    <tr data-id="${r.id}" style="--i:${i}">
-      <td>
-        <span class="rfq-product">${escapeHtml(r.product)}</span>
-        <span class="rfq-meta">${r.id} · ${r.industry}</span>
-      </td>
-      <td>${escapeHtml(r.destination)}</td>
-      <td>${fmtNum(r.quantity)}</td>
-      <td>${r.sentPrice != null ? fmtMoney(r.sentPrice) : '—'}</td>
-      <td><span class="status-chip ${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></td>
-      <td>${fmtAgo(r.minutesAgo)}</td>
-    </tr>
-  `).join('');
+  async function saveProfile(e) {
+    e && e.preventDefault();
+    const patch = {
+      company:   Auth.sanitize($('#pf-name').value),
+      location:  Auth.sanitize($('#pf-city').value),
+      employees: Auth.sanitize($('#pf-employees').value),
+      capacity:  Auth.sanitize($('#pf-capacity').value),
+      founded:   parseInt($('#pf-founded').value, 10) || null,
+      about:     Auth.sanitize($('#pf-about').value)
+    };
+    Object.assign(state.profile, patch);
+    if (sb) {
+      const { error } = await sb.from('profiles').update(patch).eq('id', me.user.id);
+      if (error) { console.warn('profile save', error); toast('Could not save: ' + error.message); return; }
+    }
+    bootProfile();
+    toast('Profile saved.');
+  }
 
-  tbody.querySelectorAll('tr').forEach(tr => {
-    tr.addEventListener('click', () => {
-      const id = tr.dataset.id;
-      const lead = state.leads.find(l => l.id === id);
-      if (lead) openDetailsModal(id);
-      else toast(`${id} — archived RFQ, full history coming soon.`);
-    });
-  });
-}
-
-/* ════════════════════════════════════════
-   ✦ PROFILE VIEW (interactive form)
-════════════════════════════════════════ */
-function bootProfile() {
-  $('#p-avatar').textContent  = PROFILE.initials;
-  $('#p-name').textContent    = PROFILE.company;
-  $('#p-role').textContent    = PROFILE.type;
-  $('#p-joined').textContent  = PROFILE.joined;
-  $('#p-city').textContent    = PROFILE.city;
-  $('#p-employees').textContent = PROFILE.employees;
-  $('#p-capacity').textContent  = PROFILE.capacity;
-  $('#p-founded').textContent   = PROFILE.founded;
-
-  // Pre-fill form
-  $('#pf-name').value      = PROFILE.company;
-  $('#pf-type').value      = PROFILE.type;
-  $('#pf-city').value      = PROFILE.city;
-  $('#pf-founded').value   = PROFILE.founded;
-  $('#pf-employees').value = PROFILE.employees;
-  $('#pf-capacity').value  = PROFILE.capacity;
-  $('#pf-about').value     = `Sialkot-based ${PROFILE.type.toLowerCase()} of premium sports goods and leather products. Established ${PROFILE.founded}. Capacity ${PROFILE.capacity}. ISO 9001 and FIFA Quality Pro certified.`;
-
-  // Certifications
-  $('#p-cert-grid').innerHTML = PROFILE.certifications.map(c => `
-    <div class="cert-chip">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M9 12l2 2 4-4"/>
-        <circle cx="12" cy="12" r="9"/>
-      </svg>
-      <div>
-        <strong>${escapeHtml(c.name)}</strong>
-        <span>${escapeHtml(c.body)} · ${c.year}</span>
-      </div>
-    </div>`).join('');
-}
-
-$('#profile-save').addEventListener('click', e => {
-  e.preventDefault();
-  // Persist to in-memory profile
-  PROFILE.company  = $('#pf-name').value.trim()  || PROFILE.company;
-  PROFILE.type     = $('#pf-type').value;
-  PROFILE.city     = $('#pf-city').value.trim()  || PROFILE.city;
-  PROFILE.founded  = $('#pf-founded').value      || PROFILE.founded;
-  PROFILE.employees= $('#pf-employees').value.trim() || PROFILE.employees;
-  PROFILE.capacity = $('#pf-capacity').value.trim()  || PROFILE.capacity;
-  PROFILE.initials = PROFILE.company.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
-
-  // Reflect updates in card + sidebar
-  bootProfile();
-  $('.user-name').textContent = PROFILE.company;
-  $('.user-role').textContent = PROFILE.type;
-  $('.user-avatar').textContent = PROFILE.initials;
-  toast('Profile saved.');
-});
-
-$('#profile-cancel').addEventListener('click', e => {
-  e.preventDefault();
-  bootProfile();
-  toast('Changes discarded.');
-});
-
-/* ════════════════════════════════════════
-   ✦ MESSAGES VIEW
-════════════════════════════════════════ */
-function renderThreads() {
-  const list = $('#thread-list');
-  if (!list) return;
-  let threads = state.threads;
-  if (state.search) {
-    const q = state.search;
-    threads = threads.filter(t =>
-      t.name.toLowerCase().includes(q) ||
-      t.preview.toLowerCase().includes(q) ||
-      t.sub.toLowerCase().includes(q)
+  /* ════════════════════════════════════════
+     MESSAGES VIEW
+  ════════════════════════════════════════ */
+  async function renderThreads() {
+    const list = $('#thread-list');
+    if (!list) return;
+    let threads = state.threads;
+    if (state.search) {
+      const q = state.search;
+      threads = threads.filter(t => (t.last_preview || '').toLowerCase().includes(q));
+    }
+    if (!threads.length) {
+      list.innerHTML = '<div class="popover-empty">' +
+        (state.search ? 'No conversations match.' : 'No conversations yet. Send a quote to start one.') +
+        '</div>';
+      hideThreadPane();
+      return;
+    }
+    list.innerHTML = threads.map((t, i) => threadHtml(t, i)).join('');
+    list.querySelectorAll('.thread-item').forEach(item =>
+      item.addEventListener('click', () => openThread(item.dataset.id))
     );
+    /* Auto-open the first thread if none selected */
+    if (!state.activeThreadId && threads[0]) openThread(threads[0].id);
   }
-  list.innerHTML = threads.map((t, i) => `
-    <div class="thread-item${t.id === state.activeThread ? ' active' : ''}${t.unread ? ' has-unread' : ''}" data-id="${t.id}" style="--i:${i}">
-      <div class="thread-avatar">${t.initials}</div>
-      <div class="thread-body">
-        <div class="thread-name">${escapeHtml(t.name)}</div>
-        <div class="thread-preview">${escapeHtml(t.preview)}</div>
-      </div>
-      <div class="thread-meta">
-        ${escapeHtml(t.time)}
-        <span class="unread-dot"></span>
-      </div>
-    </div>
-  `).join('');
-  list.querySelectorAll('.thread-item').forEach(item => {
-    item.addEventListener('click', () => {
-      state.activeThread = item.dataset.id;
-      const t = state.threads.find(x => x.id === state.activeThread);
-      if (t) t.unread = false;
-      renderThreads();
-      renderActiveThread();
-    });
-  });
-  if (threads.length === 0) {
-    list.innerHTML = '<div class="popover-empty">No conversations match.</div>';
+
+  function threadHtml(t, i) {
+    const ini = initials(t.last_preview || 'Thread');
+    return `
+      <div class="thread-item${t.id === state.activeThreadId ? ' active' : ''}" data-id="${escapeHtml(t.id)}" style="--i:${i}">
+        <div class="thread-avatar">${escapeHtml(ini)}</div>
+        <div class="thread-body">
+          <div class="thread-name">Thread · ${escapeHtml((t.id || '').slice(0,6))}</div>
+          <div class="thread-preview">${escapeHtml(t.last_preview || '')}</div>
+        </div>
+        <div class="thread-meta">${fmtAgo(t.last_at)}</div>
+      </div>`;
   }
-}
 
-function renderActiveThread() {
-  const t = state.threads.find(x => x.id === state.activeThread);
-  if (!t) return;
-  $('#thread-name').textContent = t.name;
-  $('#thread-sub').textContent  = t.sub;
-  $('#thread-avatar').textContent = t.initials;
-  $('#thread-messages').innerHTML = t.messages.map(m => `
-    <div class="msg ${m.from}">
-      ${escapeHtml(m.text)}
-      <span class="msg-time">${escapeHtml(m.time)}</span>
-    </div>`).join('');
-  // Scroll to bottom
-  const msgs = $('#thread-messages');
-  msgs.scrollTop = msgs.scrollHeight;
-}
+  async function openThread(id) {
+    state.activeThreadId = id;
+    await loadThreadMessages(id);
+    renderThreads();
+    renderActiveThread();
+  }
 
-$('#thread-composer-form').addEventListener('submit', e => {
-  e.preventDefault();
-  const input = $('#thread-composer-input');
-  const text = input.value.trim();
-  if (!text) return;
-  const t = state.threads.find(x => x.id === state.activeThread);
-  if (!t) return;
-  t.messages.push({ from: 'me', text, time: 'Just now' });
-  t.preview = text;
-  t.time = 'now';
-  input.value = '';
-  renderActiveThread();
-  renderThreads();
+  function hideThreadPane() {
+    const pane = $('#thread-messages');
+    if (pane) pane.innerHTML = `
+      <div class="empty-state" style="margin:auto; padding:32px; text-align:center;">
+        <p style="color:var(--text-muted); font-size:0.92rem;">Select a conversation, or start one by sending a quote.</p>
+      </div>`;
+  }
 
-  // Simulate a reply
-  setTimeout(() => {
-    const reply = pickReply(text);
-    t.messages.push({ from: 'them', text: reply, time: 'Just now' });
-    t.preview = reply;
+  function renderActiveThread() {
+    const t = state.threads.find(x => x.id === state.activeThreadId);
+    if (!t) { hideThreadPane(); return; }
+    const nameEl  = $('#thread-name');
+    const subEl   = $('#thread-sub');
+    const avEl    = $('#thread-avatar');
+    const msgsEl  = $('#thread-messages');
+    if (nameEl) nameEl.textContent = 'Conversation · ' + (t.id || '').slice(0,6);
+    if (subEl)  subEl.textContent  = t.rfq_id ? 'Re: RFQ ' + (t.rfq_id || '').slice(0,6) : 'Direct message';
+    if (avEl)   avEl.textContent   = initials(t.last_preview || 'Thread');
+    if (msgsEl) {
+      if (!state.activeThreadMessages.length) {
+        msgsEl.innerHTML = '<div class="popover-empty">No messages yet — say hi.</div>';
+      } else {
+        msgsEl.innerHTML = state.activeThreadMessages.map(m => `
+          <div class="msg ${m.sender_id === me.user.id ? 'me' : 'them'}">
+            ${escapeHtml(m.body)}
+            <span class="msg-time">${fmtClock(m.created_at)}</span>
+          </div>`).join('');
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      }
+    }
+  }
+
+  async function sendMessage(e) {
+    e.preventDefault();
+    if (!state.activeThreadId) { toast('Open a conversation first.'); return; }
+    const input = $('#thread-composer-input');
+    const body = Auth.sanitize(input.value);
+    if (!body) return;
+    input.value = '';
+    if (!sb) { toast('Connect Supabase to send real messages.'); return; }
+    const { data, error } = await sb.from('messages').insert({
+      thread_id: state.activeThreadId,
+      sender_id: me.user.id,
+      body
+    }).select('*').single();
+    if (error) { console.warn('send msg', error); toast(error.message || 'Could not send.'); return; }
+    state.activeThreadMessages.push(data);
+    const t = state.threads.find(x => x.id === state.activeThreadId);
+    if (t) { t.last_preview = body; t.last_at = data.created_at; }
     renderActiveThread();
     renderThreads();
-    toast(`New message from ${t.name.split(' — ')[0]}`);
-  }, 1800);
-});
+  }
 
-function pickReply(text) {
-  const lower = text.toLowerCase();
-  if (lower.includes('price') || lower.includes('quote')) return 'Got it — reviewing the numbers and will revert tomorrow.';
-  if (lower.includes('sample') || lower.includes('proto')) return 'Send the samples whenever ready. Our usual courier address still works.';
-  if (lower.includes('thank'))   return 'Anytime — let me know if anything else comes up.';
-  return 'Noted, thanks. I\'ll loop back shortly.';
-}
+  /* ════════════════════════════════════════
+     MODAL CORE
+  ════════════════════════════════════════ */
+  function openModal(m) {
+    if (!m) return;
+    m.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModals() {
+    $$('.modal-backdrop').forEach(m => m.classList.remove('show'));
+    document.body.style.overflow = '';
+    currentQuoteLead = null;
+  }
 
-/* ════════════════════════════════════════
-   LIVE-TIME TICK
-════════════════════════════════════════ */
-setInterval(() => {
-  state.leads.forEach(l => l.minutesAgo += 1);
-  HISTORY_LEADS.forEach(l => l.minutesAgo += 1);
-  $$('.lead-time').forEach(el => {
-    const m = parseInt(el.dataset.min, 10) + 1;
-    el.dataset.min = m;
-    el.textContent = fmtAgo(m);
-  });
-}, 60000);
+  /* ════════════════════════════════════════
+     TOAST
+  ════════════════════════════════════════ */
+  const toastStack = $('#toast-stack');
+  function toast(msg) {
+    if (!toastStack) return Auth.toast(msg, 'info');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
+      </svg><span>${escapeHtml(msg)}</span>`;
+    toastStack.appendChild(el);
+    setTimeout(() => { el.classList.add('leaving'); setTimeout(() => el.remove(), 260); }, 3400);
+  }
 
-/* ════════════════════════════════════════
-   SIMULATED NEW-LEAD STREAM
-════════════════════════════════════════ */
-const SAMPLE_NEW = [
-  { industry: 'sports',   product: 'Rugby Training Balls',          desc: 'Size 5, hand-stitched, 4-panel grip.',          destination: 'Australia',     moq: 100, unit: 'units', targetPrice: 7.50, leadTime: '40 days' },
-  { industry: 'surgical', product: 'Surgical Scissors (Mayo)',      desc: '6.75", stainless, ratcheted handle.',           destination: 'Canada',        moq: 200, unit: 'pcs',   targetPrice: 11.00, leadTime: '30 days' },
-  { industry: 'leather',  product: 'Equestrian Riding Gloves',      desc: 'Goatskin palm, mesh back, women\'s sizing.',    destination: 'United Kingdom',moq: 150, unit: 'pairs', targetPrice: 28.00, leadTime: '45 days' }
-];
-let nextId = 2042;
-
-function pushNewLead() {
-  if (document.hidden) return;
-  const tpl = SAMPLE_NEW[Math.floor(Math.random() * SAMPLE_NEW.length)];
-  const newLead = {
-    ...tpl,
-    id: 'L-' + (nextId++),
-    fullDesc: tpl.desc + ' Detailed RFQ available — open the lead to review specifications, certifications and buyer history.',
-    quantity: Math.floor((500 + Math.random() * 9500) / 100) * 100,
-    buyer: 'Verified Buyer · ' + ['DE-22','US-FL','UK-LDN','NL-AMS','FR-LY','IT-MI','JP-OSK'][Math.floor(Math.random()*7)],
-    buyerSince: '2024',
-    deals: Math.floor(Math.random() * 20) + 1,
-    isNew: true,
-    minutesAgo: 0,
-    status: 'open'
-  };
-  state.leads.forEach(l => l.isNew = false);
-  state.leads.unshift(newLead);
-  if (state.view === 'dashboard') renderLeads();
-  if (state.view === 'rfqs')      renderRfqs();
-  updateLiveCount();
-
-  state.notifs.unshift({
-    id: Date.now(),
-    unread: true,
-    text: `<strong>New RFQ</strong> — ${newLead.product} (${newLead.destination})`,
-    time: 'Just now'
-  });
-  renderNotifs();
-  toast(`New ${newLead.industry} lead · ${newLead.product}`);
-}
-setTimeout(() => setInterval(pushNewLead, 45000), 25000);
-
-/* ════════════════════════════════════════
-   TOAST
-════════════════════════════════════════ */
-const toastStack = $('#toast-stack');
-function toast(msg) {
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.innerHTML = `
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M9 12l2 2 4-4"/>
-      <circle cx="12" cy="12" r="9"/>
-    </svg>
-    <span>${msg}</span>`;
-  toastStack.appendChild(el);
-  setTimeout(() => {
-    el.classList.add('leaving');
-    setTimeout(() => el.remove(), 260);
-  }, 3400);
-}
-
-/* ════════════════════════════════════════
-   USER PILL — opens settings popover
-════════════════════════════════════════ */
-$('.user-pill').addEventListener('click', () => setView('profile'));
-
-/* ════════════════════════════════════════
-   BOOT
-════════════════════════════════════════ */
-bootProfile();
-renderLeads();
-renderNotifs();
-renderActiveThread();
-updateLiveCount();
+  /* ════════════════════════════════════════
+     Time tick — re-format relative times every minute
+  ════════════════════════════════════════ */
+  setInterval(() => {
+    $$('.lead-time').forEach(el => {
+      const card = el.closest('.lead-card');
+      if (!card) return;
+      const id = card.dataset.leadId;
+      const l = state.leads.find(x => x.id === id);
+      if (l) el.textContent = fmtAgo(l.created_at);
+    });
+  }, 60_000);
+})();

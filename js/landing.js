@@ -82,7 +82,11 @@ function flipIntroToNav() {
 runIntro();
 
 /* ════════════════════════════════════════
-   COUNTERS
+   COUNTERS — driven by real Supabase data
+   ────────────────────────────────────────
+   Calls nexora_public_stats() (RPC, anon-callable).
+   The HTML starts at 0 so nothing fake is ever shown;
+   the counter animates from 0 → real number once fetched.
 ════════════════════════════════════════ */
 function animateCounter(el, target, suffix, duration) {
   const start = performance.now();
@@ -96,16 +100,59 @@ function animateCounter(el, target, suffix, duration) {
   requestAnimationFrame(tick);
 }
 
-const counterObserver = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    const el = e.target;
-    animateCounter(el, parseInt(el.dataset.target), el.dataset.suffix || '', 1400);
-    counterObserver.unobserve(el);
-  });
-}, { threshold: 0.4 });
+/* Pull the four hero counters from Supabase. The RPC returns a single
+   JSON row of aggregate counts — never any user data, so it's safe to
+   call anonymously. If Supabase isn't configured the counters stay at 0. */
+async function fetchPublicStats() {
+  const cfg = window.NEXORA_CONFIG || {};
+  if (!cfg.SUPABASE_URL || /^YOUR-/.test(cfg.SUPABASE_URL) || !window.supabase) return null;
+  try {
+    const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+    const { data, error } = await sb.rpc('nexora_public_stats');
+    if (error) { console.warn('[stats]', error); return null; }
+    return data;
+  } catch (e) { console.warn('[stats]', e); return null; }
+}
 
-document.querySelectorAll('.stat-value[data-target]').forEach(el => counterObserver.observe(el));
+(async function hydrateStats() {
+  const stats = await fetchPublicStats();
+  /* Map RPC keys → DOM stat labels */
+  const map = {
+    'Active RFQs':     stats ? stats.active_rfqs    : 0,
+    'Verified Units':  stats ? stats.verified_units : 0,
+    'Early Adopters':  stats ? stats.total_adopters : 0,
+    'Export Markets':  stats ? stats.markets        : 0
+  };
+  document.querySelectorAll('.stat-item').forEach(item => {
+    const label = (item.querySelector('.stat-label') || {}).textContent || '';
+    const value = item.querySelector('.stat-value');
+    if (!value) return;
+    const target = map[label] != null ? Number(map[label]) : 0;
+    value.dataset.target = String(target);
+    value.textContent = '0' + (value.dataset.suffix || '');
+  });
+
+  /* Adopters strip ("500+ early adopters and counting") */
+  const adopters = document.querySelector('.adopters-text');
+  if (adopters) {
+    const n = map['Early Adopters'] || 0;
+    adopters.textContent = n > 0
+      ? `${n.toLocaleString()} ${n === 1 ? 'adopter' : 'adopters'} and counting`
+      : 'Be one of the first to join.';
+  }
+
+  /* Now arm the IntersectionObserver to animate when each enters view */
+  const counterObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      const target = parseInt(el.dataset.target || '0', 10);
+      animateCounter(el, target, el.dataset.suffix || '', 1400);
+      counterObserver.unobserve(el);
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('.stat-value[data-target]').forEach(el => counterObserver.observe(el));
+})();
 
 /* ════════════════════════════════════════
    ✦ SCROLL REVEALS

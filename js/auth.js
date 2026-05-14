@@ -470,6 +470,10 @@
     sanitize, sanitizeAlpha, sanitizeEmail,
     toast, redirectForRole,
     sendWelcomeEmail,
+    /* Live Supabase client (or null in demo mode).
+       Dashboard / Exporter use this to query/mutate tables and
+       subscribe to realtime postgres_changes. */
+    client: () => { const c = getSupabase(); return c || null; },
     get demoMode() { getSupabase(); return _demoMode; }
   };
 })();
