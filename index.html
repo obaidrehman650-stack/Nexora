@@ -54,8 +54,8 @@
       Nexora
     </a>
     <div class="nav-right">
-      <a class="btn-ghost" href="Nexora - Dashboard.html">Platform</a>
-      <button class="btn-primary" data-scroll-to="lead-form">Partner Now</button>
+      <a class="btn-ghost" href="auth.html">Log in</a>
+      <a class="btn-primary" href="auth.html?tab=signup">Partner Now</a>
     </div>
   </nav>
 
@@ -179,13 +179,23 @@
       <!-- ────── STAGE C: LEATHER (bottom layer, revealed last) ────── -->
       <div class="lc-stage lc-stage--leather" aria-hidden="false">
         <div class="lc-bg lc-bg--hide"></div>
-        <img class="lc-photo" alt="" loading="lazy" decoding="async"
-             src="https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=2400&q=82&fit=crop&auto=format"
-             srcset="https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=1400&q=82&fit=crop&auto=format 1400w,
-                     https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=2000&q=82&fit=crop&auto=format 2000w,
-                     https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=2500&q=82&fit=crop&auto=format 2500w"
+        <img class="lc-photo" alt="Brown leather gloves on workshop bench" loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1605733513597-a8f8341084e6?w=2400&q=82&fit=crop&auto=format"
+             srcset="https://images.unsplash.com/photo-1605733513597-a8f8341084e6?w=1400&q=82&fit=crop&auto=format 1400w,
+                     https://images.unsplash.com/photo-1605733513597-a8f8341084e6?w=2000&q=82&fit=crop&auto=format 2000w,
+                     https://images.unsplash.com/photo-1605733513597-a8f8341084e6?w=2500&q=82&fit=crop&auto=format 2500w"
              sizes="100vw"
-             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=2400&q=82&fit=crop&auto=format';this.srcset='';">
+             data-fallback-step="0"
+             onerror="
+               var s=parseInt(this.dataset.fallbackStep||'0',10);
+               var fallbacks=[
+                 'https://images.unsplash.com/photo-1591030748813-acb53b9e3aef?w=2400&q=82&fit=crop&auto=format',
+                 'https://images.unsplash.com/photo-1547949003-9792a18a2601?w=2400&q=82&fit=crop&auto=format',
+                 'https://images.unsplash.com/photo-1565025741671-1ec8a7c5ef38?w=2400&q=82&fit=crop&auto=format'
+               ];
+               if(s<fallbacks.length){this.dataset.fallbackStep=s+1;this.src=fallbacks[s];this.srcset='';}
+               else{this.onerror=null;this.style.display='none';}
+             ">
         <div class="lc-tint"></div>
         <div class="lc-paper-filter"></div>
         <div class="lc-content">

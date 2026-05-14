@@ -11,8 +11,34 @@
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/auth.css"><!-- toasts + loader -->
+
+<!-- ─── Nexora Guard ─── Supabase client + auth core. Must load before the
+     dashboard runs so an unauthenticated user is redirected before any UI
+     paints. The body is hidden via .auth-pending until the guard resolves. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<style>
+  body.auth-pending .app { visibility: hidden; }
+  body.auth-pending::before {
+    content: ""; position: fixed; inset: 0;
+    background: var(--bg); z-index: 9998;
+  }
+  body.auth-pending::after {
+    content: ""; position: fixed;
+    top: 50%; left: 50%; width: 28px; height: 28px;
+    margin: -14px 0 0 -14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    animation: nx-guard-spin 0.7s linear infinite;
+    z-index: 9999;
+  }
+  @keyframes nx-guard-spin { to { transform: rotate(360deg); } }
+</style>
 </head>
-<body class="dashboard">
+<body class="dashboard auth-pending">
 
 <!-- Grain overlay — paper texture, fixed over everything -->
 <div id="grain" aria-hidden="true"></div>
@@ -83,16 +109,19 @@
     </div>
 
     <div class="sidebar-footer">
-      <div class="user-pill" role="button" tabindex="0" aria-label="Account">
-        <div class="user-avatar">OI</div>
+      <div class="user-pill" id="nx-user-pill" role="button" tabindex="0" aria-label="Account">
+        <div class="user-avatar" id="nx-user-avatar">··</div>
         <div class="user-meta">
-          <div class="user-name">Obur Industries</div>
-          <div class="user-role">Manufacturer</div>
+          <div class="user-name" id="nx-user-name">Loading…</div>
+          <div class="user-role" id="nx-user-role">—</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color: var(--text-muted)">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </div>
+      <button class="btn-ghost" id="nx-signout" style="width:100%; margin-top:10px; font-size:0.82rem; padding:8px 12px;">
+        Sign out
+      </button>
     </div>
   </aside>
 
@@ -502,6 +531,42 @@
 
 <!-- Toast stack -->
 <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ─── Nexora Guard runtime ───
+     Verifies the session, populates the user pill from the real
+     profile, and wires the Sign out button. Only manufacturers
+     and logistics roles can enter this dashboard; exporters get
+     bounced to their own portal. -->
+<script>
+(function () {
+  if (!window.NexoraAuth) return;
+  NexoraAuth.requireAuth(['manufacturer', 'logistics']).then(me => {
+    if (!me) return; // guard already redirected
+    /* Hydrate the user pill with the real account. */
+    const p = me.profile || {};
+    const initials = (p.full_name || p.company || me.user.email || 'NX')
+      .split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+    const av = document.getElementById('nx-user-avatar');
+    const nm = document.getElementById('nx-user-name');
+    const rl = document.getElementById('nx-user-role');
+    if (av) av.textContent = initials || 'NX';
+    if (nm) nm.textContent = p.company || p.full_name || me.user.email;
+    if (rl) rl.textContent = (p.role || 'manufacturer').replace(/^./, c => c.toUpperCase());
+
+    /* Sign out */
+    const signoutBtn = document.getElementById('nx-signout');
+    signoutBtn && signoutBtn.addEventListener('click', async () => {
+      await NexoraAuth.signOut();
+      NexoraAuth.toast('Signed out.', 'info');
+      setTimeout(() => location.replace('auth.html'), 600);
+    });
+
+    /* Expose to dashboard.js so it can use the real account in views. */
+    window.NEXORA_USER = me;
+    document.body.classList.remove('auth-pending');
+  });
+})();
+</script>
 
 <script src="js/dashboard.js" defer></script>
 </body>
