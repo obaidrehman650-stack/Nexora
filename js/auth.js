@@ -358,6 +358,35 @@
   }
 
   /**
+   * Hard-delete the current user's account.
+   *  • Supabase mode: calls the `nexora_delete_my_account()` RPC,
+   *    which removes the auth.users row (cascading FKs sweep the rest).
+   *  • Demo mode: removes the user from localStorage and clears the session.
+   * Either way the client session is cleared on success.
+   */
+  async function deleteAccount() {
+    getSupabase();
+    if (_demoMode) {
+      const s = demoSession();
+      if (s && s.user) {
+        const remaining = demoUsers().filter(u => u.id !== s.user.id);
+        saveDemoUsers(remaining);
+      }
+      saveDemoSession(null);
+      _profileCache = null;
+      return { ok: true };
+    }
+    const sb = getSupabase();
+    if (!sb) throw new Error('Supabase not configured.');
+    const { error } = await sb.rpc('nexora_delete_my_account');
+    if (error) throw error;
+    /* The auth.users row is gone — clear the local session/cache. */
+    try { await sb.auth.signOut(); } catch {}
+    _profileCache = null;
+    return { ok: true };
+  }
+
+  /**
    * Returns { user, profile } if signed in, else null.
    * Caches the profile after the first lookup.
    */
@@ -441,7 +470,64 @@
       if (flash && flash.message) toast(flash.message, flash.type || 'info');
     } catch {}
   }
-  document.addEventListener('DOMContentLoaded', consumeFlash);
+  document.addEventListener('DOMContentLoaded', () => {
+    consumeFlash();
+    bindDeleteAccountForm();
+  });
+
+  /* ════════════════════════════════════════
+     DELETE ACCOUNT — UI wiring
+     Auto-binds any <form id="delete-account-form"> found on the
+     page. Requires:
+       • input#dz-confirm — user types "DELETE" to enable submit
+       • button#dz-submit — primary destructive action
+     On success: signs out, queues a paper toast on the next page,
+     redirects to the landing page.
+  ════════════════════════════════════════ */
+  function bindDeleteAccountForm() {
+    const form    = document.getElementById('delete-account-form');
+    if (!form) return;
+    const confirm = form.querySelector('#dz-confirm');
+    const submit  = form.querySelector('#dz-submit');
+    if (!confirm || !submit) return;
+
+    confirm.addEventListener('input', () => {
+      submit.disabled = confirm.value.trim().toUpperCase() !== 'DELETE';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (confirm.value.trim().toUpperCase() !== 'DELETE') return;
+
+      /* Last-second native dialog so a misclick can't wipe months of work */
+      const sure = window.confirm(
+        'Permanently delete your Nexora account?\n\nThis removes every RFQ, quote, message and profile detail.\nIt cannot be undone.'
+      );
+      if (!sure) return;
+
+      submit.classList.add('is-loading');
+      submit.disabled = true;
+      try {
+        await deleteAccount();
+        try {
+          sessionStorage.setItem('nexora-flash', JSON.stringify({
+            type: 'success',
+            message: 'Your account has been deleted. We hope to see you again.'
+          }));
+        } catch {}
+        window.location.replace('index.html');
+      } catch (err) {
+        console.error('[Nexora Auth] deleteAccount failed:', err);
+        submit.classList.remove('is-loading');
+        submit.disabled = false;
+        confirm.value = '';
+        toast(
+          (err && err.message) || 'Could not delete your account. Please try again.',
+          'error'
+        );
+      }
+    });
+  }
 
   /* ────────────────────────────────────────
      "Welcome" email stub
@@ -463,7 +549,7 @@
 
   /* ── Expose ───────────────────────────── */
   window.NexoraAuth = {
-    signUp, signIn, signOut,
+    signUp, signIn, signOut, deleteAccount,
     getSession, getCurrentUser,
     requireAuth, requireRole,
     passwordStrength,

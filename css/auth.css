@@ -619,3 +619,132 @@ body.auth {
   .auth-stats { display: none; }
   .auth-card h2 { font-size: 1.4rem; }
 }
+
+/* ════════════════════════════════════════
+   DANGER ZONE — Delete account
+   Lives at the bottom of every profile view.
+   Inline confirmation (no extra modal needed):
+   the destructive button stays disabled until
+   the user types DELETE in the confirm input.
+══════════════════════════════════════ */
+.danger-zone {
+  margin-top: 32px;
+  padding: 24px;
+  border: 1px solid rgba(184,71,58,0.30);
+  background: rgba(184,71,58,0.04);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+.danger-zone-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.danger-zone-icon {
+  width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(184,71,58,0.10);
+  color: var(--danger);
+}
+.danger-zone-title {
+  font-family: var(--font-display);
+  font-variation-settings: var(--fraunces-soft);
+  font-size: 1.05rem;
+  font-weight: 460;
+  color: var(--danger);
+  letter-spacing: -0.012em;
+}
+.danger-zone-body {
+  font-size: 0.9rem;
+  color: var(--text-mid);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.danger-zone-body strong { color: var(--text); font-weight: 600; }
+.danger-zone-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 0.86rem;
+  color: var(--text-mid);
+}
+.danger-zone-list li::before {
+  content: "·";
+  color: var(--danger);
+  font-weight: 700;
+  margin-right: 8px;
+}
+.danger-zone-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+.danger-zone-form .field { margin: 0; }
+.danger-zone-form label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+}
+.danger-zone-form input {
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.94rem;
+  letter-spacing: 0.04em;
+  outline: none;
+  width: 100%;
+  min-height: 42px;
+  color: var(--text);
+}
+.danger-zone-form input:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(184,71,58,0.10);
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border: 0;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 42px;
+  transition: background 0.18s ease, transform 0.12s ease, opacity 0.2s ease;
+}
+.btn-danger:hover:not(:disabled) { background: #983a30; }
+.btn-danger:active:not(:disabled) { transform: translateY(1px); }
+.btn-danger:disabled {
+  background: var(--border-mid);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+.btn-danger.is-loading {
+  position: relative;
+  color: transparent;
+}
+.btn-danger.is-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 14px; height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  animation: nx-guard-spin 0.7s linear infinite;
+}
+
+@media (max-width: 640px) {
+  .danger-zone-form { grid-template-columns: 1fr; }
+  .btn-danger { width: 100%; }
+}

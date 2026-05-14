@@ -427,6 +427,33 @@
           <button class="btn-ghost" id="pf-reset">Reset</button>
           <button class="btn-primary" id="pf-save">Save</button>
         </div>
+
+        <!-- ─── Danger zone: delete account ─── -->
+        <section class="danger-zone" aria-labelledby="dz-title-ex" style="margin-top:28px;">
+          <div class="danger-zone-header">
+            <span class="danger-zone-icon" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </span>
+            <h3 id="dz-title-ex" class="danger-zone-title">Delete account</h3>
+          </div>
+          <p class="danger-zone-body">
+            This <strong>permanently</strong> removes your account from Nexora and Supabase.
+            This action cannot be undone.
+          </p>
+          <ul class="danger-zone-list">
+            <li>Your account and contact details</li>
+            <li>Every RFQ you've posted (and the quotes attached to them)</li>
+            <li>All conversations you started with manufacturers</li>
+          </ul>
+          <form class="danger-zone-form" id="delete-account-form" onsubmit="return false;">
+            <div class="field">
+              <label for="dz-confirm">Type <strong>DELETE</strong> to confirm</label>
+              <input id="dz-confirm" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE">
+            </div>
+            <button type="submit" class="btn-danger" id="dz-submit" disabled>Delete my account</button>
+          </form>
+        </section>
+
       </div>
     </section>
 
