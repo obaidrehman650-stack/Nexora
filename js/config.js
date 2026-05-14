@@ -8,8 +8,8 @@
 ════════════════════════════════════════ */
 window.NEXORA_CONFIG = {
   /* From your Supabase dashboard → Settings → API */
-  SUPABASE_URL:      'https://YOUR-PROJECT.supabase.co',
-  SUPABASE_ANON_KEY: 'YOUR-PUBLIC-ANON-KEY',
+  SUPABASE_URL:      'https://sjpsbshrvymlotxgurwk.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqcHNic2hydnltbG90eGd1cndrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjkzOTYsImV4cCI6MjA5NDMwNTM5Nn0.utQQa4wM3PIfRBKla_9YyMxkNyke6xfM-VqJDAfStoA',
 
   /* If the keys above are still placeholders, the auth layer
      falls back to a local-storage "demo" mode so you can test
