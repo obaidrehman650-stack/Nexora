@@ -138,7 +138,14 @@
   function setView(name) {
     state.view = name;
     $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === name));
-    $$('.view').forEach(v => v.hidden = v.dataset.view !== name);
+    /* dashboard.css hides `.view` by default and shows `.view.active`.
+       Toggle the class (not the `hidden` attribute) or the CSS rule
+       `.view { display: none }` always wins. */
+    $$('.view').forEach(v => {
+      const isActive = v.dataset.view === name;
+      v.classList.toggle('active', isActive);
+      v.hidden = !isActive;  // keep both — works even if CSS is swapped later
+    });
     const title = $('#topbar-section-title');
     if (title) title.textContent = sectionTitles[name] || '';
     if (name === 'mine')      renderMine();
