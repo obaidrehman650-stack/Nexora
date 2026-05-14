@@ -223,7 +223,28 @@
     const sb = getSupabase();
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    const profile = await _loadProfile(data.user.id);
+    let profile = await _loadProfile(data.user.id);
+    /* Self-heal: if the profile row is missing or its role is empty,
+       fall back to the role we stored in user_metadata at signup.
+       Prevents an exporter ever being routed to the manufacturer
+       dashboard just because the DB trigger misfired. */
+    const meta = (data.user && data.user.user_metadata) || {};
+    if (!profile) profile = { id: data.user.id, email: data.user.email };
+    if (!profile.role && meta.role) {
+      profile.role     = meta.role;
+      profile.industry = profile.industry || meta.industry || null;
+      profile.full_name = profile.full_name || meta.full_name || '';
+      /* Best-effort write back to the DB so future logins are clean. */
+      try {
+        await sb.from('profiles').upsert({
+          id:        data.user.id,
+          email:     data.user.email,
+          role:      meta.role,
+          industry:  meta.industry || null,
+          full_name: meta.full_name || ''
+        }, { onConflict: 'id' });
+      } catch (e) { /* RLS or write error — ignore, we still have the role in memory */ }
+    }
     return { user: data.user, session: data.session, profile };
   }
 
@@ -404,7 +425,16 @@
     if (_profileCache && _profileCache.id === data.user.id) {
       return { user: data.user, profile: _profileCache };
     }
-    const profile = await _loadProfile(data.user.id);
+    let profile = await _loadProfile(data.user.id);
+    /* Same self-heal as _supaSignIn — if the profile is empty or
+       has no role, route off the user_metadata role instead. */
+    const meta = data.user.user_metadata || {};
+    if (!profile) profile = { id: data.user.id, email: data.user.email };
+    if (!profile.role && meta.role) {
+      profile.role     = meta.role;
+      profile.industry = profile.industry || meta.industry || null;
+      profile.full_name = profile.full_name || meta.full_name || '';
+    }
     _profileCache = profile;
     return { user: data.user, profile };
   }
