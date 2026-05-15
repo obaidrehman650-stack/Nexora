@@ -45,6 +45,7 @@
     state = {
       view: 'overview',
       stats: null,
+      bootedAt: Date.now(),
       users: [], rfqs: [], quotes: [], threads: [], notifications: [],
       filter: { users:'all', rfqs:'all', quotes:'all' },
       search: ''
@@ -230,10 +231,10 @@
     const gmv      = computeGmv();
     const gmvStr   = formatMoneyShort(gmv);
     setText('#hero-sub', state.users.length
-      ? `${verified.toLocaleString()} verified businesses across three industries. ${gmvStr.value}${gmvStr.unit} GMV running through the network this quarter. Every metric below is live — admins can drill in via the sidebar.`
+      ? `${verified.toLocaleString()} verified businesses across three industries. $${gmvStr.value}${gmvStr.unit} GMV running through the network this quarter. Below: every metric you need to keep the floor honest.`
       : 'No users on the network yet. Stats will populate as people sign up.');
 
-    /* ─ Status pill ─ */
+    /* ─ Status pill (topbar) ─ */
     setText('#health-pill', sb
       ? `All systems green · ${state.users.length ? '99.98%' : 'awaiting first user'} · ${state.stats ? '14d' : '—'}`
       : 'Demo mode · Supabase not configured');
@@ -245,9 +246,9 @@
     setText('#h-verif', pending ? `${pending} pending` : 'Clear');
     setText('#h-rt',    sb ? `${state.users.length || 0} connected` : 'Offline');
     setText('#h-sync',  now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:false }) + ' PKT');
-    const vDot = $('#h-verif-dot'); if (vDot) vDot.className = 'dot' + (pending > 5 ? ' warn' : '');
-    const dbDot = $('#h-db-dot'); if (dbDot) dbDot.className = 'dot' + (sb ? '' : ' bad');
-    const rtDot = $('#h-rt-dot'); if (rtDot) rtDot.className = 'dot' + (sb ? '' : ' bad');
+    const vDot = $('#h-verif-dot'); if (vDot) vDot.className = 'status-dot' + (pending > 5 ? ' status-dot--warn' : '');
+    const dbDot = $('#h-db-dot');   if (dbDot) dbDot.className = 'status-dot' + (sb ? '' : ' status-dot--warn');
+    const rtDot = $('#h-rt-dot');   if (rtDot) rtDot.className = 'status-dot' + (sb ? '' : ' status-dot--warn');
 
     /* ─ KPI cells ─ */
     setHeroKpi('#ah-verified', verified);
@@ -255,7 +256,7 @@
       u.verified_status && Date.now() - new Date(u.created_at).getTime() < 7 * 86_400_000
     ).length;
     setText('#ah-verified-delta', verifiedWeek > 0 ? `▲ ${verifiedWeek}` : '— this week');
-    $('#ah-verified-delta').className = 'delta-chip ' + (verifiedWeek > 0 ? 'up' : 'flat');
+    $('#ah-verified-delta').className = 'delta ' + (verifiedWeek > 0 ? 'up' : 'flat');
 
     /* GMV with smart unit (k vs M) */
     setText('#ah-gmv', gmvStr.value);
@@ -263,7 +264,7 @@
     const lastQuarterGmv = computeGmvForRange(getRange('lastQuarter'));
     const gmvDelta = lastQuarterGmv ? ((gmv - lastQuarterGmv) / lastQuarterGmv) * 100 : 0;
     setText('#ah-gmv-delta', gmvDelta === 0 ? '— QoQ' : (gmvDelta > 0 ? '▲ ' : '▼ ') + Math.abs(Math.round(gmvDelta)) + '%');
-    $('#ah-gmv-delta').className = 'delta-chip ' + (gmvDelta > 0 ? 'up' : gmvDelta < 0 ? 'down' : 'flat');
+    $('#ah-gmv-delta').className = 'delta ' + (gmvDelta > 0 ? 'up' : gmvDelta < 0 ? 'down' : 'flat');
 
     const active = state.rfqs.filter(r => ['open','quoted'].includes(r.status)).length;
     setHeroKpi('#ah-active', active);
@@ -272,43 +273,66 @@
       Date.now() - new Date(r.created_at).getTime() < 7 * 86_400_000
     ).length;
     setText('#ah-active-delta', activeLast7 > 0 ? `▲ ${activeLast7} · 7d` : '— vs 7d');
-    $('#ah-active-delta').className = 'delta-chip ' + (activeLast7 > 0 ? 'up' : 'flat');
+    $('#ah-active-delta').className = 'delta ' + (activeLast7 > 0 ? 'up' : 'flat');
 
     const ttq = computeAvgTimeToQuote();
     setText('#ah-ttq', ttq != null ? ttq.toFixed(1) : '—');
     setText('#ah-ttq-unit', ttq != null ? 'h' : '');
     setText('#ah-ttq-delta', ttq != null ? 'live' : '—');
+    const ttqEl = $('#ah-ttq-delta'); if (ttqEl) ttqEl.className = 'delta flat';
 
-    /* ─ Network growth chart (stacked area, last 12 months) ─ */
+    /* ─ Network growth + legend totals ─ */
     renderGrowthChart();
+    setText('#lg-surgical', fmtNum(state.users.filter(u => u.industry === 'surgical').length));
+    setText('#lg-sports',   fmtNum(state.users.filter(u => u.industry === 'sports').length));
+    setText('#lg-leather',  fmtNum(state.users.filter(u => u.industry === 'leather').length));
 
-    /* ─ Funnel ─ */
+    /* ─ Funnel + end-to-end conversion + median cycle ─ */
     renderFunnel();
+
+    /* ─ GMV columns ─ */
+    renderGmvColumns();
+
+    /* ─ Geo list ─ */
+    renderGeoList();
+
+    /* ─ Verification queue ─ */
+    renderVerificationQueue();
+
+    /* ─ Top manufacturers + recent users ─ */
+    renderTopManufacturers();
+    renderRecentUsers();
 
     /* ─ Live ticker ─ */
     renderTicker();
 
-    /* ─ Activity feed ─ */
+    /* ─ Audit log feed ─ */
     const items = [
-      ...state.rfqs.slice(0, 6).map(r => ({ ts:r.created_at, html:`New RFQ — <span class="ent">${esc(r.product||'')}</span> by ${esc(r._by.company || r._by.email || '—')} → ${esc(r.destination||'')}`, kind:'rfq' })),
-      ...state.quotes.slice(0, 6).map(q => ({ ts:q.created_at, html:`Quote on <span class="ent">${esc((q._rfq||{}).product||'RFQ')}</span> by ${esc(q._by.company || q._by.email || '—')} — ${fmtMoney(q.unit_price)}`, kind:'quote' })),
-      ...state.users.slice(0, 6).map(u => ({ ts:u.created_at, html:`New ${esc(u.role||'user')} signed up — ${esc(u.company || u.full_name || u.email)}`, kind:'signup' }))
-    ].sort((a, b) => (b.ts||'').localeCompare(a.ts||'')).slice(0, 12);
+      ...state.rfqs.slice(0, 6).map(r => ({ ts:r.created_at, html:`New RFQ — <strong>${esc(r.product||'')}</strong> by <span class="ent">${esc(r._by.company || r._by.email || '—')}</span><span class="sub">${esc(r.destination||'')} · ${fmtNum(r.quantity)} units</span>`, kind:'rfq' })),
+      ...state.quotes.slice(0, 6).map(q => ({ ts:q.created_at, html:`Quote on <strong>${esc((q._rfq||{}).product||'RFQ')}</strong> by <span class="ent">${esc(q._by.company || q._by.email || '—')}</span><span class="sub">Unit price ${fmtMoney(q.unit_price)} · lead ${esc(q.lead_time || '—')}</span>`, kind:'quote' })),
+      ...state.users.slice(0, 6).map(u => ({ ts:u.created_at, html:`New <span class="ent">${esc(u.role||'user')}</span> signed up — <strong>${esc(u.company || u.full_name || u.email)}</strong><span class="sub">${u.verified_status ? 'Verified' : 'Pending verification'}${u.industry ? ' · ' + esc(u.industry) : ''}</span>`, kind:'signup' }))
+    ].sort((a, b) => (b.ts||'').localeCompare(a.ts||'')).slice(0, 8);
     const af = $('#overview-activity');
     if (af) {
       af.innerHTML = !items.length
         ? `<div style="padding:18px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet.</div>`
         : items.map(it => `
           <div class="feed-item">
-            <div class="feed-dot" style="color:${it.kind === 'quote' ? 'var(--success)' : it.kind === 'signup' ? 'var(--accent)' : 'var(--text-mid)'};">
+            <div class="feed-dot" style="color:${it.kind === 'quote' ? 'var(--success)' : it.kind === 'signup' ? 'var(--accent)' : 'var(--ind-surgical)'};">
               ${it.kind === 'quote' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>' :
-                it.kind === 'signup' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>' :
+                it.kind === 'signup' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>' :
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>'}
             </div>
             <div class="feed-text">${it.html}</div>
             <div class="feed-time">${fmtAgo(it.ts)}</div>
           </div>`).join('');
     }
+
+    /* ─ Footer uptime ─ */
+    const upMs = Date.now() - (state.bootedAt || Date.now());
+    const upH = Math.floor(upMs / 3_600_000);
+    const upM = Math.floor((upMs % 3_600_000) / 60_000);
+    setText('#footer-uptime', `uptime ${upH}h ${upM}m`);
   }
 
   /* ─ Helpers for the editorial KPIs ─ */
@@ -385,7 +409,7 @@
 
     /* Stacked (default) shows monthly cohort counts; Cumulative
        sums them so every layer climbs over time. */
-    const mode = $('#growth-mode button.is-on');
+    const mode = $('#growth-mode .tab.active');
     const isCumulative = mode && mode.dataset.mode === 'cumulative';
     let acc = { surgical: 0, sports: 0, leather: 0, exporters: 0 };
     const dataOut = series.map(row => {
@@ -400,64 +424,342 @@
 
     wrap.innerHTML = '';
     NX.stackedArea(wrap, {
-      width: 720, height: 240,
+      width: 760, height: 280,
       data: dataOut,
-      keys: ['surgical', 'sports', 'leather', 'exporters'],
-      colors: ['var(--ind-surgical)', 'var(--ind-sports)', 'var(--ind-leather)', 'var(--accent)']
+      keys: ['surgical', 'sports', 'leather'],
+      colors: ['var(--ind-surgical)', 'var(--ind-sports)', 'var(--ind-leather)']
     });
+  }
+
+  /* ─ GMV columns chart: Quoted vs Confirmed, last 6 months ─ */
+  function renderGmvColumns() {
+    const wrap = document.getElementById('gmv-cols');
+    if (!wrap || !window.NX) return;
+
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ key: d.getFullYear() + '-' + d.getMonth(), label: d.toLocaleString('en-US', { month: 'short' }), a: 0, b: 0 });
+    }
+
+    state.quotes.forEach(q => {
+      const t = new Date(q.created_at);
+      const k = t.getFullYear() + '-' + t.getMonth();
+      const idx = months.findIndex(m => m.key === k);
+      if (idx < 0) return;
+      const qty = ((q._rfq || {}).quantity) || 0;
+      const value = (Number(q.unit_price) || 0) * qty;
+      months[idx].a += value;            /* quoted volume */
+      if (q.status === 'accepted') months[idx].b += value; /* confirmed */
+    });
+
+    /* Convert to thousands of dollars for the axis */
+    const data = months.map(m => ({ label: m.label, a: Math.round(m.a / 1000), b: Math.round(m.b / 1000) }));
+
+    wrap.innerHTML = '';
+    NX.columns(wrap, {
+      width: 580, height: 240,
+      data,
+      series: [
+        { key: 'a', color: 'var(--accent)', label: 'Quoted' },
+        { key: 'b', color: 'var(--text)',   label: 'Confirmed' }
+      ],
+      unit: 'k'
+    });
+
+    const totalA = data.reduce((s, d) => s + d.a, 0);
+    const totalB = data.reduce((s, d) => s + d.b, 0);
+    setText('#lg-quoted',    fmtMoneyShort(totalA * 1000));
+    setText('#lg-confirmed', fmtMoneyShort(totalB * 1000));
+  }
+
+  function fmtMoneyShort(v) {
+    if (v >= 1_000_000) return '$' + (v / 1_000_000).toFixed(1) + 'M';
+    if (v >= 1_000)     return '$' + Math.round(v / 1_000) + 'k';
+    return '$' + Math.round(v);
+  }
+
+  /* ─ Geography list: RFQ destinations, last 90 days ─ */
+  const FLAG = {
+    us: '🇺🇸', usa: '🇺🇸', 'united states': '🇺🇸',
+    de: '🇩🇪', germany: '🇩🇪',
+    uk: '🇬🇧', gb: '🇬🇧', 'united kingdom': '🇬🇧', england: '🇬🇧',
+    jp: '🇯🇵', japan: '🇯🇵',
+    ae: '🇦🇪', uae: '🇦🇪', 'united arab emirates': '🇦🇪',
+    br: '🇧🇷', brazil: '🇧🇷',
+    fr: '🇫🇷', france: '🇫🇷',
+    ca: '🇨🇦', canada: '🇨🇦',
+    au: '🇦🇺', australia: '🇦🇺',
+    in: '🇮🇳', india: '🇮🇳',
+    cn: '🇨🇳', china: '🇨🇳',
+    sa: '🇸🇦', 'saudi arabia': '🇸🇦',
+    nl: '🇳🇱', netherlands: '🇳🇱',
+    it: '🇮🇹', italy: '🇮🇹',
+    es: '🇪🇸', spain: '🇪🇸',
+    za: '🇿🇦', 'south africa': '🇿🇦'
+  };
+  function flagFor(name) {
+    if (!name) return '🌐';
+    const tail = String(name).split(',').pop().trim().toLowerCase();
+    return FLAG[tail] || FLAG[name.toLowerCase()] || '🌐';
+  }
+  function countryOf(dest) {
+    if (!dest) return '—';
+    const parts = String(dest).split(',').map(s => s.trim()).filter(Boolean);
+    return parts[parts.length - 1] || dest;
+  }
+  function renderGeoList() {
+    const wrap = $('#geo-list'); if (!wrap) return;
+    const cutoff = Date.now() - 90 * 86_400_000;
+    const buckets = new Map(); /* country -> { rfqs, cities:Set } */
+    state.rfqs.forEach(r => {
+      if (!r.destination) return;
+      const t = new Date(r.created_at).getTime();
+      if (t < cutoff) return;
+      const country = countryOf(r.destination);
+      const city    = String(r.destination).split(',')[0].trim();
+      const b = buckets.get(country) || { rfqs: 0, cities: new Set() };
+      b.rfqs += 1;
+      if (city) b.cities.add(city);
+      buckets.set(country, b);
+    });
+    const rows = [...buckets.entries()]
+      .map(([country, v]) => ({ country, rfqs: v.rfqs, cities: v.cities.size }))
+      .sort((a, b) => b.rfqs - a.rfqs)
+      .slice(0, 6);
+
+    setText('#geo-count', buckets.size);
+
+    if (!rows.length) {
+      wrap.innerHTML = `<div style="padding:18px 0;text-align:center;color:var(--text-muted);font-size:0.86rem;">No destinations yet — list will populate as RFQs come in.</div>`;
+      return;
+    }
+    const top = rows[0].rfqs;
+    wrap.innerHTML = rows.map(r => {
+      const p = top ? Math.max(0.08, r.rfqs / top) : 0;
+      return `<div class="geo-row in" style="--p:${p.toFixed(3)};">
+        <span class="ct">${flagFor(r.country)}&nbsp;&nbsp;${esc(r.country)}${r.cities ? ` · ${r.cities} cit${r.cities === 1 ? 'y' : 'ies'}` : ''}</span>
+        <span class="bar"><span></span></span>
+        <span class="vl">${fmtNum(r.rfqs)} RFQs</span>
+      </div>`;
+    }).join('');
+  }
+
+  /* ─ Verification queue: manufacturers awaiting review ─ */
+  function renderVerificationQueue() {
+    const tbody = $('#verif-tbody'); if (!tbody) return;
+    const pending = state.users
+      .filter(u => u.role === 'manufacturer' && !u.verified_status)
+      .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
+      .slice(0, 5);
+    setText('#verif-count', pending.length);
+
+    if (!pending.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:24px;text-align:center;color:var(--text-muted);">No verification submissions awaiting review.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = pending.map(u => {
+      const initials = (u.company || u.full_name || u.email || '')
+        .split(/\s|@/).filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('') || '··';
+      const indClass = u.industry === 'surgical' ? 'chip--surg'
+                     : u.industry === 'sports'   ? 'chip--sport'
+                     : u.industry === 'leather'  ? 'chip--leath'
+                     : 'chip--quoted';
+      const risk = computeRisk(u);
+      return `<tr data-id="${esc(u.id)}">
+        <td><div class="dt-cell-main"><div class="av">${esc(initials)}</div><div><div class="ti">${esc(u.company || u.full_name || '—')}</div><div class="su">${esc(u.email || '')}${u.location ? ' · ' + esc(u.location) : ''}</div></div></div></td>
+        <td><span class="chip ${indClass}">Manufacturer${u.industry ? ' · ' + esc(u.industry) : ''}</span></td>
+        <td><span class="chip ${risk.cls}">${risk.label}</span></td>
+        <td class="ta-right col-mono" style="color:var(--text-muted);">${fmtAgo(u.created_at)}</td>
+        <td class="ta-right">
+          <button class="btn btn-primary btn-xs" data-action="verify" data-id="${esc(u.id)}">Approve</button>
+          <button class="btn btn-ghost btn-xs" data-action="open-user" data-id="${esc(u.id)}">Review</button>
+        </td>
+      </tr>`;
+    }).join('');
+    bindRowActions(tbody);
+  }
+
+  function computeRisk(u) {
+    const days = u.created_at ? (Date.now() - new Date(u.created_at).getTime()) / 86_400_000 : 999;
+    const missing = (!u.company ? 1 : 0) + (!u.industry ? 1 : 0) + (!u.location ? 1 : 0);
+    if (days < 14 && missing >= 2) return { cls: 'chip--blocked', label: 'High' };
+    if (missing >= 1)              return { cls: 'chip--pending', label: 'Medium' };
+    return { cls: 'chip--won', label: 'Low' };
+  }
+
+  /* ─ Top performing manufacturers (last 30 days, by accepted GMV) ─ */
+  function renderTopManufacturers() {
+    const tbody = $('#top-mfgs-tbody'); if (!tbody) return;
+    const cutoff = Date.now() - 30 * 86_400_000;
+    const totals = new Map(); /* manufacturer_id -> { quotes, wins, confirmed } */
+    state.quotes.forEach(q => {
+      if (new Date(q.created_at).getTime() < cutoff) return;
+      const t = totals.get(q.manufacturer_id) || { quotes: 0, wins: 0, confirmed: 0 };
+      t.quotes += 1;
+      if (q.status === 'accepted') {
+        t.wins += 1;
+        t.confirmed += (Number(q.unit_price) || 0) * (((q._rfq || {}).quantity) || 0);
+      }
+      totals.set(q.manufacturer_id, t);
+    });
+    const rows = [...totals.entries()]
+      .map(([id, t]) => ({ user: state.users.find(u => u.id === id), ...t }))
+      .filter(r => r.user && r.user.role === 'manufacturer')
+      .sort((a, b) => b.confirmed - a.confirmed)
+      .slice(0, 5);
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:24px;text-align:center;color:var(--text-muted);">No accepted quotes in the last 30 days yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => {
+      const u = r.user;
+      const initials = (u.company || u.full_name || u.email || '')
+        .split(/\s|@/).filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('') || '··';
+      const indClass = u.industry === 'surgical' ? 'chip--surg'
+                     : u.industry === 'sports'   ? 'chip--sport'
+                     : u.industry === 'leather'  ? 'chip--leath'
+                     : 'chip--quoted';
+      const rate = r.quotes ? Math.round(100 * r.wins / r.quotes) : 0;
+      return `<tr data-id="${esc(u.id)}">
+        <td><div class="dt-cell-main"><div class="av">${esc(initials)}</div><div><div class="ti">${esc(u.company || u.full_name || '—')}</div><div class="su">${u.verified_status ? '★ Verified' : 'Pending verification'}</div></div></div></td>
+        <td><span class="chip ${indClass}">${esc(cap(u.industry || '—'))}</span></td>
+        <td class="ta-right col-mono">${fmtNum(r.quotes)}</td>
+        <td class="ta-right col-mono">${rate}%</td>
+        <td class="ta-right col-mono" style="font-weight:600;">${fmtMoneyShort(r.confirmed)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ─ Recent users (last 7 days) ─ */
+  function renderRecentUsers() {
+    const tbody = $('#recent-users-tbody'); if (!tbody) return;
+    const cutoff = Date.now() - 7 * 86_400_000;
+    const rows = state.users
+      .filter(u => new Date(u.created_at || 0).getTime() >= cutoff)
+      .slice(0, 6);
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--text-muted);">No new signups in the last 7 days.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(u => {
+      const initials = (u.company || u.full_name || u.email || '')
+        .split(/\s|@/).filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('') || '··';
+      const indClass = u.industry === 'surgical' ? 'chip--surg'
+                     : u.industry === 'sports'   ? 'chip--sport'
+                     : u.industry === 'leather'  ? 'chip--leath'
+                     : 'chip--quoted';
+      const roleLabel = u.role === 'manufacturer'
+        ? `Manuf${u.industry ? ' · ' + cap(u.industry) : ''}`
+        : cap(u.role || 'user');
+      return `<tr data-id="${esc(u.id)}">
+        <td><div class="dt-cell-main"><div class="av">${esc(initials)}</div><div><div class="ti">${esc(u.company || u.full_name || '—')}</div><div class="su">${esc(u.email || '')}</div></div></div></td>
+        <td><span class="chip ${indClass}">${esc(roleLabel)}</span></td>
+        <td><span class="chip ${u.verified_status ? 'chip--won' : 'chip--pending'}">${u.verified_status ? 'Verified' : 'Pending'}</span></td>
+        <td class="ta-right col-mono" style="color:var(--text-muted);">${fmtAgo(u.created_at)}</td>
+      </tr>`;
+    }).join('');
   }
 
   /* ─ RFQ flow funnel ─ */
   function renderFunnel() {
     const wrap = $('#funnel-list'); if (!wrap) return;
-    const total = state.rfqs.length || 0;
+    const total     = state.rfqs.length || 0;
     const withQuote = state.rfqs.filter(r => state.quotes.some(q => q.rfq_id === r.id)).length;
-    const sampled   = state.rfqs.filter(r => r.status === 'quoted' || r.status === 'won').length;
-    const won       = state.rfqs.filter(r => r.status === 'won').length;
+    const sampled   = state.rfqs.filter(r => r.status === 'quoted' || r.status === 'won' || r.status === 'closed').length;
+    const confirmed = state.rfqs.filter(r => r.status === 'won').length;
+    const paid      = state.quotes.filter(q => q.status === 'accepted').length;
+
     const rows = [
-      { label: 'RFQs posted',  pct: 100, n: total },
-      { label: '≥1 quote',     pct: total ? Math.round(100 * withQuote / total) : 0, n: withQuote },
-      { label: 'Sampled',      pct: total ? Math.round(100 * sampled   / total) : 0, n: sampled, tone: 'tone-3' },
-      { label: 'Won',          pct: total ? Math.round(100 * won       / total) : 0, n: won,     tone: 'tone-4' }
+      { label: 'RFQs posted',     n: total,     tone: 'tone-1' },
+      { label: '≥1 quote',        n: withQuote, tone: 'tone-2' },
+      { label: 'Sampled',         n: sampled,   tone: 'tone-3' },
+      { label: 'Confirmed',       n: confirmed, tone: 'tone-4' },
+      { label: 'Paid & shipped',  n: paid,      tone: 'tone-5' }
     ];
+
     if (!total) {
       wrap.innerHTML = `<div style="padding:18px 0;text-align:center;color:var(--text-muted);font-size:0.86rem;">No RFQs yet — funnel will appear once requirements are posted.</div>`;
+      setText('#conv-e2e', '—');
+      setText('#median-cycle', '—');
       return;
     }
-    wrap.innerHTML = rows.map((r, i) => `
-      <div class="fn-row ${r.tone || ('tone-' + (i+1))}">
-        <div class="fn-row-label">${esc(r.label)}<small>${r.pct}%</small></div>
-        <div class="fn-bar"><span style="width:${r.pct}%;"></span></div>
-        <div class="fn-row-val">${fmtNum(r.n)}</div>
-      </div>`).join('');
+    wrap.innerHTML = rows.map(r => {
+      const pct = total ? Math.round(100 * r.n / total) : 0;
+      const p   = total ? (r.n / total) : 0;
+      return `
+        <div class="funnel-step" style="--p:${p.toFixed(3)};">
+          <div class="lbl">${esc(r.label)}<span class="pct">${pct}%</span></div>
+          <div class="funnel-bar"><span class="${r.tone}" style="width:100%;"></span></div>
+          <div class="vl">${fmtNum(r.n)}</div>
+        </div>`;
+    }).join('');
+
+    /* Reveal funnel bars (CSS scales them via --p when .in is added) */
+    wrap.querySelectorAll('.funnel-step').forEach(s => s.classList.add('in'));
+
+    /* End-to-end conversion + median cycle */
+    const e2e = total ? Math.round(100 * paid / total) : 0;
+    setText('#conv-e2e', e2e);
+
+    const cycles = state.rfqs
+      .filter(r => r.status === 'won')
+      .map(r => {
+        const winQuote = state.quotes.find(q => q.rfq_id === r.id && q.status === 'accepted');
+        if (!winQuote) return null;
+        const ms = new Date(winQuote.created_at).getTime() - new Date(r.created_at).getTime();
+        return ms > 0 ? ms / 86_400_000 : null;
+      })
+      .filter(v => v != null)
+      .sort((a, b) => a - b);
+    const median = cycles.length ? cycles[Math.floor(cycles.length / 2)] : null;
+    setText('#median-cycle', median != null ? Math.round(median) : '—');
   }
 
   /* ─ Live ticker ─ */
   function renderTicker() {
+    const inner = $('#ticker-stream-inner'); if (!inner) return;
     const items = [];
-    state.rfqs.slice(0, 6).forEach(r => items.push({ ts: r.created_at, html: `<em>RFQ posted</em> · ${esc(r.product || '—')} → ${esc(r.destination || '')}` }));
-    state.quotes.slice(0, 6).forEach(q => items.push({ ts: q.created_at, html: `<em>Quote</em> · ${fmtMoney(q.unit_price)} on ${esc((q._rfq || {}).product || 'RFQ')}` }));
-    state.users.slice(0, 4).forEach(u => items.push({ ts: u.created_at, html: `<em>New ${esc(u.role || 'user')}</em> · ${esc(u.company || u.email)}` }));
+    state.rfqs.slice(0, 6).forEach(r => items.push({ ts: r.created_at, html: `<b>RFQ ${esc((r.id||'').slice(0,6))}</b> posted · ${esc(r.destination || '')} → Sialkot · ${fmtNum(r.quantity)} ${esc(r.product || 'units')}` }));
+    state.quotes.slice(0, 6).forEach(q => items.push({ ts: q.created_at, html: `<b>Quote</b> ${esc(q._by.company || q._by.email || '—')} → ${esc(((q._rfq||{})._by||{}).company || 'buyer')} · ${fmtMoney(q.unit_price)}` }));
+    state.users.slice(0, 4).forEach(u => items.push({ ts: u.created_at, html: `<b>New user</b> ${u.verified_status ? 'verified' : 'joined'} · ${esc(u.company || u.full_name || u.email)} (${esc(u.role || 'user')})` }));
     items.sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
-    const top = items.slice(0, 10);
+    const top = items.slice(0, 8);
 
-    const html = top.length
-      ? top.map(it => `<span class="ticker-item">${it.html} · ${fmtAgo(it.ts)}</span>`).join('')
-      : `<span class="ticker-item">Waiting for live events…</span>`;
+    const oneLoop = top.length
+      ? top.map(it => `<span>${it.html} · ${fmtAgo(it.ts)}</span>`).join('')
+      : `<span>Waiting for live events…</span>`;
 
-    /* Duplicate the content twice so the marquee scrolls seamlessly */
-    const a = $('#ticker-loop-a'), b = $('#ticker-loop-b');
-    if (a) a.innerHTML = html;
-    if (b) b.innerHTML = html;
+    /* Duplicate so the CSS marquee can scroll seamlessly */
+    inner.innerHTML = oneLoop + oneLoop;
   }
 
   /* Mode toggle for the growth chart */
   document.addEventListener('click', e => {
-    const btn = e.target.closest('#growth-mode button');
+    const btn = e.target.closest('#growth-mode .tab');
     if (!btn) return;
-    $$('#growth-mode button').forEach(b => b.classList.remove('is-on'));
-    btn.classList.add('is-on');
+    e.preventDefault();
+    $$('#growth-mode .tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     renderGrowthChart();
+  });
+
+  /* "Open full queue" button → users / pending */
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#verif-open-all')) return;
+    e.preventDefault();
+    sessionStorage.setItem('nx-admin-prefilter', 'users:pending');
+    setView('users');
+    applyPreFilter('users:pending');
+  });
+
+  /* Window selector (Last 24h ▾) — placeholder for future ranges */
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#btn-window')) return;
+    Auth.toast('Time window selector coming soon.', 'info');
   });
 
   /* Export report button — for now, dump the stats RPC result */
@@ -665,6 +967,12 @@
                : t ? `Conversation ${id.slice(0,8)}`
                : n ? 'Notification' : '';
 
+    if (action === 'open-user') {
+      sessionStorage.setItem('nx-admin-prefilter', 'users:pending');
+      setView('users');
+      applyPreFilter('users:pending');
+      return;
+    }
     if (action === 'verify')        return confirmRun('Verify this manufacturer?', desc, () => updateProfile(id, { verified_status: true }));
     if (action === 'unverify')      return confirmRun('Revoke verification?', desc, () => updateProfile(id, { verified_status: false }));
     if (action === 'promote')       return confirmRun('Promote to admin?', desc, () => updateProfile(id, { is_admin: true }));

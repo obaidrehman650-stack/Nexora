@@ -18,9 +18,9 @@ window.NEXORA_CONFIG = {
 
   /* Where each role lands after a successful login */
   REDIRECTS: {
-    manufacturer: 'Nexora - Dashboard.html',
+    manufacturer: 'dashboard.html',
     exporter:     'exporter.html',
-    logistics:    'Nexora - Dashboard.html'
+    logistics:    'dashboard.html'
   },
 
   /* Where unauthenticated users get bounced to */
