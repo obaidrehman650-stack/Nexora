@@ -4,23 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#f5f4ed">
-<title>Nexora — The Bench</title>
+<title>Nexora — The Bench · Manufacturer</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/auth.css"><!-- toasts + loader -->
+<link rel="stylesheet" href="css/dashboard-pro.css">
+<link rel="stylesheet" href="css/auth.css"><!-- toasts + danger zone -->
 
-<!-- ─── Nexora Guard ─── Supabase client + auth core. Must load before the
-     dashboard runs so an unauthenticated user is redirected before any UI
-     paints. The body is hidden via .auth-pending until the guard resolves. -->
+<!-- ─── Nexora Guard ─── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <style>
-  body.auth-pending .app { visibility: hidden; }
+  body.auth-pending .shell { visibility: hidden; }
   body.auth-pending::before {
     content: ""; position: fixed; inset: 0;
     background: var(--bg); z-index: 9998;
@@ -36,421 +36,506 @@
     z-index: 9999;
   }
   @keyframes nx-guard-spin { to { transform: rotate(360deg); } }
+  /* View switcher built on top of the .canvas system */
+  .canvas .view { display: none; }
+  .canvas .view.is-active { display: block; }
 </style>
 </head>
-<body class="dashboard auth-pending">
+<body class="dash auth-pending">
 
-<!-- Grain overlay — paper texture, fixed over everything -->
 <div id="grain" aria-hidden="true"></div>
 
-<div class="app">
+<div class="shell">
 
   <!-- ════ SIDEBAR ════ -->
-  <aside class="sidebar" id="sidebar">
-    <a class="sidebar-logo" href="index.html" aria-label="Back to Nexora home">
-      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true">
-        <path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"></path>
-      </svg>
-      Nexora
+  <aside class="side">
+    <a class="side-logo" href="index.html" aria-label="Back to Nexora home">
+      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true"><path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"></path></svg>
+      <span>Nexora</span>
     </a>
 
-    <!-- Industry chapter rail — visual echo of landing chapters I, II, III -->
-    <div class="sidebar-section-label">Sialkot Floor</div>
-    <div class="chapter-rail" aria-hidden="true">
-      <span class="chip chip--surgical"><span class="chip-num">I</span><span class="chip-label">Surgical</span></span>
-      <span class="chip chip--sports"><span class="chip-num">II</span><span class="chip-label">Sports</span></span>
-      <span class="chip chip--leather"><span class="chip-num">III</span><span class="chip-label">Leather</span></span>
-    </div>
+    <span class="side-role">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"></path></svg>
+      Manufacturer · The Bench
+    </span>
 
-    <div class="sidebar-section-label">Workspace</div>
-    <nav class="sidebar-nav" aria-label="Primary">
+    <div class="side-section-label">Workspace</div>
+    <nav class="side-nav">
       <a class="nav-item active" data-section="dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <rect x="3" y="3"  width="7" height="9"  rx="1"></rect>
-          <rect x="14" y="3" width="7" height="5"  rx="1"></rect>
-          <rect x="14" y="12" width="7" height="9" rx="1"></rect>
-          <rect x="3" y="16" width="7" height="5"  rx="1"></rect>
-        </svg>
-        The Bench
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+        <span class="nav-label">The Bench</span>
       </a>
       <a class="nav-item" data-section="rfqs">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="9" y1="13" x2="15" y2="13"></line>
-          <line x1="9" y1="17" x2="13" y2="17"></line>
-        </svg>
-        RFQs
-        <span class="badge">0</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        <span class="nav-label">Live RFQs</span>
+        <span class="badge" id="bd-rfqs">0</span>
       </a>
-      <a class="nav-item" data-section="profile">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <circle cx="12" cy="8" r="4"></circle>
-          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path>
-        </svg>
-        My Profile
+      <a class="nav-item" data-section="quotes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path d="M8 12l3 3 5-6"></path></svg>
+        <span class="nav-label">My Quotes</span>
+        <span class="badge badge--mute" id="bd-quotes">0</span>
       </a>
       <a class="nav-item" data-section="messages">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path>
-        </svg>
-        Messages
-        <span class="badge">0</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
+        <span class="nav-label">Messages</span>
+        <span class="badge" id="bd-messages">0</span>
       </a>
     </nav>
 
-    <div class="sidebar-foot-nav">
+    <div class="side-section-label">Shop</div>
+    <nav class="side-nav">
+      <a class="nav-item" data-section="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path></svg>
+        <span class="nav-label">Profile</span>
+      </a>
       <a class="nav-item nx-admin-only" href="admin.html" hidden style="color: var(--accent);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/>
-        </svg>
-        Admin portal
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/></svg>
+        <span class="nav-label">Admin portal</span>
       </a>
-      <a class="nav-item" href="index.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M19 12H5M12 19l-7-7 7-7"></path>
-        </svg>
-        Back to Nexora.co
-      </a>
-    </div>
+    </nav>
 
-    <div class="sidebar-footer">
-      <div class="user-pill" id="nx-user-pill" role="button" tabindex="0" aria-label="Account">
+    <div class="side-foot">
+      <div class="user-pill" id="nx-user-pill" role="button" tabindex="0">
         <div class="user-avatar" id="nx-user-avatar">··</div>
         <div class="user-meta">
           <div class="user-name" id="nx-user-name">Loading…</div>
-          <div class="user-role" id="nx-user-role">—</div>
+          <div class="user-role" id="nx-user-role">Manufacturer</div>
         </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color: var(--text-muted)">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color: var(--text-muted)"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
-      <button class="btn-ghost" id="nx-signout" style="width:100%; margin-top:10px; font-size:0.82rem; padding:8px 12px;">
-        Sign out
-      </button>
+      <button class="btn btn-ghost btn-sm" id="nx-signout" style="width:100%; margin-top:10px;">Sign out</button>
     </div>
   </aside>
-
-  <div class="sidebar-scrim" aria-hidden="true"></div>
 
   <!-- ════ MAIN ════ -->
   <main class="main">
 
-    <!-- Topbar -->
     <header class="topbar">
-      <button class="menu-toggle" aria-label="Open menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <line x1="4" y1="6"  x2="20" y2="6"></line>
-          <line x1="4" y1="12" x2="20" y2="12"></line>
-          <line x1="4" y1="18" x2="20" y2="18"></line>
-        </svg>
-      </button>
-
-      <div class="search">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="search" id="search-input" placeholder="Search leads, buyers, products…" aria-label="Search">
-        <button class="search-clear" id="search-clear" aria-label="Clear search" type="button">×</button>
+      <div class="topbar-title">
+        <span class="topbar-eyebrow" id="topbar-eyebrow">The Bench</span>
+        <span id="topbar-section-title">Live workspace</span>
       </div>
 
-      <span class="topbar-day" aria-label="System status">All systems operational · Sialkot UTC+5</span>
+      <div class="topbar-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="topbar-search-input" placeholder="Search RFQs, buyers, products…" aria-label="Search">
+        <span class="topbar-kbd">⌘K</span>
+      </div>
+
+      <span class="live-pill">Live · Sialkot UTC+5</span>
 
       <div class="topbar-actions">
-        <button class="icon-btn" id="btn-notifs" aria-label="Notifications">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.7 21a2 2 0 01-3.4 0"></path>
-          </svg>
-          <span class="notif-dot" id="notif-dot" aria-hidden="true"></span>
+        <button class="icon-btn" aria-label="Notifications" id="btn-notifs">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 01-3.4 0"></path></svg>
+          <span class="pip" id="notif-pip" hidden></span>
         </button>
-        <button class="icon-btn" id="btn-settings" aria-label="Settings">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3h.1a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8v.1a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"></path>
-          </svg>
-        </button>
-
-        <!-- Notifications popover -->
-        <div class="popover" id="popover-notifs" role="dialog" aria-label="Notifications">
-          <div class="popover-header">
-            <h4>Notifications</h4>
-            <span class="pop-action" id="notif-clear">Mark all read</span>
-          </div>
-          <div class="popover-list" id="notif-list"></div>
-        </div>
-
-        <!-- Settings popover -->
-        <div class="popover menu-popover" id="popover-settings" role="dialog" aria-label="Settings">
-          <div class="menu-item" data-action="account">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path></svg>
-            Account settings
-          </div>
-          <div class="menu-item" data-action="theme">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
-            Appearance
-          </div>
-          <div class="menu-item" data-action="help">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"></circle><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h0"></path></svg>
-            Help &amp; support
-          </div>
-          <div class="menu-divider"></div>
-          <div class="menu-item" data-action="logout" style="color: var(--danger);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"></path></svg>
-            Log out
-          </div>
-        </div>
       </div>
     </header>
 
-    <div class="page-wrap">
+    <div class="canvas">
 
       <!-- ═══════ DASHBOARD VIEW ═══════ -->
-      <section class="view active" data-view="dashboard">
+      <section class="view is-active" data-view="dashboard">
 
-        <!-- Editorial hero strip — dark band echoing landing chapter style -->
-        <div class="bench-hero">
-          <div class="bench-hero-grid">
+        <!-- ───── PAGE HEAD ───── -->
+        <div class="page-head rev">
+          <div>
+            <h1>Good morning, <em id="ph-name">there</em>. <em id="ph-count">0</em> open on the bench.</h1>
+            <p class="page-head-sub" id="ph-sub">Open requirements from verified buyers across global markets, streaming live.</p>
+          </div>
+          <div class="page-head-meta">
+            <div class="tabs">
+              <a class="tab active" data-window="today">Today <span class="count" id="win-today">0</span></a>
+              <a class="tab" data-window="week">This week <span class="count" id="win-week">0</span></a>
+              <a class="tab" data-window="month">This month <span class="count" id="win-month">0</span></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── KPI ROW ───── -->
+        <div class="kpi-row stagger">
+          <div class="kpi">
+            <div class="kpi-label">
+              <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>
+              Open RFQs
+            </div>
+            <div class="kpi-value"><span data-counter="0" id="kpi-open">0</span></div>
+            <div class="kpi-foot">
+              <span class="delta" id="kpi-open-delta">—</span>
+              <span>in your industry</span>
+            </div>
+            <div class="kpi-spark" id="spark-rfqs"></div>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi-label">
+              <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></span>
+              Quotes sent
+            </div>
+            <div class="kpi-value"><span data-counter="0" id="kpi-quotes">0</span></div>
+            <div class="kpi-foot">
+              <span class="delta" id="kpi-quotes-delta">—</span>
+              <span>by you</span>
+            </div>
+            <div class="kpi-spark" id="spark-quotes"></div>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi-label">
+              <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"></path></svg></span>
+              Pipeline value
+            </div>
+            <div class="kpi-value">$<span data-counter="0" id="kpi-pipeline">0</span><span class="unit">k</span></div>
+            <div class="kpi-foot">
+              <span class="delta">—</span>
+              <span>open quotes outstanding</span>
+            </div>
+            <div class="kpi-spark" id="spark-pipeline"></div>
+          </div>
+
+          <div class="kpi">
+            <div class="kpi-label">
+              <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></span>
+              Win rate
+            </div>
+            <div class="kpi-value"><span data-counter="0" data-decimals="1" id="kpi-winrate">0.0</span><span class="unit">%</span></div>
+            <div class="kpi-foot">
+              <span class="delta">—</span>
+              <span>of quoted RFQs won</span>
+            </div>
+            <div class="kpi-spark" id="spark-win"></div>
+          </div>
+        </div>
+
+        <!-- ───── REVENUE + INDUSTRY ROW ───── -->
+        <div class="chart-row rev">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title"><span class="card-title-eyebrow">Series · USD</span>Pipeline trajectory</div>
+                <div class="card-sub">Quoted value over the last 8 months</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap" id="revenue-chart" style="height:260px;"></div>
+              <div class="legend" style="margin-top:8px;">
+                <span class="legend-item"><span class="legend-swatch sw-accent"></span>Quoted value <span class="lg-num" id="lg-quoted">$0k</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title"><span class="card-title-eyebrow">Mix</span>By industry</div>
+                <div class="card-sub">Open RFQs you can quote</div>
+              </div>
+            </div>
+            <div class="card-body" style="display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;">
+              <div class="chart-wrap" id="industry-donut" style="width:200px;"></div>
+              <div id="industry-legend" style="display:flex;flex-direction:column;gap:14px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── FUNNEL + GEO ROW ───── -->
+        <div class="chart-row chart-row--even rev">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title"><span class="card-title-eyebrow">Conversion</span>From inquiry to ship</div>
+                <div class="card-sub">Your funnel across all RFQs you've touched</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="funnel" id="funnel-stack"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:18px;padding-top:14px;border-top:1px dashed var(--rule);">
+                <div>
+                  <div style="font-size:0.66rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);font-weight:600;">Quote → Win</div>
+                  <div style="font-family:var(--font-display);font-size:1.6rem;font-variation-settings:var(--fraunces-soft);margin-top:4px;"><span id="funnel-conv">0</span><span style="font-size:0.55em;color:var(--text-muted);">%</span></div>
+                </div>
+                <div>
+                  <div style="font-size:0.66rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);font-weight:600;">Avg ticket</div>
+                  <div style="font-family:var(--font-display);font-size:1.6rem;font-variation-settings:var(--fraunces-soft);margin-top:4px;">$<span id="funnel-ticket">0</span></div>
+                </div>
+                <div>
+                  <div style="font-size:0.66rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);font-weight:600;">Markets</div>
+                  <div style="font-family:var(--font-display);font-size:1.6rem;font-variation-settings:var(--fraunces-soft);margin-top:4px;"><span id="funnel-markets">0</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card map-card">
+            <div class="card-head">
+              <div>
+                <div class="card-title"><span class="card-title-eyebrow"><span id="geo-count">0</span> markets</span>Where your buyers are</div>
+                <div class="card-sub">Active RFQs by destination</div>
+              </div>
+            </div>
+            <div class="card-body" style="padding:14px 18px 18px;">
+              <svg class="geo-svg" viewBox="0 0 480 220" aria-hidden="true">
+                <path class="geo-country" d="M30,55 Q40,38 70,40 L130,42 Q150,45 152,70 L150,108 Q140,118 110,116 L60,114 Q35,108 30,90 Z" />
+                <path class="geo-country" d="M110,135 L130,130 Q142,138 140,156 L138,180 Q128,200 116,196 L98,180 Q92,158 110,135 Z" />
+                <path class="geo-country" d="M195,45 L240,42 Q258,46 260,62 L256,90 Q248,100 230,98 L195,96 Q188,82 195,45 Z" />
+                <path class="geo-country" d="M210,108 Q230,104 248,116 L256,148 Q252,180 232,186 L210,180 Q198,154 210,108 Z" />
+                <path class="geo-country" d="M268,70 L290,72 Q298,82 294,98 L286,108 Q272,108 266,98 Z" />
+                <path class="geo-country is-active" d="M310,82 L340,84 Q348,98 342,116 L332,128 Q318,126 312,114 Z" />
+                <path class="geo-country" d="M362,52 L420,50 Q438,62 436,80 L432,108 Q420,118 396,116 L364,114 Q352,98 362,52 Z" />
+                <path class="geo-country" d="M386,158 L432,156 Q442,168 438,180 L430,190 Q400,194 388,186 Q378,170 386,158 Z" />
+                <g transform="translate(322 100)">
+                  <circle r="3" class="geo-pulse"></circle>
+                  <circle r="3" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.6">
+                    <animate attributeName="r" from="3" to="20" dur="2s" repeatCount="indefinite"></animate>
+                    <animate attributeName="opacity" from="0.7" to="0" dur="2s" repeatCount="indefinite"></animate>
+                  </circle>
+                </g>
+              </svg>
+              <div class="geo-list" style="margin-top:6px;" id="geo-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── LIVE RFQ TABLE ───── -->
+        <div class="card rev">
+          <div class="card-head">
             <div>
-              <div class="bench-hero-eyebrow">Sialkot · Live</div>
-              <h1>
-                <span class="live-dot" aria-hidden="true"></span>
-                On the <em>bench</em> today — <span id="live-count">0</span> open work orders.
-              </h1>
-              <p class="bench-hero-sub">
-                Verified RFQs from buyers across global markets. Quote, send, win — every action moves through the same paper trail.
-              </p>
+              <div class="card-title"><span class="card-title-eyebrow">Open · <span id="ot-count">0</span></span>On the bench right now</div>
+              <div class="card-sub">Click any row to draft a quote · sorted by recency</div>
+            </div>
+            <div class="page-head-meta">
+              <div class="tabs" id="bench-filters">
+                <a class="tab active" data-filter="all">All <span class="count" id="ft-all">0</span></a>
+                <a class="tab" data-filter="surgical"><span class="pip pip--surg">I</span>Surgical <span class="count" id="ft-surg">0</span></a>
+                <a class="tab" data-filter="sports"><span class="pip pip--sport">II</span>Sports <span class="count" id="ft-sport">0</span></a>
+                <a class="tab" data-filter="leather"><span class="pip pip--leath">III</span>Leather <span class="count" id="ft-leath">0</span></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Buyer · Product</th>
+                    <th>Industry</th>
+                    <th>Destination</th>
+                    <th class="ta-right">Qty</th>
+                    <th class="ta-right">Target</th>
+                    <th>Status</th>
+                    <th class="ta-right">Posted</th>
+                    <th class="ta-right"></th>
+                  </tr>
+                </thead>
+                <tbody id="bench-tbody">
+                  <tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-muted);">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="padding:14px 20px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;font-size:0.82rem;color:var(--text-muted);">
+              <span id="bench-foot">—</span>
+              <a href="#" data-section-link="rfqs" style="color:var(--accent);font-weight:500;">View all on the bench →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── ACTIVITY + RECOMMENDED ───── -->
+        <div class="chart-row rev">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title"><span class="card-title-eyebrow">Live feed</span>Recent activity</div>
+                <div class="card-sub">Latest events across your bench</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="feed" id="activity-feed">
+                <div class="feed-empty" style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet. New RFQs and messages will appear here in real time.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <div class="card-title"><span class="card-title-eyebrow">This quarter</span>Floor capacity</div>
+                </div>
+              </div>
+              <div class="card-body" style="text-align:center;">
+                <div class="chart-wrap" id="capacity-gauge" style="width:180px;margin:0 auto 8px;"></div>
+                <div style="font-size:0.84rem;color:var(--text-mid);max-width:30ch;margin:0 auto;line-height:1.5;">
+                  <span id="capacity-text">No quotes yet — capacity is wide open.</span>
+                </div>
+              </div>
             </div>
 
-            <!-- Live inline figures (right column) -->
-            <div class="bench-figures">
-              <div class="fig">
-                <span class="fig-label">Open leads</span>
-                <span class="fig-value" id="stat-total">0</span>
-                <span class="fig-delta">In your industry</span>
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <div class="card-title"><span class="card-title-eyebrow">Account</span>Verification</div>
+                  <div class="card-sub" id="verify-sub">—</div>
+                </div>
               </div>
-              <div class="fig">
-                <span class="fig-label">New this hour</span>
-                <span class="fig-value" id="stat-new">0</span>
-                <span class="fig-delta">Streaming live</span>
-              </div>
-              <div class="fig">
-                <span class="fig-label">Quotes sent</span>
-                <span class="fig-value" id="stat-quoted">0</span>
-                <span class="fig-delta">By you</span>
-              </div>
-              <div class="fig">
-                <span class="fig-label">Markets reached</span>
-                <span class="fig-value" id="stat-markets">0</span>
-                <span class="fig-delta">Buyer destinations</span>
+              <div class="card-body tight">
+                <div id="verify-block" style="font-size:0.86rem;color:var(--text-mid);line-height:1.55;"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- (legacy stats-row kept for JS but hidden via CSS) -->
-        <div class="stats-row" aria-hidden="true">
-          <div class="stat-card"><div class="stat-card-value" id="stat-total-2">0</div></div>
-        </div>
-
-        <!-- Section header: filters + count -->
-        <div class="bench-grid-header">
-          <h2>Live leads <span class="count" id="leads-section-count">0 open</span></h2>
-          <div class="filter-pills" role="tablist" aria-label="Filter by industry">
-            <button class="pill active" data-filter="all"      role="tab">All <span class="count">0</span></button>
-            <button class="pill"        data-filter="surgical" role="tab"><span class="pip">I</span> Surgical <span class="count">0</span></button>
-            <button class="pill"        data-filter="sports"   role="tab"><span class="pip">II</span> Sports <span class="count">0</span></button>
-            <button class="pill"        data-filter="leather"  role="tab"><span class="pip">III</span> Leather <span class="count">0</span></button>
-          </div>
-        </div>
-
-        <div class="bench-grid-wrap">
-          <section class="leads-grid" id="leads-grid" aria-live="polite"></section>
+        <div style="text-align:center;padding:12px;color:var(--text-muted);font-size:0.78rem;letter-spacing:0.05em;border-top:1px dashed var(--rule);">
+          Nexora · Sialkot Industrial Platform · v0.4 beta · <span id="sync-time">connected</span>
         </div>
       </section>
 
-      <!-- ═══════ RFQs VIEW ═══════ -->
+      <!-- ═══════ LIVE RFQs VIEW (full table) ═══════ -->
       <section class="view" data-view="rfqs">
-        <div class="view-content">
-          <div class="page-header">
-            <div class="page-header-left">
-              <h1 class="page-title">All <em>RFQs</em></h1>
-              <p class="page-subtitle">Open, quoted, won, and lost — your full RFQ ledger.</p>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title"><span class="card-title-eyebrow">All open</span>Live RFQ feed</div>
+              <div class="card-sub">Full feed of requirements you can quote on</div>
             </div>
-            <div class="filter-pills">
-              <button class="pill active" data-rfq-filter="all">All <span class="count" id="rfq-stat-all">0</span></button>
-              <button class="pill" data-rfq-filter="open">Open <span class="count" id="rfq-stat-open">0</span></button>
-              <button class="pill" data-rfq-filter="quoted">Quoted <span class="count" id="rfq-stat-quoted">0</span></button>
-              <button class="pill" data-rfq-filter="won">Won <span class="count" id="rfq-stat-won">0</span></button>
-              <button class="pill" data-rfq-filter="lost">Lost <span class="count" id="rfq-stat-lost">0</span></button>
+            <div class="tabs" id="rfqs-filters">
+              <a class="tab active" data-filter="all">All <span class="count" id="rf-all">0</span></a>
+              <a class="tab" data-filter="surgical"><span class="pip pip--surg">I</span>Surgical <span class="count" id="rf-surg">0</span></a>
+              <a class="tab" data-filter="sports"><span class="pip pip--sport">II</span>Sports <span class="count" id="rf-sport">0</span></a>
+              <a class="tab" data-filter="leather"><span class="pip pip--leath">III</span>Leather <span class="count" id="rf-leath">0</span></a>
             </div>
           </div>
-
-          <div class="rfq-table-wrap">
-            <div class="rfq-table-header">
-              <h3>RFQ Ledger</h3>
-              <span style="font-size: 0.84rem; color: var(--text-muted);">Click any row for details</span>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Buyer · Product</th>
+                    <th>Industry</th>
+                    <th>Destination</th>
+                    <th class="ta-right">Qty</th>
+                    <th class="ta-right">Target</th>
+                    <th>Status</th>
+                    <th class="ta-right">Posted</th>
+                    <th class="ta-right"></th>
+                  </tr>
+                </thead>
+                <tbody id="rfqs-tbody"></tbody>
+              </table>
             </div>
-            <table class="rfq-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Destination</th>
-                  <th>Quantity</th>
-                  <th>Quoted Price</th>
-                  <th>Status</th>
-                  <th>Updated</th>
-                </tr>
-              </thead>
-              <tbody id="rfq-tbody"></tbody>
-            </table>
           </div>
         </div>
       </section>
 
-      <!-- ═══════ PROFILE VIEW ═══════ -->
-      <section class="view" data-view="profile">
-        <div class="view-content">
-          <div class="page-header">
-            <div class="page-header-left">
-              <h1 class="page-title">Your <em>shop</em>, on Nexora.</h1>
-              <p class="page-subtitle">Your public business profile — visible to verified buyers across Nexora.</p>
+      <!-- ═══════ MY QUOTES VIEW ═══════ -->
+      <section class="view" data-view="quotes">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title"><span class="card-title-eyebrow">Sent</span>My quotes</div>
+              <div class="card-sub">Every quote you've drafted, with current status</div>
             </div>
           </div>
-
-          <div class="profile-grid">
-            <aside class="profile-card">
-              <div class="profile-avatar-big" id="p-avatar">··</div>
-              <div class="profile-name" id="p-name">Loading…</div>
-              <div class="profile-role" id="p-role">—</div>
-              <div class="profile-verified" id="p-verified">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Verified by Nexora
-              </div>
-              <div class="profile-meta">
-                <div class="profile-meta-row"><span class="lbl">Status</span>   <span class="val" id="p-joined">—</span></div>
-                <div class="profile-meta-row"><span class="lbl">City</span>     <span class="val" id="p-city">—</span></div>
-                <div class="profile-meta-row"><span class="lbl">Employees</span><span class="val" id="p-employees">—</span></div>
-                <div class="profile-meta-row"><span class="lbl">Capacity</span> <span class="val" id="p-capacity">—</span></div>
-                <div class="profile-meta-row"><span class="lbl">Founded</span>  <span class="val" id="p-founded">—</span></div>
-              </div>
-            </aside>
-
-            <form class="profile-form" id="profile-form" onsubmit="return false;">
-              <h3>Edit business profile</h3>
-              <div class="form-grid">
-                <div class="field full">
-                  <label for="pf-name">Company name</label>
-                  <input id="pf-name" type="text" required>
-                </div>
-                <div class="field">
-                  <label for="pf-type">Business type</label>
-                  <select id="pf-type">
-                    <option>Manufacturer</option>
-                    <option>Exporter</option>
-                    <option>Supplier</option>
-                    <option>Logistics</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="pf-city">City</label>
-                  <input id="pf-city" type="text">
-                </div>
-                <div class="field">
-                  <label for="pf-founded">Founded</label>
-                  <input id="pf-founded" type="number" min="1900" max="2026">
-                </div>
-                <div class="field">
-                  <label for="pf-employees">Employees</label>
-                  <input id="pf-employees" type="text">
-                </div>
-                <div class="field full">
-                  <label for="pf-capacity">Monthly capacity</label>
-                  <input id="pf-capacity" type="text">
-                </div>
-                <div class="field full">
-                  <label for="pf-about">About</label>
-                  <textarea id="pf-about" rows="4"></textarea>
-                </div>
-              </div>
-
-              <h3 style="margin-top: 28px;">Certifications</h3>
-              <div class="cert-grid" id="p-cert-grid"></div>
-
-              <div class="form-footer">
-                <button class="btn-ghost" id="profile-cancel">Cancel</button>
-                <button class="btn-primary" id="profile-save">Save profile</button>
-              </div>
-            </form>
-          </div>
-
-          <!-- ─── Danger zone: delete account ─── -->
-          <section class="danger-zone" aria-labelledby="dz-title">
-            <div class="danger-zone-header">
-              <span class="danger-zone-icon" aria-hidden="true">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              </span>
-              <h3 id="dz-title" class="danger-zone-title">Delete account</h3>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Industry</th>
+                    <th>Destination</th>
+                    <th class="ta-right">Quoted price</th>
+                    <th>Status</th>
+                    <th class="ta-right">Sent</th>
+                  </tr>
+                </thead>
+                <tbody id="quotes-tbody"></tbody>
+              </table>
             </div>
-            <p class="danger-zone-body">
-              This <strong>permanently</strong> removes your account from Nexora and Supabase.
-              This action cannot be undone.
-            </p>
-            <ul class="danger-zone-list">
-              <li>Your profile, certifications and verification status</li>
-              <li>Every quote you've sent on RFQs</li>
-              <li>All your conversations and messages</li>
-              <li>Every notification ever sent to you</li>
-            </ul>
-            <form class="danger-zone-form" id="delete-account-form" onsubmit="return false;">
-              <div class="field">
-                <label for="dz-confirm">Type <strong>DELETE</strong> to confirm</label>
-                <input id="dz-confirm" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE">
-              </div>
-              <button type="submit" class="btn-danger" id="dz-submit" disabled>Delete my account</button>
-            </form>
-          </section>
-
+          </div>
         </div>
       </section>
 
       <!-- ═══════ MESSAGES VIEW ═══════ -->
       <section class="view" data-view="messages">
-        <div class="view-content">
-          <div class="page-header">
-            <div class="page-header-left">
-              <h1 class="page-title">Messages</h1>
-              <p class="page-subtitle">Conversations with verified buyers on active RFQs.</p>
+        <div class="card" style="height:640px;display:grid;grid-template-columns:340px 1fr;overflow:hidden;">
+          <aside style="border-right:1px solid var(--rule);overflow-y:auto;">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--rule);font-family:var(--font-display);font-variation-settings:var(--fraunces-soft);font-size:1rem;">Inbox</div>
+            <div id="thread-list" style="display:flex;flex-direction:column;"></div>
+          </aside>
+          <section style="display:flex;flex-direction:column;background:var(--bg-elevated);min-width:0;">
+            <header style="padding:14px 18px;border-bottom:1px solid var(--rule);background:var(--surface);display:flex;align-items:center;gap:12px;">
+              <div class="user-avatar" id="thread-avatar" style="width:32px;height:32px;font-size:0.74rem;">··</div>
+              <div>
+                <div id="thread-name" style="font-family:var(--font-display);font-variation-settings:var(--fraunces-soft);font-size:0.96rem;">Select a conversation</div>
+                <div id="thread-sub" style="font-size:0.74rem;color:var(--text-muted);margin-top:1px;">—</div>
+              </div>
+            </header>
+            <div id="thread-messages" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;"></div>
+            <form id="thread-composer-form" style="display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--rule);background:var(--surface);">
+              <input type="text" id="thread-composer-input" placeholder="Type a message…" autocomplete="off" style="flex:1;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-pill);padding:10px 16px;font:inherit;outline:none;">
+              <button type="submit" style="width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;border:0;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              </button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <!-- ═══════ PROFILE VIEW ═══════ -->
+      <section class="view" data-view="profile">
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;">
+          <aside class="card" style="text-align:center;padding:30px 24px;">
+            <div class="user-avatar" id="p-avatar" style="width:72px;height:72px;font-size:1.4rem;margin:0 auto 14px;">··</div>
+            <div id="p-name" style="font-family:var(--font-display);font-variation-settings:var(--fraunces-soft);font-size:1.3rem;margin-bottom:4px;">Loading…</div>
+            <div id="p-role" style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">—</div>
+            <div id="p-verified" class="chip chip--won" style="display:none;justify-content:center;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg> Verified
             </div>
-          </div>
+            <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--rule);text-align:left;display:flex;flex-direction:column;gap:8px;font-size:0.84rem;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Status</span><span id="p-status">—</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">City</span><span id="p-city">—</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Industry</span><span id="p-industry">—</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Joined</span><span id="p-joined">—</span></div>
+            </div>
+          </aside>
 
-          <div class="messages-grid">
-            <aside class="thread-list" id="thread-list-wrap">
-              <div class="thread-list-header">Inbox</div>
-              <div id="thread-list"></div>
-            </aside>
+          <form class="card" id="profile-form" onsubmit="return false;" style="padding:24px;">
+            <div class="card-title" style="margin-bottom:14px;">Edit business profile</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="field" style="grid-column:1/-1;"><label for="pf-name">Company name</label><input id="pf-name" type="text"></div>
+              <div class="field"><label for="pf-city">City</label><input id="pf-city" type="text"></div>
+              <div class="field"><label for="pf-founded">Founded</label><input id="pf-founded" type="number" min="1900" max="2030"></div>
+              <div class="field"><label for="pf-employees">Employees</label><input id="pf-employees" type="text"></div>
+              <div class="field"><label for="pf-capacity">Monthly capacity</label><input id="pf-capacity" type="text"></div>
+              <div class="field" style="grid-column:1/-1;"><label for="pf-about">About</label><textarea id="pf-about" rows="3"></textarea></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--rule);">
+              <button class="btn btn-ghost btn-sm" id="profile-cancel">Cancel</button>
+              <button class="btn btn-primary btn-sm" id="profile-save">Save profile</button>
+            </div>
 
-            <section class="thread-pane">
-              <header class="thread-pane-header">
-                <div class="thread-avatar" id="thread-avatar">··</div>
-                <div>
-                  <div class="thread-pane-name" id="thread-name">No conversation selected</div>
-                  <div class="thread-pane-sub" id="thread-sub">Pick a thread from the left to start chatting.</div>
-                </div>
-              </header>
-              <div class="thread-messages" id="thread-messages"></div>
-              <form class="thread-composer" id="thread-composer-form">
-                <input type="text" id="thread-composer-input" placeholder="Type a message…" autocomplete="off">
-                <button type="submit" class="thread-send" aria-label="Send">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                </button>
+            <!-- Danger zone -->
+            <section class="danger-zone" aria-labelledby="dz-title" style="margin-top:28px;">
+              <div class="danger-zone-header">
+                <span class="danger-zone-icon" aria-hidden="true">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                <h3 id="dz-title" class="danger-zone-title">Delete account</h3>
+              </div>
+              <p class="danger-zone-body">This <strong>permanently</strong> removes your account from Nexora and Supabase. This action cannot be undone.</p>
+              <ul class="danger-zone-list">
+                <li>Your profile, certifications and verification status</li>
+                <li>Every quote you've sent on RFQs</li>
+                <li>All your conversations and messages</li>
+                <li>Every notification ever sent to you</li>
+              </ul>
+              <form class="danger-zone-form" id="delete-account-form" onsubmit="return false;">
+                <div class="field"><label for="dz-confirm">Type <strong>DELETE</strong> to confirm</label><input id="dz-confirm" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE"></div>
+                <button type="submit" class="btn-danger" id="dz-submit" disabled>Delete my account</button>
               </form>
             </section>
-          </div>
+          </form>
         </div>
       </section>
 
@@ -458,7 +543,16 @@
   </main>
 </div>
 
-<!-- ════ QUOTE MODAL ════ -->
+<!-- ═══════ Notifications popover ═══════ -->
+<div id="popover-notifs" class="popover" style="position:fixed;top:60px;right:24px;width:340px;max-height:420px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);display:none;z-index:90;">
+  <div style="padding:14px 18px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;">
+    <strong style="font-family:var(--font-display);font-variation-settings:var(--fraunces-soft);">Notifications</strong>
+    <a href="#" id="notif-clear" style="font-size:0.78rem;color:var(--accent);">Mark all read</a>
+  </div>
+  <div id="notif-list"></div>
+</div>
+
+<!-- ═══════ Quote modal ═══════ -->
 <div class="modal-backdrop" id="modal-quote" role="dialog" aria-modal="true">
   <div class="modal">
     <header class="modal-header">
@@ -468,10 +562,7 @@
         <p class="modal-sub" id="q-sub">—</p>
       </div>
       <button class="modal-close" data-close-modal aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <line x1="18" y1="6"  x2="6"  y2="18"></line>
-          <line x1="6"  y1="6"  x2="18" y2="18"></line>
-        </svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </header>
     <div class="modal-body">
@@ -480,63 +571,30 @@
         <div class="sum-item"><div class="lbl">Target price</div><div class="val" id="q-sum-target">—</div></div>
         <div class="sum-item"><div class="lbl">Destination</div><div class="val" id="q-sum-dest">—</div></div>
       </div>
-
       <div class="modal-grid">
-        <div class="field">
-          <label for="q-price">Unit price (USD)</label>
-          <input id="q-price" type="number" step="0.01" min="0" placeholder="0.00">
+        <div class="field"><label for="q-price">Unit price (USD)</label><input id="q-price" type="number" step="0.01" min="0" placeholder="0.00"></div>
+        <div class="field"><label for="q-moq">Your MOQ</label><input id="q-moq" type="number" min="1"></div>
+        <div class="field"><label for="q-lead-time">Lead time</label>
+          <select id="q-lead-time"><option>30 days</option><option>40 days</option><option>45 days</option><option>60 days</option><option>75 days</option><option>90 days</option></select>
         </div>
-        <div class="field">
-          <label for="q-moq">Your MOQ</label>
-          <input id="q-moq" type="number" min="1">
+        <div class="field"><label for="q-incoterm">Incoterm</label>
+          <select id="q-incoterm"><option>EXW Sialkot</option><option>FOB Karachi</option><option>CIF Buyer Port</option><option>DDP Buyer Door</option></select>
         </div>
-        <div class="field">
-          <label for="q-lead-time">Lead time</label>
-          <select id="q-lead-time">
-            <option>30 days</option>
-            <option>40 days</option>
-            <option>45 days</option>
-            <option>60 days</option>
-            <option>75 days</option>
-            <option>90 days</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="q-incoterm">Incoterm</label>
-          <select id="q-incoterm">
-            <option>EXW Sialkot</option>
-            <option>FOB Karachi</option>
-            <option>CIF Buyer Port</option>
-            <option>DDP Buyer Door</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label for="q-payment">Payment terms</label>
-          <input id="q-payment" type="text" placeholder="e.g. 30% deposit, 70% on B/L">
-        </div>
-        <div class="field full">
-          <label for="q-notes">Notes for buyer</label>
-          <textarea id="q-notes" rows="3" placeholder="Sample availability, packaging notes, certifications attached…"></textarea>
-        </div>
+        <div class="field full"><label for="q-payment">Payment terms</label><input id="q-payment" type="text" placeholder="e.g. 30% deposit, 70% on B/L"></div>
+        <div class="field full"><label for="q-notes">Notes for buyer</label><textarea id="q-notes" rows="3" placeholder="Sample availability, packaging notes, certifications attached…"></textarea></div>
       </div>
     </div>
     <footer class="modal-footer">
       <span class="hint">Buyer sees this within seconds.</span>
       <div class="modal-footer-actions">
-        <button class="btn-ghost" data-close-modal>Cancel</button>
-        <button class="btn-primary" id="q-submit">
-          Send Quote
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </button>
+        <button class="btn btn-ghost btn-sm" data-close-modal>Cancel</button>
+        <button class="btn btn-primary btn-sm" id="q-submit">Send Quote</button>
       </div>
     </footer>
   </div>
 </div>
 
-<!-- ════ DETAILS MODAL ════ -->
+<!-- ═══════ Details modal ═══════ -->
 <div class="modal-backdrop" id="modal-details" role="dialog" aria-modal="true">
   <div class="modal modal-large">
     <header class="modal-header">
@@ -546,18 +604,15 @@
         <p class="modal-sub" id="d-sub">—</p>
       </div>
       <button class="modal-close" data-close-modal aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <line x1="18" y1="6"  x2="6"  y2="18"></line>
-          <line x1="6"  y1="6"  x2="18" y2="18"></line>
-        </svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </header>
     <div class="modal-body" id="d-body"></div>
     <footer class="modal-footer">
       <span class="hint">All buyer data is verified by Nexora.</span>
       <div class="modal-footer-actions">
-        <button class="btn-ghost" data-close-modal>Close</button>
-        <button class="btn-primary" id="d-cta">Send Quote</button>
+        <button class="btn btn-ghost btn-sm" data-close-modal>Close</button>
+        <button class="btn btn-primary btn-sm" id="d-cta">Send Quote</button>
       </div>
     </footer>
   </div>
@@ -566,46 +621,35 @@
 <!-- Toast stack -->
 <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
-<!-- ─── Nexora Guard runtime ───
-     Verifies the session, populates the user pill from the real
-     profile, and wires the Sign out button. Only manufacturers
-     and logistics roles can enter this dashboard; exporters get
-     bounced to their own portal. -->
+<!-- ─── Nexora Guard runtime ─── -->
 <script>
 (function () {
   if (!window.NexoraAuth) return;
   NexoraAuth.requireAuth(['manufacturer', 'logistics']).then(me => {
-    if (!me) return; // guard already redirected
-    /* Hydrate the user pill with the real account. */
+    if (!me) return;
     const p = me.profile || {};
-    const initials = (p.full_name || p.company || me.user.email || 'NX')
+    const ini = (p.full_name || p.company || me.user.email || 'NX')
       .split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
-    const av = document.getElementById('nx-user-avatar');
-    const nm = document.getElementById('nx-user-name');
-    const rl = document.getElementById('nx-user-role');
-    if (av) av.textContent = initials || 'NX';
-    if (nm) nm.textContent = p.company || p.full_name || me.user.email;
-    if (rl) rl.textContent = (p.role || 'manufacturer').replace(/^./, c => c.toUpperCase());
+    document.getElementById('nx-user-avatar').textContent = ini || 'NX';
+    document.getElementById('nx-user-name').textContent   = p.company || p.full_name || me.user.email;
+    document.getElementById('nx-user-role').textContent   = (p.role || 'manufacturer').replace(/^./, c => c.toUpperCase());
 
-    /* Sign out */
-    const signoutBtn = document.getElementById('nx-signout');
-    signoutBtn && signoutBtn.addEventListener('click', async () => {
+    document.getElementById('nx-signout').addEventListener('click', async () => {
       await NexoraAuth.signOut();
       NexoraAuth.toast('Signed out.', 'info');
       setTimeout(() => location.replace('auth.html'), 600);
     });
 
-    /* Expose to dashboard.js so it can use the real account in views. */
-    window.NEXORA_USER = me;
-    /* Reveal the Admin portal link in the sidebar for admins */
     if (p.is_admin) {
       document.querySelectorAll('.nx-admin-only').forEach(el => el.hidden = false);
     }
+    window.NEXORA_USER = me;
     document.body.classList.remove('auth-pending');
   });
 })();
 </script>
 
+<script src="js/charts.js"></script>
 <script src="js/dashboard.js" defer></script>
 </body>
 </html>

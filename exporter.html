@@ -4,467 +4,395 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#f5f4ed">
-<title>Nexora — Exporter Control Center</title>
+<title>Nexora — Control Center · Exporter</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/auth.css"><!-- toasts -->
+<link rel="stylesheet" href="css/dashboard-pro.css">
+<link rel="stylesheet" href="css/auth.css">
 
 <!-- ─── Nexora Guard ─── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <style>
-  body.auth-pending .app { visibility: hidden; }
-  body.auth-pending::before {
-    content: ""; position: fixed; inset: 0;
-    background: var(--bg); z-index: 9998;
-  }
+  body.auth-pending .shell { visibility: hidden; }
+  body.auth-pending::before { content: ""; position: fixed; inset: 0; background: var(--bg); z-index: 9998; }
   body.auth-pending::after {
-    content: ""; position: fixed;
-    top: 50%; left: 50%; width: 28px; height: 28px;
-    margin: -14px 0 0 -14px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    animation: nx-guard-spin 0.7s linear infinite;
-    z-index: 9999;
+    content: ""; position: fixed; top: 50%; left: 50%; width: 28px; height: 28px;
+    margin: -14px 0 0 -14px; border-radius: 50%;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    animation: nx-guard-spin 0.7s linear infinite; z-index: 9999;
   }
   @keyframes nx-guard-spin { to { transform: rotate(360deg); } }
-
-  /* Exporter-specific tweaks */
-  .post-rfq-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    padding: 32px 32px 28px;
-    max-width: 760px;
-  }
-  .post-rfq-card h2 {
-    font-family: var(--font-display);
-    font-variation-settings: var(--fraunces-soft);
-    font-weight: 420;
-    font-size: 1.7rem;
-    letter-spacing: -0.022em;
-    margin-bottom: 6px;
-  }
-  .post-rfq-card > p.sub {
-    color: var(--text-mid);
-    font-size: 0.94rem;
-    line-height: 1.5;
-    margin-bottom: 22px;
-  }
-  .post-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-  .post-grid .full { grid-column: 1 / -1; }
-  @media (max-width: 640px) { .post-grid { grid-template-columns: 1fr; } }
-
-  .industry-radio {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 4px;
-  }
-  .industry-radio label {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 12px;
-    text-align: center;
-    cursor: pointer;
-    font-family: var(--font-display);
-    font-variation-settings: var(--fraunces-soft);
-    font-size: 0.94rem;
-    transition: border-color 0.18s, background 0.18s;
-  }
-  .industry-radio input { display: none; }
-  .industry-radio input:checked + .label {
-    background: var(--accent-tint);
-    border-color: var(--accent);
-    color: var(--accent-dark);
-  }
-  .industry-radio label:hover { border-color: var(--border-mid); }
-  .industry-radio .label { display: block; }
-
-  .rfq-history-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 14px;
-  }
-  .rfq-mine {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 18px 18px 16px;
-    display: flex; flex-direction: column; gap: 10px;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-  }
-  .rfq-mine:hover {
-    border-color: var(--border-mid);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-1px);
-  }
-  .rfq-mine-top {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 0.74rem;
-    color: var(--text-muted);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .rfq-mine-product {
-    font-family: var(--font-display);
-    font-variation-settings: var(--fraunces-soft);
-    font-size: 1.08rem;
-    font-weight: 460;
-    color: var(--text);
-    line-height: 1.25;
-  }
-  .rfq-mine-meta {
-    font-size: 0.84rem;
-    color: var(--text-mid);
-  }
-  .rfq-mine-foot {
-    display: flex; justify-content: space-between; align-items: center;
-    padding-top: 10px;
-    margin-top: auto;
-    border-top: 1px dashed var(--rule);
-    font-size: 0.84rem;
-  }
-  .rfq-mine-count {
-    color: var(--accent);
-    font-weight: 600;
-  }
-  .rfq-status {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 3px 9px;
-    border-radius: var(--radius-pill);
-    font-family: var(--font-body);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .rfq-status::before {
-    content: ""; width: 6px; height: 6px;
-    border-radius: 50%; background: currentColor;
-  }
-  .rfq-status--open    { color: var(--accent); background: var(--accent-tint); }
-  .rfq-status--quoted  { color: var(--ind-surgical); background: var(--ind-surgical-bg); }
-  .rfq-status--won     { color: var(--success); background: rgba(90,125,79,0.10); }
-  .rfq-status--closed  { color: var(--text-muted); background: var(--bg-elevated); }
-
-  /* Exporter topbar layout */
-  .topbar-title {
-    font-family: var(--font-display);
-    font-variation-settings: var(--fraunces-soft);
-    font-weight: 420;
-    font-size: 1.05rem;
-    letter-spacing: -0.012em;
-    color: var(--text);
-    margin: 0;
-    display: flex; align-items: baseline; gap: 12px;
-  }
-  .topbar-eyebrow {
-    font-family: var(--font-body);
-    font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .topbar-right { margin-left: auto; }
-
-  .empty-state {
-    padding: 36px 24px;
-    background: var(--surface);
-    border: 1px dashed var(--border-mid);
-    border-radius: var(--radius-md);
-    text-align: center;
-    color: var(--text-mid);
-  }
-  .empty-state svg { color: var(--text-dim); margin: 0 auto 10px; }
-  .empty-state h3 {
-    font-family: var(--font-display);
-    font-variation-settings: var(--fraunces-soft);
-    font-size: 1.08rem;
-    font-weight: 460;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
-
-  .main { padding: 0; }
-  .view { padding: 28px 32px 64px; }
-  @media (max-width: 880px) {
-    .view { padding: 22px 18px 48px; }
-    .post-rfq-card { padding: 22px 20px; }
-  }
+  .canvas .view { display: none; }
+  .canvas .view.is-active { display: block; }
 </style>
 </head>
-<body class="dashboard auth-pending">
+<body class="dash auth-pending">
 
-<!-- Grain overlay — paper texture, fixed over everything -->
 <div id="grain" aria-hidden="true"></div>
 
-<div class="app">
+<div class="shell">
 
   <!-- ════ SIDEBAR ════ -->
-  <aside class="sidebar" id="sidebar">
-    <a class="sidebar-logo" href="index.html" aria-label="Back to Nexora home">
-      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true">
-        <path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"></path>
-      </svg>
-      Nexora
+  <aside class="side">
+    <a class="side-logo" href="index.html" aria-label="Back to Nexora home">
+      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true"><path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"></path></svg>
+      <span>Nexora</span>
     </a>
 
-    <div class="sidebar-section-label">Control Center</div>
-    <nav class="sidebar-nav" aria-label="Primary">
-      <a class="nav-item active" data-section="post">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M12 5v14M5 12h14"/>
-        </svg>
-        Post a requirement
+    <span class="side-role">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path></svg>
+      Exporter · Control
+    </span>
+
+    <div class="side-section-label">Workspace</div>
+    <nav class="side-nav">
+      <a class="nav-item active" data-section="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+        <span class="nav-label">Overview</span>
+      </a>
+      <a class="nav-item" data-section="post">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"></path></svg>
+        <span class="nav-label">Post requirement</span>
       </a>
       <a class="nav-item" data-section="mine">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M3 7h18M3 12h18M3 17h12"/>
-        </svg>
-        My RFQs
-        <span class="badge" id="ex-rfqs-badge">0</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        <span class="nav-label">My RFQs</span>
+        <span class="badge" id="bd-rfqs">0</span>
       </a>
       <a class="nav-item" data-section="responses">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M8 12l3 3 5-6"/>
-        </svg>
-        Responses
-        <span class="badge" id="ex-resp-badge">0</span>
-      </a>
-      <a class="nav-item" data-section="profile">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
-        </svg>
-        My profile
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path d="M8 12l3 3 5-6"></path></svg>
+        <span class="nav-label">Responses</span>
+        <span class="badge" id="bd-resp">0</span>
       </a>
     </nav>
 
-    <div class="sidebar-foot-nav">
+    <div class="side-section-label">Account</div>
+    <nav class="side-nav">
+      <a class="nav-item" data-section="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path></svg>
+        <span class="nav-label">Profile</span>
+      </a>
       <a class="nav-item nx-admin-only" href="admin.html" hidden style="color: var(--accent);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/>
-        </svg>
-        Admin portal
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/></svg>
+        <span class="nav-label">Admin portal</span>
       </a>
-      <a class="nav-item" href="index.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M19 12H5M12 19l-7-7 7-7"></path>
-        </svg>
-        Back to home
-      </a>
-    </div>
+    </nav>
 
-    <div class="sidebar-footer">
-      <div class="user-pill" id="nx-user-pill" role="button" tabindex="0" aria-label="Account">
+    <div class="side-foot">
+      <div class="user-pill" id="nx-user-pill">
         <div class="user-avatar" id="nx-user-avatar">··</div>
         <div class="user-meta">
           <div class="user-name" id="nx-user-name">Loading…</div>
-          <div class="user-role" id="nx-user-role">—</div>
+          <div class="user-role" id="nx-user-role">Exporter</div>
         </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color: var(--text-muted)"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
-      <button class="btn-ghost" id="nx-signout" style="width:100%; margin-top:10px; font-size:0.82rem; padding:8px 12px;">
-        Sign out
-      </button>
+      <button class="btn btn-ghost btn-sm" id="nx-signout" style="width:100%; margin-top:10px;">Sign out</button>
     </div>
   </aside>
 
   <!-- ════ MAIN ════ -->
   <main class="main">
+
     <header class="topbar">
-      <h1 class="topbar-title">
-        <span class="topbar-eyebrow">Exporter</span>
-        <span id="topbar-section-title">Post a requirement</span>
-      </h1>
-      <div class="topbar-right">
-        <a class="btn-ghost" href="Nexora - Dashboard.html">Browse the bench →</a>
+      <div class="topbar-title">
+        <span class="topbar-eyebrow">Control Center</span>
+        <span id="topbar-section-title">Overview</span>
+      </div>
+
+      <div class="topbar-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="topbar-search-input" placeholder="Search requirements & responses…" aria-label="Search">
+        <span class="topbar-kbd">⌘K</span>
+      </div>
+
+      <span class="live-pill" id="live-pill">Connected</span>
+
+      <div class="topbar-actions">
+        <button class="btn btn-dark btn-sm" data-section-link="post">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+          New RFQ
+        </button>
       </div>
     </header>
 
-    <!-- ─── View: POST RFQ ─── -->
-    <section class="view" data-view="post">
-      <div class="post-rfq-card">
-        <h2>Post a requirement.</h2>
-        <p class="sub">Reaches every verified manufacturer in your chosen industry. Average response: 4 hours.</p>
+    <div class="canvas">
 
-        <form id="post-rfq-form" novalidate>
-          <div class="field">
-            <label for="rfq-product">Product</label>
-            <input id="rfq-product" name="product" type="text"
-                   placeholder="e.g. Hand-stitched match-day footballs, size 5" required>
-            <div class="field-error">Please describe the product.</div>
+      <!-- ═══════ OVERVIEW ═══════ -->
+      <section class="view is-active" data-view="overview">
+
+        <div class="page-head rev">
+          <div>
+            <h1>Hello <em id="ph-name">there</em>. <em id="ph-resp-count">0</em> manufacturers responded.</h1>
+            <p class="page-head-sub" id="ph-sub">Verified Sialkot manufacturers respond to your requirements in real time.</p>
           </div>
-
-          <div class="field">
-            <label>Industry</label>
-            <div class="industry-radio">
-              <label>
-                <input type="radio" name="industry" value="surgical" required>
-                <span class="label">Surgical</span>
-              </label>
-              <label>
-                <input type="radio" name="industry" value="sports">
-                <span class="label">Sports</span>
-              </label>
-              <label>
-                <input type="radio" name="industry" value="leather">
-                <span class="label">Leather</span>
-              </label>
-            </div>
-            <div class="field-error">Please choose an industry.</div>
-          </div>
-
-          <div class="post-grid">
-            <div class="field">
-              <label for="rfq-qty">Quantity</label>
-              <input id="rfq-qty" name="quantity" type="number" min="1" placeholder="10000" required>
-              <div class="field-error">Please enter a quantity.</div>
-            </div>
-            <div class="field">
-              <label for="rfq-unit">Unit</label>
-              <select id="rfq-unit" name="unit">
-                <option>units</option>
-                <option>pieces</option>
-                <option>pairs</option>
-                <option>sets</option>
-                <option>cartons</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="rfq-budget">Target unit price (USD)</label>
-              <input id="rfq-budget" name="target_price" type="number" step="0.01" min="0" placeholder="6.50">
-            </div>
-            <div class="field">
-              <label for="rfq-leadtime">Lead time</label>
-              <select id="rfq-leadtime" name="lead_time">
-                <option>30 days</option>
-                <option>45 days</option>
-                <option>60 days</option>
-                <option>90 days</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="rfq-destination">Destination port / country</label>
-              <input id="rfq-destination" name="destination" type="text" placeholder="Hamburg, Germany" required>
-              <div class="field-error">Please enter a destination.</div>
-            </div>
-            <div class="field">
-              <label for="rfq-incoterm">Incoterm</label>
-              <select id="rfq-incoterm" name="incoterm">
-                <option>EXW</option>
-                <option>FOB Karachi</option>
-                <option selected>CIF Destination</option>
-                <option>DDP</option>
-              </select>
-            </div>
-            <div class="field full">
-              <label for="rfq-specs">Specifications &amp; certifications</label>
-              <textarea id="rfq-specs" name="specs" rows="4"
-                        placeholder="Materials, certifications, packaging, sample requirements…"></textarea>
-            </div>
-          </div>
-
-          <div class="btn-row" style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
-            <button type="button" class="btn-ghost" id="rfq-draft">Save as draft</button>
-            <button type="submit" class="btn-primary" id="rfq-submit">
-              <span class="spinner" aria-hidden="true"></span>
-              <span class="label">Post to network</span>
-              <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+          <div class="page-head-meta">
+            <button class="btn btn-primary btn-sm" data-section-link="post">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+              Post a requirement
             </button>
           </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- ─── View: MY RFQs ─── -->
-    <section class="view" data-view="mine" hidden>
-      <div class="rfq-header" style="margin-bottom:18px;">
-        <p class="sub" style="color:var(--text-mid);">Every requirement you've posted, with live response counts.</p>
-      </div>
-      <div class="rfq-history-grid" id="rfq-history"></div>
-    </section>
-
-    <!-- ─── View: RESPONSES ─── -->
-    <section class="view" data-view="responses" hidden>
-      <div class="rfq-history-grid" id="rfq-responses"></div>
-    </section>
-
-    <!-- ─── View: PROFILE ─── -->
-    <section class="view" data-view="profile" hidden>
-      <div class="post-rfq-card">
-        <h2>Account details.</h2>
-        <p class="sub">Visible to verified manufacturers when you post a requirement.</p>
-        <div class="post-grid">
-          <div class="field">
-            <label>Full name</label>
-            <input id="pf-name" type="text">
-          </div>
-          <div class="field">
-            <label>Company</label>
-            <input id="pf-company" type="text">
-          </div>
-          <div class="field">
-            <label>Email</label>
-            <input id="pf-email" type="email" disabled>
-          </div>
-          <div class="field">
-            <label>Country</label>
-            <input id="pf-country" type="text">
-          </div>
-        </div>
-        <div class="btn-row" style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
-          <button class="btn-ghost" id="pf-reset">Reset</button>
-          <button class="btn-primary" id="pf-save">Save</button>
         </div>
 
-        <!-- ─── Danger zone: delete account ─── -->
-        <section class="danger-zone" aria-labelledby="dz-title-ex" style="margin-top:28px;">
-          <div class="danger-zone-header">
-            <span class="danger-zone-icon" aria-hidden="true">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </span>
-            <h3 id="dz-title-ex" class="danger-zone-title">Delete account</h3>
+        <!-- KPIs -->
+        <div class="kpi-row stagger">
+          <div class="kpi">
+            <div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path></svg></span>Open RFQs</div>
+            <div class="kpi-value"><span data-counter="0" id="kpi-rfqs">0</span></div>
+            <div class="kpi-foot"><span class="delta" id="kpi-rfqs-delta">—</span><span>posted by you</span></div>
+            <div class="kpi-spark" id="spark-rfqs"></div>
           </div>
-          <p class="danger-zone-body">
-            This <strong>permanently</strong> removes your account from Nexora and Supabase.
-            This action cannot be undone.
-          </p>
-          <ul class="danger-zone-list">
-            <li>Your account and contact details</li>
-            <li>Every RFQ you've posted (and the quotes attached to them)</li>
-            <li>All conversations you started with manufacturers</li>
-          </ul>
-          <form class="danger-zone-form" id="delete-account-form" onsubmit="return false;">
-            <div class="field">
-              <label for="dz-confirm">Type <strong>DELETE</strong> to confirm</label>
-              <input id="dz-confirm" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE">
+          <div class="kpi">
+            <div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></span>Quote responses</div>
+            <div class="kpi-value"><span data-counter="0" id="kpi-resp">0</span></div>
+            <div class="kpi-foot"><span class="delta" id="kpi-resp-delta">—</span><span>across all RFQs</span></div>
+            <div class="kpi-spark" id="spark-resp"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>Avg responses / RFQ</div>
+            <div class="kpi-value"><span data-counter="0" data-decimals="1" id="kpi-avg">0</span></div>
+            <div class="kpi-foot"><span class="delta">—</span><span>signal quality</span></div>
+            <div class="kpi-spark" id="spark-avg"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"></path></svg></span>Pipeline value</div>
+            <div class="kpi-value">$<span data-counter="0" id="kpi-pipe">0</span><span class="unit">k</span></div>
+            <div class="kpi-foot"><span class="delta">—</span><span>est. across responses</span></div>
+            <div class="kpi-spark" id="spark-pipe"></div>
+          </div>
+        </div>
+
+        <!-- Active RFQs + Industry mix -->
+        <div class="chart-row rev">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title"><span class="card-title-eyebrow" id="active-eye">Active · 0</span>Live requirements</div>
+                <div class="card-sub">Live response counts on each open requirement</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" data-section-link="mine">View all →</button>
             </div>
-            <button type="submit" class="btn-danger" id="dz-submit" disabled>Delete my account</button>
-          </form>
-        </section>
+            <div class="card-body flush">
+              <div class="dt-wrap">
+                <table class="dt">
+                  <thead><tr><th>Product</th><th>Industry</th><th class="ta-right">Qty</th><th>Responses</th><th>Status</th><th class="ta-right">Posted</th></tr></thead>
+                  <tbody id="overview-tbody"><tr><td colspan="6" style="padding:24px;text-align:center;color:var(--text-muted);">Loading…</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
 
-      </div>
-    </section>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card">
+              <div class="card-head"><div><div class="card-title"><span class="card-title-eyebrow">By industry</span>Sourcing mix</div></div></div>
+              <div class="card-body" style="display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;">
+                <div class="chart-wrap" id="industry-donut" style="width:160px;"></div>
+                <div id="industry-legend" style="display:flex;flex-direction:column;gap:10px;font-size:0.85rem;"></div>
+              </div>
+            </div>
 
+            <div class="card">
+              <div class="card-head"><div><div class="card-title"><span class="card-title-eyebrow">Recent</span>Top responding suppliers</div></div></div>
+              <div class="card-body tight">
+                <div class="feed" id="suppliers-feed" style="gap:0;">
+                  <div style="padding:18px;text-align:center;color:var(--text-muted);font-size:0.86rem;">Suppliers who quote you will appear here.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spend chart + activity -->
+        <div class="chart-row rev">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title"><span class="card-title-eyebrow">Pipeline · 8 months</span>Quote volume</div>
+                <div class="card-sub">Total quoted value across your RFQs</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap" id="spend-chart" style="height:240px;"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title"><span class="card-title-eyebrow">Live feed</span>Activity</div></div>
+            </div>
+            <div class="card-body">
+              <div class="feed" id="activity-feed">
+                <div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet. Quotes and messages will appear here in real time.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:12px;color:var(--text-muted);font-size:0.78rem;letter-spacing:0.05em;border-top:1px dashed var(--rule);">
+          Nexora · Exporter Control Center · v0.4 beta
+        </div>
+      </section>
+
+      <!-- ═══════ POST RFQ ═══════ -->
+      <section class="view" data-view="post">
+        <div class="card" style="max-width:780px;">
+          <div class="card-head">
+            <div>
+              <div class="card-title"><span class="card-title-eyebrow">Reaches every verified Sialkot manufacturer</span>Post a requirement</div>
+              <div class="card-sub">Average first-quote time: 4 hours</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <form id="post-rfq-form" novalidate>
+              <div class="field">
+                <label for="rfq-product">Product</label>
+                <input id="rfq-product" name="product" type="text" placeholder="e.g. Hand-stitched match-day footballs, size 5" required>
+                <div class="field-error">Please describe the product.</div>
+              </div>
+
+              <div class="field">
+                <label>Industry</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;" id="industry-radio">
+                  <label style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;text-align:center;cursor:pointer;font-family:var(--font-display);font-variation-settings:var(--fraunces-soft);">
+                    <input type="radio" name="industry" value="surgical" required style="display:none;"><span class="lbl">Surgical</span>
+                  </label>
+                  <label style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;text-align:center;cursor:pointer;font-family:var(--font-display);font-variation-settings:var(--fraunces-soft);">
+                    <input type="radio" name="industry" value="sports" style="display:none;"><span class="lbl">Sports</span>
+                  </label>
+                  <label style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;text-align:center;cursor:pointer;font-family:var(--font-display);font-variation-settings:var(--fraunces-soft);">
+                    <input type="radio" name="industry" value="leather" style="display:none;"><span class="lbl">Leather</span>
+                  </label>
+                </div>
+                <div class="field-error">Please choose an industry.</div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="field"><label for="rfq-qty">Quantity</label><input id="rfq-qty" name="quantity" type="number" min="1" placeholder="10000" required><div class="field-error">Please enter a quantity.</div></div>
+                <div class="field"><label for="rfq-unit">Unit</label>
+                  <select id="rfq-unit" name="unit"><option>units</option><option>pieces</option><option>pairs</option><option>sets</option><option>cartons</option></select>
+                </div>
+                <div class="field"><label for="rfq-budget">Target unit price (USD)</label><input id="rfq-budget" name="target_price" type="number" step="0.01" min="0" placeholder="6.50"></div>
+                <div class="field"><label for="rfq-leadtime">Lead time</label>
+                  <select id="rfq-leadtime" name="lead_time"><option>30 days</option><option>45 days</option><option>60 days</option><option>90 days</option></select>
+                </div>
+                <div class="field"><label for="rfq-destination">Destination</label><input id="rfq-destination" name="destination" type="text" placeholder="Hamburg, Germany" required><div class="field-error">Please enter a destination.</div></div>
+                <div class="field"><label for="rfq-incoterm">Incoterm</label>
+                  <select id="rfq-incoterm" name="incoterm"><option>EXW</option><option>FOB Karachi</option><option selected>CIF Destination</option><option>DDP</option></select>
+                </div>
+                <div class="field" style="grid-column:1/-1;"><label for="rfq-specs">Specifications &amp; certifications</label>
+                  <textarea id="rfq-specs" name="specs" rows="4" placeholder="Materials, certifications, packaging, sample requirements…"></textarea>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
+                <button type="button" class="btn btn-ghost btn-sm" id="rfq-draft">Save draft</button>
+                <button type="submit" class="btn btn-primary btn-sm" id="rfq-submit">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+                  Post to network
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ MY RFQs ═══════ -->
+      <section class="view" data-view="mine">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title"><span class="card-title-eyebrow">All</span>Your requirements</div>
+              <div class="card-sub">Every RFQ you've posted, with live response counts</div>
+            </div>
+          </div>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead><tr><th>Product</th><th>Industry</th><th>Destination</th><th class="ta-right">Qty</th><th>Responses</th><th>Status</th><th class="ta-right">Posted</th></tr></thead>
+                <tbody id="mine-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ RESPONSES ═══════ -->
+      <section class="view" data-view="responses">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title"><span class="card-title-eyebrow">Quotes received</span>Manufacturer responses</div>
+              <div class="card-sub">Click any to open the conversation</div>
+            </div>
+          </div>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead><tr><th>Manufacturer</th><th>Product</th><th class="ta-right">Unit price</th><th>Lead time</th><th>Status</th><th class="ta-right">Sent</th></tr></thead>
+                <tbody id="responses-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ PROFILE ═══════ -->
+      <section class="view" data-view="profile">
+        <div class="card" style="max-width:780px;">
+          <div class="card-head">
+            <div>
+              <div class="card-title"><span class="card-title-eyebrow">Account</span>Your details</div>
+              <div class="card-sub">Visible to verified manufacturers when you post</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="field"><label>Full name</label><input id="pf-name" type="text"></div>
+              <div class="field"><label>Company</label><input id="pf-company" type="text"></div>
+              <div class="field"><label>Email</label><input id="pf-email" type="email" disabled></div>
+              <div class="field"><label>Country</label><input id="pf-country" type="text"></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+              <button class="btn btn-ghost btn-sm" id="pf-reset">Reset</button>
+              <button class="btn btn-primary btn-sm" id="pf-save">Save</button>
+            </div>
+
+            <!-- Danger zone -->
+            <section class="danger-zone" style="margin-top:28px;">
+              <div class="danger-zone-header">
+                <span class="danger-zone-icon" aria-hidden="true">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                <h3 class="danger-zone-title">Delete account</h3>
+              </div>
+              <p class="danger-zone-body">This <strong>permanently</strong> removes your account from Nexora and Supabase. This action cannot be undone.</p>
+              <ul class="danger-zone-list">
+                <li>Your account and contact details</li>
+                <li>Every RFQ you've posted (and the quotes attached to them)</li>
+                <li>All conversations you started with manufacturers</li>
+              </ul>
+              <form class="danger-zone-form" id="delete-account-form" onsubmit="return false;">
+                <div class="field"><label for="dz-confirm">Type <strong>DELETE</strong> to confirm</label><input id="dz-confirm" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE"></div>
+                <button type="submit" class="btn-danger" id="dz-submit" disabled>Delete my account</button>
+              </form>
+            </section>
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
 </div>
+
+<!-- Toast stack -->
+<div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
 <!-- ─── Nexora Guard runtime ─── -->
 <script>
@@ -473,9 +401,9 @@
   NexoraAuth.requireAuth(['exporter']).then(me => {
     if (!me) return;
     const p = me.profile || {};
-    const initials = (p.full_name || p.company || me.user.email || 'NX')
+    const ini = (p.full_name || p.company || me.user.email || 'NX')
       .split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
-    document.getElementById('nx-user-avatar').textContent = initials || 'NX';
+    document.getElementById('nx-user-avatar').textContent = ini || 'NX';
     document.getElementById('nx-user-name').textContent   = p.company || p.full_name || me.user.email;
     document.getElementById('nx-user-role').textContent   = (p.role || 'exporter').replace(/^./, c => c.toUpperCase());
 
@@ -485,16 +413,14 @@
       setTimeout(() => location.replace('auth.html'), 600);
     });
 
+    if (p.is_admin) document.querySelectorAll('.nx-admin-only').forEach(el => el.hidden = false);
     window.NEXORA_USER = me;
-    /* Reveal the Admin portal link in the sidebar for admins */
-    if (p.is_admin) {
-      document.querySelectorAll('.nx-admin-only').forEach(el => el.hidden = false);
-    }
     document.body.classList.remove('auth-pending');
   });
 })();
 </script>
 
+<script src="js/charts.js"></script>
 <script src="js/exporter.js" defer></script>
 </body>
 </html>

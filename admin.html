@@ -3,341 +3,313 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f5f4ed">
-<title>Nexora — Admin</title>
+<meta name="theme-color" content="#1a1612">
+<title>Nexora — Command · Admin</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,30..100,0..1;1,9..144,300..700,30..100,0..1&family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/dashboard-pro.css">
 <link rel="stylesheet" href="css/auth.css">
-<link rel="stylesheet" href="css/admin.css">
 
 <!-- ─── Nexora Guard ─── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <style>
-  body.auth-pending .app { visibility: hidden; }
-  body.auth-pending::before {
-    content: ""; position: fixed; inset: 0;
-    background: var(--bg); z-index: 9998;
-  }
+  body.auth-pending .shell { visibility: hidden; }
+  body.auth-pending::before { content: ""; position: fixed; inset: 0; background: var(--bg); z-index: 9998; }
   body.auth-pending::after {
-    content: ""; position: fixed;
-    top: 50%; left: 50%; width: 28px; height: 28px;
-    margin: -14px 0 0 -14px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    animation: nx-guard-spin 0.7s linear infinite;
-    z-index: 9999;
+    content: ""; position: fixed; top: 50%; left: 50%; width: 28px; height: 28px;
+    margin: -14px 0 0 -14px; border-radius: 50%;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    animation: nx-guard-spin 0.7s linear infinite; z-index: 9999;
   }
   @keyframes nx-guard-spin { to { transform: rotate(360deg); } }
+  .canvas .view { display: none; }
+  .canvas .view.is-active { display: block; }
+  /* Row action buttons (admin) */
+  .row-actions { display:inline-flex; gap:6px; justify-content:flex-end; }
+  .row-action {
+    background:transparent; border:1px solid var(--border-mid); color:var(--text-mid);
+    font-family:var(--font-body); font-size:0.74rem; font-weight:500;
+    padding:5px 10px; border-radius:var(--radius-sm); cursor:pointer; white-space:nowrap;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .row-action:hover { background:var(--bg-elevated); color:var(--text); border-color:var(--border-strong); }
+  .row-action.is-primary { color:var(--accent-dark); border-color:rgba(201,100,66,0.30); }
+  .row-action.is-primary:hover { background:var(--accent-tint); border-color:var(--accent); }
+  .row-action.is-danger { color:var(--danger); border-color:rgba(184,71,58,0.30); }
+  .row-action.is-danger:hover { background:rgba(184,71,58,0.08); border-color:var(--danger); }
+  .row-action:disabled { opacity:0.5; cursor:not-allowed; pointer-events:none; }
 </style>
 </head>
-<body class="dashboard admin-portal auth-pending">
+<body class="dash auth-pending">
 
-<!-- Grain overlay -->
 <div id="grain" aria-hidden="true"></div>
 
-<div class="app">
+<div class="shell">
 
-  <!-- ════ SIDEBAR ════ -->
-  <aside class="sidebar" id="sidebar">
-    <a class="sidebar-logo" href="index.html" aria-label="Back to Nexora home">
-      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true">
-        <path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"></path>
-      </svg>
-      Nexora
+  <!-- ════ SIDEBAR (dark variant) ════ -->
+  <aside class="side" style="background:#1a1612;border-right-color:rgba(245,244,237,0.08);">
+    <a class="side-logo" href="index.html" style="color:#f0e1d8;border-color:rgba(245,244,237,0.08);" aria-label="Back to Nexora home">
+      <svg width="22" height="22" viewBox="0 0 52 52" fill="currentColor" aria-hidden="true" style="color:#d97a4f;"><path d="M26 3 L46 15 L46 37 L26 49 L6 37 L6 15 Z"></path></svg>
+      <span>Nexora</span>
     </a>
 
-    <!-- Admin badge -->
-    <div class="admin-rail" aria-hidden="true">
-      <span class="admin-rail-chip">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-          <path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/>
-        </svg>
-        Admin · root access
-      </span>
-    </div>
+    <span class="side-role side-role--admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"></path></svg>
+      Command · root
+    </span>
 
-    <div class="sidebar-section-label">Control</div>
-    <nav class="sidebar-nav" aria-label="Primary">
-      <a class="nav-item active" data-section="overview">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <rect x="3" y="3" width="7" height="9" rx="1"/>
-          <rect x="14" y="3" width="7" height="5" rx="1"/>
-          <rect x="14" y="12" width="7" height="9" rx="1"/>
-          <rect x="3" y="16" width="7" height="5" rx="1"/>
-        </svg>
-        Overview
+    <div class="side-section-label" style="color:rgba(245,244,237,0.5);">Control</div>
+    <nav class="side-nav">
+      <a class="nav-item active" data-section="overview" style="color:rgba(245,244,237,0.95);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+        <span class="nav-label">Overview</span>
       </a>
-      <a class="nav-item" data-section="users">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-          <path d="M16 3.13a4 4 0 010 7.75"/>
-        </svg>
-        Users
+      <a class="nav-item" data-section="users" style="color:rgba(245,244,237,0.72);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+        <span class="nav-label">Users</span>
         <span class="badge" id="bd-users">0</span>
       </a>
-      <a class="nav-item" data-section="rfqs">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="9" y1="13" x2="15" y2="13"/>
-          <line x1="9" y1="17" x2="13" y2="17"/>
-        </svg>
-        RFQs
+      <a class="nav-item" data-section="rfqs" style="color:rgba(245,244,237,0.72);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        <span class="nav-label">RFQs</span>
         <span class="badge" id="bd-rfqs">0</span>
       </a>
-      <a class="nav-item" data-section="quotes">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          <path d="M8 12l3 3 5-6"/>
-        </svg>
-        Quotes
+      <a class="nav-item" data-section="quotes" style="color:rgba(245,244,237,0.72);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path d="M8 12l3 3 5-6"></path></svg>
+        <span class="nav-label">Quotes</span>
         <span class="badge" id="bd-quotes">0</span>
       </a>
-      <a class="nav-item" data-section="threads">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-        </svg>
-        Conversations
+      <a class="nav-item" data-section="threads" style="color:rgba(245,244,237,0.72);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
+        <span class="nav-label">Threads</span>
         <span class="badge" id="bd-threads">0</span>
       </a>
-      <a class="nav-item" data-section="notifications">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.7 21a2 2 0 01-3.4 0"/>
-        </svg>
-        Notifications
+      <a class="nav-item" data-section="notifications" style="color:rgba(245,244,237,0.72);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 01-3.4 0"></path></svg>
+        <span class="nav-label">Notifications</span>
       </a>
     </nav>
 
-    <div class="sidebar-foot-nav">
-      <a class="nav-item" href="index.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M19 12H5M12 19l-7-7 7-7"></path>
-        </svg>
-        Back to home
+    <div class="side-section-label" style="color:rgba(245,244,237,0.5);">System</div>
+    <nav class="side-nav">
+      <a class="nav-item" data-section="users" data-pre-filter="pending" style="color:rgba(245,244,237,0.72);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path></svg>
+        <span class="nav-label">Verifications</span>
+        <span class="badge" id="bd-pending" style="background:#d97a4f;">0</span>
       </a>
-    </div>
+    </nav>
 
-    <div class="sidebar-footer">
-      <div class="user-pill" id="nx-user-pill" role="button" tabindex="0" aria-label="Account">
-        <div class="user-avatar" id="nx-user-avatar">··</div>
+    <div class="side-foot" style="border-color:rgba(245,244,237,0.08);">
+      <div class="user-pill" id="nx-user-pill" style="color:#f5f4ed;background:rgba(245,244,237,0.06);border-color:rgba(245,244,237,0.10);">
+        <div class="user-avatar" id="nx-user-avatar" style="background:#d97a4f;color:#1a1612;">··</div>
         <div class="user-meta">
-          <div class="user-name" id="nx-user-name">Loading…</div>
-          <div class="user-role" id="nx-user-role">Admin</div>
+          <div class="user-name" id="nx-user-name" style="color:#f5f4ed;">Loading…</div>
+          <div class="user-role" id="nx-user-role" style="color:rgba(245,244,237,0.55);">Admin</div>
         </div>
       </div>
-      <button class="btn-ghost" id="nx-signout" style="width:100%; margin-top:10px; font-size:0.82rem; padding:8px 12px;">
-        Sign out
-      </button>
+      <button class="btn btn-ghost btn-sm" id="nx-signout" style="width:100%;margin-top:10px;background:transparent;color:rgba(245,244,237,0.85);box-shadow:inset 0 0 0 1px rgba(245,244,237,0.18);">Sign out</button>
     </div>
   </aside>
 
   <!-- ════ MAIN ════ -->
   <main class="main">
 
-    <!-- Topbar -->
     <header class="topbar">
-      <h1 class="admin-topbar-title">
+      <div class="topbar-title">
         <span class="topbar-eyebrow">Admin</span>
         <span id="topbar-section-title">Overview</span>
-      </h1>
-      <div class="admin-topbar-right">
-        <div class="search admin-search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input type="search" id="admin-search-input" placeholder="Search the current view…" aria-label="Search">
-          <button class="search-clear" id="admin-search-clear" aria-label="Clear search" type="button">×</button>
-        </div>
-        <button class="btn-ghost" id="admin-refresh">Refresh</button>
+      </div>
+
+      <div class="topbar-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="admin-search-input" placeholder="Search current view…" aria-label="Search">
+        <span class="topbar-kbd">⌘K</span>
+      </div>
+
+      <span class="live-pill">Root · live</span>
+
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" id="admin-refresh">Refresh</button>
       </div>
     </header>
 
-    <!-- ───────── OVERVIEW ───────── -->
-    <section class="view active" data-view="overview">
-      <div class="view-content">
-        <div class="admin-overview-grid" id="overview-stats"></div>
+    <div class="canvas">
 
-        <h3 class="admin-section-title">Most recent activity</h3>
-        <div class="admin-activity" id="overview-activity"></div>
-      </div>
-    </section>
+      <!-- ═══════ OVERVIEW ═══════ -->
+      <section class="view is-active" data-view="overview">
 
-    <!-- ───────── USERS ───────── -->
-    <section class="view" data-view="users">
-      <div class="view-content">
-        <div class="admin-filter-bar">
-          <div class="filter-pills" role="tablist" aria-label="Filter users">
-            <button class="pill active" data-user-filter="all">All</button>
-            <button class="pill" data-user-filter="manufacturer">Manufacturer</button>
-            <button class="pill" data-user-filter="exporter">Exporter</button>
-            <button class="pill" data-user-filter="pending">Pending verification</button>
-            <button class="pill" data-user-filter="admin">Admins</button>
+        <div class="page-head rev">
+          <div>
+            <h1>Platform health · <em id="hd-users">0</em> users active.</h1>
+            <p class="page-head-sub" id="hd-sub">All RFQs, quotes, and conversations across the network — searchable and editable from this console.</p>
           </div>
         </div>
 
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Industry</th>
-                <th>Status</th>
-                <th>Joined</th>
-                <th class="ta-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="users-tbody"></tbody>
-          </table>
+        <!-- KPI row: 8 cards, two rows -->
+        <div class="kpi-row stagger" id="kpi-stack">
+          <div class="kpi"><div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>Users · total</div><div class="kpi-value"><span id="k-users">0</span></div><div class="kpi-foot"><span class="delta up" id="k-users-delta">—</span><span>signups · 24h</span></div><div class="kpi-spark" id="sp-users"></div></div>
+          <div class="kpi"><div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></span>RFQs · total</div><div class="kpi-value"><span id="k-rfqs">0</span></div><div class="kpi-foot"><span class="delta" id="k-rfqs-delta">—</span><span>posted · 24h</span></div><div class="kpi-spark" id="sp-rfqs"></div></div>
+          <div class="kpi"><div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>Quotes · total</div><div class="kpi-value"><span id="k-quotes">0</span></div><div class="kpi-foot"><span class="delta" id="k-quotes-delta">—</span><span>sent · 24h</span></div><div class="kpi-spark" id="sp-quotes"></div></div>
+          <div class="kpi"><div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/></svg></span>Pending verification</div><div class="kpi-value"><span id="k-pending">0</span></div><div class="kpi-foot"><span class="delta">—</span><span>action needed</span></div><div class="kpi-spark" id="sp-pending"></div></div>
         </div>
-      </div>
-    </section>
 
-    <!-- ───────── RFQs ───────── -->
-    <section class="view" data-view="rfqs">
-      <div class="view-content">
-        <div class="admin-filter-bar">
-          <div class="filter-pills" role="tablist" aria-label="Filter RFQs">
-            <button class="pill active" data-rfq-filter="all">All</button>
-            <button class="pill" data-rfq-filter="open">Open</button>
-            <button class="pill" data-rfq-filter="quoted">Quoted</button>
-            <button class="pill" data-rfq-filter="won">Won</button>
-            <button class="pill" data-rfq-filter="closed">Closed</button>
+        <!-- Composition + activity -->
+        <div class="chart-row rev">
+          <div class="card">
+            <div class="card-head"><div><div class="card-title"><span class="card-title-eyebrow">By role</span>Account composition</div></div></div>
+            <div class="card-body" style="display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;">
+              <div class="chart-wrap" id="role-donut" style="width:200px;"></div>
+              <div id="role-legend" style="display:flex;flex-direction:column;gap:10px;font-size:0.85rem;"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><div><div class="card-title"><span class="card-title-eyebrow">Live</span>Recent activity</div></div></div>
+            <div class="card-body">
+              <div class="feed" id="overview-activity">
+                <div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet.</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Posted by</th>
-                <th>Industry</th>
-                <th>Destination</th>
-                <th>Quantity</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th class="ta-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="rfqs-tbody"></tbody>
-          </table>
+        <div style="text-align:center;padding:12px;color:var(--text-muted);font-size:0.78rem;letter-spacing:0.05em;border-top:1px dashed var(--rule);">
+          Nexora Admin · Sialkot · v0.4 beta · realtime
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ───────── QUOTES ───────── -->
-    <section class="view" data-view="quotes">
-      <div class="view-content">
-        <div class="admin-filter-bar">
-          <div class="filter-pills" role="tablist" aria-label="Filter quotes">
-            <button class="pill active" data-quote-filter="all">All</button>
-            <button class="pill" data-quote-filter="sent">Sent</button>
-            <button class="pill" data-quote-filter="accepted">Accepted</button>
-            <button class="pill" data-quote-filter="rejected">Rejected</button>
-            <button class="pill" data-quote-filter="withdrawn">Withdrawn</button>
+      <!-- ═══════ USERS ═══════ -->
+      <section class="view" data-view="users">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title"><span class="card-title-eyebrow">Filter</span>All users</div>
+            </div>
+            <div class="tabs" id="users-filters">
+              <a class="tab active" data-filter="all">All</a>
+              <a class="tab" data-filter="manufacturer">Manufacturers</a>
+              <a class="tab" data-filter="exporter">Exporters</a>
+              <a class="tab" data-filter="pending">Pending</a>
+              <a class="tab" data-filter="admin">Admins</a>
+            </div>
+          </div>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead><tr><th>User</th><th>Role</th><th>Industry</th><th>Status</th><th>Joined</th><th class="ta-right">Actions</th></tr></thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>RFQ</th>
-                <th>Manufacturer</th>
-                <th>Unit price</th>
-                <th>Lead time</th>
-                <th>Status</th>
-                <th>Sent</th>
-                <th class="ta-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="quotes-tbody"></tbody>
-          </table>
+      <!-- ═══════ RFQs ═══════ -->
+      <section class="view" data-view="rfqs">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title"><span class="card-title-eyebrow">All</span>RFQ ledger</div></div>
+            <div class="tabs" id="rfqs-filters">
+              <a class="tab active" data-filter="all">All</a>
+              <a class="tab" data-filter="open">Open</a>
+              <a class="tab" data-filter="quoted">Quoted</a>
+              <a class="tab" data-filter="won">Won</a>
+              <a class="tab" data-filter="closed">Closed</a>
+            </div>
+          </div>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead><tr><th>Product</th><th>Posted by</th><th>Industry</th><th>Destination</th><th class="ta-right">Qty</th><th>Status</th><th>Created</th><th class="ta-right">Actions</th></tr></thead>
+                <tbody id="rfqs-tbody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ───────── CONVERSATIONS ───────── -->
-    <section class="view" data-view="threads">
-      <div class="view-content">
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Thread</th>
-                <th>Exporter</th>
-                <th>Manufacturer</th>
-                <th>RFQ</th>
-                <th>Last message</th>
-                <th>Last activity</th>
-                <th class="ta-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="threads-tbody"></tbody>
-          </table>
+      <!-- ═══════ QUOTES ═══════ -->
+      <section class="view" data-view="quotes">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title"><span class="card-title-eyebrow">All</span>Quote ledger</div></div>
+            <div class="tabs" id="quotes-filters">
+              <a class="tab active" data-filter="all">All</a>
+              <a class="tab" data-filter="sent">Sent</a>
+              <a class="tab" data-filter="accepted">Accepted</a>
+              <a class="tab" data-filter="rejected">Rejected</a>
+            </div>
+          </div>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead><tr><th>RFQ</th><th>Manufacturer</th><th class="ta-right">Unit price</th><th>Lead</th><th>Status</th><th>Sent</th><th class="ta-right">Actions</th></tr></thead>
+                <tbody id="quotes-tbody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ───────── NOTIFICATIONS ───────── -->
-    <section class="view" data-view="notifications">
-      <div class="view-content">
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Recipient</th>
-                <th>Kind</th>
-                <th>Message</th>
-                <th>Status</th>
-                <th>Sent</th>
-                <th class="ta-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="notifications-tbody"></tbody>
-          </table>
+      <!-- ═══════ THREADS ═══════ -->
+      <section class="view" data-view="threads">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title"><span class="card-title-eyebrow">All</span>Conversations</div></div></div>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead><tr><th>Thread</th><th>Exporter</th><th>Manufacturer</th><th>RFQ</th><th>Last message</th><th>Last activity</th><th class="ta-right">Actions</th></tr></thead>
+                <tbody id="threads-tbody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
+      <!-- ═══════ NOTIFICATIONS ═══════ -->
+      <section class="view" data-view="notifications">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title"><span class="card-title-eyebrow">All</span>Notifications fan-out</div></div></div>
+          <div class="card-body flush">
+            <div class="dt-wrap">
+              <table class="dt">
+                <thead><tr><th>Recipient</th><th>Kind</th><th>Body</th><th>Status</th><th>Sent</th><th class="ta-right">Actions</th></tr></thead>
+                <tbody id="notifications-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
 </div>
 
-<!-- ═══════ Confirmation modal ═══════ -->
+<!-- ═══════ Confirm modal ═══════ -->
 <div class="modal-backdrop" id="admin-confirm-modal" role="dialog" aria-modal="true">
-  <div class="modal" style="max-width: 460px;">
+  <div class="modal" style="max-width:460px;">
     <header class="modal-header">
       <div>
-        <div class="modal-eyebrow" style="color: var(--danger);">Destructive action</div>
+        <div class="modal-eyebrow" style="color:var(--danger);">Destructive action</div>
         <h2 class="modal-title" id="ac-title">Are you sure?</h2>
         <p class="modal-sub" id="ac-sub">This cannot be undone.</p>
       </div>
       <button class="modal-close" data-close-modal aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <line x1="18" y1="6"  x2="6"  y2="18"></line>
-          <line x1="6"  y1="6"  x2="18" y2="18"></line>
-        </svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </header>
     <footer class="modal-footer">
       <span class="hint" id="ac-hint"></span>
       <div class="modal-footer-actions">
-        <button class="btn-ghost" data-close-modal>Cancel</button>
-        <button class="btn-danger" id="ac-go" style="padding:11px 18px;">Confirm</button>
+        <button class="btn btn-ghost btn-sm" data-close-modal>Cancel</button>
+        <button class="btn-danger" id="ac-go" style="padding:10px 16px;">Confirm</button>
       </div>
     </footer>
   </div>
@@ -358,19 +330,18 @@
     document.getElementById('nx-user-avatar').textContent = ini || 'NX';
     document.getElementById('nx-user-name').textContent   = p.company || p.full_name || me.user.email;
     document.getElementById('nx-user-role').textContent   = 'Admin';
-
     document.getElementById('nx-signout').addEventListener('click', async () => {
       await NexoraAuth.signOut();
       NexoraAuth.toast('Signed out.', 'info');
       setTimeout(() => location.replace('auth.html'), 600);
     });
-
     window.NEXORA_USER = me;
     document.body.classList.remove('auth-pending');
   });
 })();
 </script>
 
+<script src="js/charts.js"></script>
 <script src="js/admin.js" defer></script>
 </body>
 </html>

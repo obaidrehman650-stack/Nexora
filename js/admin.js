@@ -1,7 +1,7 @@
 /* ════════════════════════════════════════
    NEXORA — Admin portal
-   Read/write access to every table for admins.
-   100% Supabase-backed.
+   100% Supabase-backed. Renders into the
+   new dashboard-pro.css markup.
 ═══════════════════════════════════════════ */
 (function () {
   const Auth = window.NexoraAuth;
@@ -17,45 +17,41 @@
   }
   onReady(boot);
 
-  /* ════════════════════════════════════════
-     STATE
-  ════════════════════════════════════════ */
-  let sb, me, state;
-  const VIEW_TITLES = {
-    overview:      'Overview',
-    users:         'Users',
-    rfqs:          'Requests for Quotation',
-    quotes:        'Quotes',
-    threads:       'Conversations',
-    notifications: 'Notifications'
-  };
+  /* ── Utilities ─── */
+  const fmtNum   = n => Number(n ?? 0).toLocaleString('en-US');
+  const fmtMoney = n => n == null ? '—' : '$' + Number(n).toFixed(2);
+  function fmtAgo(iso) {
+    if (!iso) return '—';
+    const min = Math.max(0, (Date.now() - new Date(iso).getTime()) / 60_000);
+    if (min < 1)   return 'just now';
+    if (min < 60)  return Math.floor(min) + 'm ago';
+    const h = min / 60;
+    if (h < 24)    return Math.floor(h) + 'h ago';
+    return Math.floor(h / 24) + 'd ago';
+  }
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const cap = s => String(s || '').replace(/^./, c => c.toUpperCase());
+  const setText = (sel, v) => { const el = $(sel); if (el) el.textContent = String(v); };
 
-  /* ════════════════════════════════════════
-     BOOT
-  ════════════════════════════════════════ */
+  /* ── State ─── */
+  let sb, me, state;
+  const VIEWS = { overview:'Overview', users:'Users', rfqs:'RFQs', quotes:'Quotes', threads:'Conversations', notifications:'Notifications' };
+
   async function boot() {
     sb = Auth.client();
     me = window.NEXORA_USER || (await Auth.getCurrentUser());
-    if (!me || !me.user) {
-      Auth.toast('Session expired. Please sign in again.', 'error');
-      setTimeout(() => location.replace('auth.html'), 600);
-      return;
-    }
+    if (!me || !me.user) { Auth.toast('Session expired.', 'error'); setTimeout(() => location.replace('auth.html'), 600); return; }
 
     state = {
       view: 'overview',
       stats: null,
-      users: [],
-      rfqs: [],
-      quotes: [],
-      threads: [],
-      notifications: [],
-      filter: { users: 'all', rfqs: 'all', quotes: 'all' },
+      users: [], rfqs: [], quotes: [], threads: [], notifications: [],
+      filter: { users:'all', rfqs:'all', quotes:'all' },
       search: ''
     };
 
     wireUI();
-    setView('overview');                 // show overview synchronously
+    setView('overview');
 
     if (!sb) {
       Auth.toast('Connect Supabase in js/config.js to load admin data.', 'warn', { timeout: 6000 });
@@ -64,185 +60,134 @@
     await loadEverything();
     rerenderAll();
     subscribeRealtime();
+
+    /* If a sidebar item set a pre-filter (e.g. "Verifications" → users/pending) */
+    const preFilter = sessionStorage.getItem('nx-admin-prefilter');
+    if (preFilter) { sessionStorage.removeItem('nx-admin-prefilter'); applyPreFilter(preFilter); }
   }
 
-  /* User-id lookup map, populated once profiles load.
-     Used to attach minimal "who is this" info to rfqs/quotes/threads/notifs
-     client-side, since rfqs.posted_by etc. FK to auth.users (not profiles)
-     so PostgREST can't embed profiles directly. */
-  let usersById = new Map();
-  function buildUsersIndex() {
+  /* ── Data ─── */
+  let usersById = new Map(), rfqsById = new Map();
+  function buildIndices() {
     usersById = new Map(state.users.map(u => [u.id, u]));
+    rfqsById  = new Map(state.rfqs.map(r => [r.id, r]));
   }
   function userBlurb(id) {
     const u = usersById.get(id);
-    if (!u) return { company: '', full_name: '', email: '' };
-    return { company: u.company, full_name: u.full_name, email: u.email };
-  }
-
-  /* RFQ-id lookup so quotes can show their RFQ's product name */
-  let rfqsById = new Map();
-  function buildRfqsIndex() {
-    rfqsById = new Map(state.rfqs.map(r => [r.id, r]));
+    return u ? { company: u.company, full_name: u.full_name, email: u.email } : { company:'', full_name:'', email:'' };
   }
 
   async function loadEverything() {
-    /* Stats + users first so the indexes are ready for the others */
     await Promise.allSettled([loadStats(), loadUsers()]);
-    buildUsersIndex();
+    buildIndices();
     await Promise.allSettled([loadRfqs(), loadQuotes(), loadThreads(), loadNotifications()]);
-    buildRfqsIndex();
-    /* Now decorate quotes with their rfq + manufacturer profile */
-    state.quotes = state.quotes.map(q => ({
-      ...q,
-      profiles: userBlurb(q.manufacturer_id),
-      rfqs:     rfqsById.get(q.rfq_id) || null
-    }));
-    state.rfqs = state.rfqs.map(r => ({
-      ...r,
-      profiles: userBlurb(r.posted_by)
-    }));
-    state.threads = state.threads.map(t => ({
-      ...t,
-      exporter: userBlurb(t.exporter_id),
-      mfg:      userBlurb(t.manufacturer_id),
-      rfqs:     rfqsById.get(t.rfq_id) || null
-    }));
-    state.notifications = state.notifications.map(n => ({
-      ...n,
-      profiles: userBlurb(n.user_id)
-    }));
+    buildIndices();
+    /* Decorate */
+    state.rfqs = state.rfqs.map(r => ({ ...r, _by: userBlurb(r.posted_by) }));
+    state.quotes = state.quotes.map(q => ({ ...q, _by: userBlurb(q.manufacturer_id), _rfq: rfqsById.get(q.rfq_id) || null }));
+    state.threads = state.threads.map(t => ({ ...t, _ex: userBlurb(t.exporter_id), _mfg: userBlurb(t.manufacturer_id), _rfq: rfqsById.get(t.rfq_id) || null }));
+    state.notifications = state.notifications.map(n => ({ ...n, _to: userBlurb(n.user_id) }));
   }
 
-  /* ════════════════════════════════════════
-     DATA LAYER
-  ════════════════════════════════════════ */
   async function loadStats() {
     const { data, error } = await sb.rpc('nexora_admin_stats');
     if (error) { console.warn('loadStats', error); return; }
     state.stats = data;
   }
   async function loadUsers() {
-    const { data, error } = await sb.from('profiles')
-      .select('*').order('created_at', { ascending: false });
-    if (error) { console.warn('loadUsers', error); return; }
-    state.users = data || [];
+    const { data, error } = await sb.from('profiles').select('*').order('created_at',{ascending:false});
+    if (!error) state.users = data || [];
   }
   async function loadRfqs() {
-    const { data, error } = await sb.from('rfqs')
-      .select('*').order('created_at', { ascending: false }).limit(500);
-    if (error) { console.warn('loadRfqs', error); return; }
-    state.rfqs = data || [];
+    const { data, error } = await sb.from('rfqs').select('*').order('created_at',{ascending:false}).limit(500);
+    if (!error) state.rfqs = data || [];
   }
   async function loadQuotes() {
-    const { data, error } = await sb.from('quotes')
-      .select('*').order('created_at', { ascending: false }).limit(500);
-    if (error) { console.warn('loadQuotes', error); return; }
-    state.quotes = data || [];
+    const { data, error } = await sb.from('quotes').select('*').order('created_at',{ascending:false}).limit(500);
+    if (!error) state.quotes = data || [];
   }
   async function loadThreads() {
-    const { data, error } = await sb.from('threads')
-      .select('*').order('last_at', { ascending: false }).limit(500);
-    if (error) { console.warn('loadThreads', error); return; }
-    state.threads = data || [];
+    const { data, error } = await sb.from('threads').select('*').order('last_at',{ascending:false}).limit(500);
+    if (!error) state.threads = data || [];
   }
   async function loadNotifications() {
-    const { data, error } = await sb.from('notifications')
-      .select('*').order('created_at', { ascending: false }).limit(500);
-    if (error) { console.warn('loadNotifications', error); return; }
-    state.notifications = data || [];
+    const { data, error } = await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(500);
+    if (!error) state.notifications = data || [];
   }
 
-  /* ════════════════════════════════════════
-     REALTIME — keep the portal live
-  ════════════════════════════════════════ */
+  /* ── Realtime ─── */
   function subscribeRealtime() {
     const refresh = debounce(async () => { await loadEverything(); rerenderAll(); }, 600);
     sb.channel('admin-feed')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' },     refresh)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'rfqs' },         refresh)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'quotes' },       refresh)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'threads' },      refresh)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' },refresh)
+      .on('postgres_changes', { event:'*', schema:'public', table:'profiles' },     refresh)
+      .on('postgres_changes', { event:'*', schema:'public', table:'rfqs' },         refresh)
+      .on('postgres_changes', { event:'*', schema:'public', table:'quotes' },       refresh)
+      .on('postgres_changes', { event:'*', schema:'public', table:'threads' },      refresh)
+      .on('postgres_changes', { event:'*', schema:'public', table:'notifications' },refresh)
       .subscribe();
   }
-  function debounce(fn, ms) {
-    let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
-  }
+  function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
-  /* ════════════════════════════════════════
-     UI WIRING
-  ════════════════════════════════════════ */
+  /* ── UI wiring ─── */
   function wireUI() {
+    /* Sidebar */
     $$('.nav-item[data-section]').forEach(n =>
-      n.addEventListener('click', e => { e.preventDefault(); setView(n.dataset.section); })
+      n.addEventListener('click', e => {
+        e.preventDefault();
+        if (n.dataset.preFilter) sessionStorage.setItem('nx-admin-prefilter', n.dataset.section + ':' + n.dataset.preFilter);
+        setView(n.dataset.section);
+        if (n.dataset.preFilter) applyPreFilter(n.dataset.section + ':' + n.dataset.preFilter);
+      })
     );
-
-    /* Filter pills (each view has its own) */
-    $$('.pill[data-user-filter]').forEach(b => b.addEventListener('click', () => {
-      $$('.pill[data-user-filter]').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      state.filter.users = b.dataset.userFilter;
-      renderUsers();
+    /* Filter pills */
+    $$('#users-filters .tab').forEach(b => b.addEventListener('click', () => {
+      $$('#users-filters .tab').forEach(x => x.classList.remove('active')); b.classList.add('active');
+      state.filter.users = b.dataset.filter; renderUsers();
     }));
-    $$('.pill[data-rfq-filter]').forEach(b => b.addEventListener('click', () => {
-      $$('.pill[data-rfq-filter]').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      state.filter.rfqs = b.dataset.rfqFilter;
-      renderRfqs();
+    $$('#rfqs-filters .tab').forEach(b => b.addEventListener('click', () => {
+      $$('#rfqs-filters .tab').forEach(x => x.classList.remove('active')); b.classList.add('active');
+      state.filter.rfqs = b.dataset.filter; renderRfqs();
     }));
-    $$('.pill[data-quote-filter]').forEach(b => b.addEventListener('click', () => {
-      $$('.pill[data-quote-filter]').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      state.filter.quotes = b.dataset.quoteFilter;
-      renderQuotes();
+    $$('#quotes-filters .tab').forEach(b => b.addEventListener('click', () => {
+      $$('#quotes-filters .tab').forEach(x => x.classList.remove('active')); b.classList.add('active');
+      state.filter.quotes = b.dataset.filter; renderQuotes();
     }));
 
     /* Search */
     const search = $('#admin-search-input');
-    const clearBtn = $('#admin-search-clear');
-    search.addEventListener('input', e => {
-      state.search = e.target.value.trim().toLowerCase();
-      search.parentElement.classList.toggle('has-value', !!state.search);
-      rerenderCurrent();
-    });
-    clearBtn.addEventListener('click', () => {
-      search.value = ''; state.search = '';
-      search.parentElement.classList.remove('has-value');
-      rerenderCurrent();
-    });
+    if (search) search.addEventListener('input', e => { state.search = e.target.value.trim().toLowerCase(); rerenderCurrent(); });
 
     /* Refresh */
     $('#admin-refresh').addEventListener('click', async () => {
       $('#admin-refresh').disabled = true;
-      await loadEverything();
-      rerenderAll();
+      await loadEverything(); rerenderAll();
       $('#admin-refresh').disabled = false;
       Auth.toast('Refreshed.', 'info');
     });
 
-    /* Confirm modal close */
+    /* Modal close */
     $$('[data-close-modal]').forEach(b => b.addEventListener('click', closeConfirm));
-    $('#admin-confirm-modal').addEventListener('click', e => {
-      if (e.target.id === 'admin-confirm-modal') closeConfirm();
-    });
+    $('#admin-confirm-modal').addEventListener('click', e => { if (e.target.id === 'admin-confirm-modal') closeConfirm(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeConfirm(); });
   }
 
-  /* ════════════════════════════════════════
-     VIEW SWITCHING
-  ════════════════════════════════════════ */
+  function applyPreFilter(spec) {
+    const [section, filter] = spec.split(':');
+    if (section === 'users' && state.filter.users !== filter) {
+      state.filter.users = filter;
+      $$('#users-filters .tab').forEach(t => t.classList.toggle('active', t.dataset.filter === filter));
+      renderUsers();
+    }
+  }
+
+  /* ── View switching ─── */
   function setView(name) {
     state.view = name;
     $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === name));
-    $$('.view').forEach(v => {
-      const isActive = v.dataset.view === name;
-      v.classList.toggle('active', isActive);
-    });
-    const title = $('#topbar-section-title');
-    if (title) title.textContent = VIEW_TITLES[name] || '';
+    $$('.canvas .view').forEach(v => v.classList.toggle('is-active', v.dataset.view === name));
+    setText('#topbar-section-title', VIEWS[name] || '');
     const search = $('#admin-search-input');
-    if (search) search.placeholder = `Search ${VIEW_TITLES[name]?.toLowerCase() || 'this view'}…`;
+    if (search) search.placeholder = `Search ${(VIEWS[name] || '').toLowerCase()}…`;
     rerenderCurrent();
   }
 
@@ -268,347 +213,283 @@
     setText('#bd-rfqs',    state.rfqs.length);
     setText('#bd-quotes',  state.quotes.length);
     setText('#bd-threads', state.threads.length);
+    const pending = state.users.filter(u => u.role === 'manufacturer' && !u.verified_status).length;
+    setText('#bd-pending', pending);
   }
 
-  /* ════════════════════════════════════════
-     RENDER — Overview
-  ════════════════════════════════════════ */
+  /* ── Overview ─── */
   function renderOverview() {
     const s = state.stats || {};
-    const grid = $('#overview-stats');
-    grid.innerHTML = [
-      stat('Total users',         s.users_total,         `${s.signups_24h || 0} new in 24h`),
-      stat('Manufacturers',       s.users_manufacturer),
-      stat('Exporters',           s.users_exporter),
-      stat('Pending verification',s.users_pending,       null, s.users_pending > 0 ? 'danger' : ''),
-      stat('Admins',              s.users_admins),
+    setText('#hd-users', s.users_total || state.users.length);
+    setText('#hd-sub',
+      `${s.rfqs_total || state.rfqs.length} RFQs · ${s.quotes_total || state.quotes.length} quotes · ${s.threads_total || state.threads.length} conversations.`);
 
-      stat('RFQs',                s.rfqs_total,          `${s.rfqs_24h || 0} new in 24h`),
-      stat('Open RFQs',           s.rfqs_open),
-      stat('Quoted RFQs',         s.rfqs_quoted),
-      stat('Won RFQs',            s.rfqs_won,            null, 'success'),
+    setKpi('#k-users',   s.users_total   || state.users.length);
+    setKpi('#k-rfqs',    s.rfqs_total    || state.rfqs.length);
+    setKpi('#k-quotes',  s.quotes_total  || state.quotes.length);
+    setKpi('#k-pending', s.users_pending || state.users.filter(u => u.role==='manufacturer' && !u.verified_status).length);
 
-      stat('Quotes',              s.quotes_total,        `${s.quotes_24h || 0} new in 24h`),
-      stat('Quotes accepted',     s.quotes_accepted,     null, 'success'),
+    setText('#k-users-delta',  '▲ ' + (s.signups_24h || 0));
+    setText('#k-rfqs-delta',   '▲ ' + (s.rfqs_24h || 0));
+    setText('#k-quotes-delta', '▲ ' + (s.quotes_24h || 0));
 
-      stat('Conversations',       s.threads_total),
-      stat('Messages',            s.messages_total),
-      stat('Notifications',       s.notifications_total),
-    ].join('');
+    drawSpark('sp-users',  bucketize(state.users));
+    drawSpark('sp-rfqs',   bucketize(state.rfqs));
+    drawSpark('sp-quotes', bucketize(state.quotes));
+    drawSpark('sp-pending', bucketize(state.users.filter(u => !u.verified_status)));
 
-    /* Recent activity = newest of (rfqs, quotes, users) */
-    const activity = [
-      ...state.rfqs.slice(0, 8).map(r => ({
-        kind: 'rfq',
-        text: `New RFQ — <strong>${esc(r.product)}</strong> by ${esc((r.profiles||{}).company || (r.profiles||{}).email || 'someone')} → ${esc(r.destination)}`,
-        when: r.created_at
-      })),
-      ...state.quotes.slice(0, 8).map(q => ({
-        kind: 'quote',
-        text: `Quote on <strong>${esc((q.rfqs||{}).product || 'RFQ')}</strong> by ${esc((q.profiles||{}).company || (q.profiles||{}).email || 'someone')} — ${fmtMoney(q.unit_price)}`,
-        when: q.created_at
-      })),
-      ...state.users.slice(0, 8).map(u => ({
-        kind: 'signup',
-        text: `New ${esc(u.role || 'user')} signed up — ${esc(u.company || u.full_name || u.email)}`,
-        when: u.created_at
-      }))
-    ].sort((a, b) => (b.when || '').localeCompare(a.when || '')).slice(0, 12);
+    /* Role donut */
+    const wrap = document.getElementById('role-donut');
+    if (wrap && window.NX) {
+      const buckets = { manufacturer:0, exporter:0, logistics:0, admin:0 };
+      state.users.forEach(u => {
+        if (u.is_admin) buckets.admin++;
+        else if (buckets[u.role] != null) buckets[u.role]++;
+      });
+      wrap.innerHTML = '';
+      NX.donut(wrap, {
+        size: 200, thickness: 18,
+        data: [
+          { label:'Manufacturer', value: buckets.manufacturer || 0.0001, color:'var(--ind-sports)' },
+          { label:'Exporter',     value: buckets.exporter     || 0.0001, color:'var(--ind-surgical)' },
+          { label:'Logistics',    value: buckets.logistics    || 0.0001, color:'var(--ind-leather)' },
+          { label:'Admin',        value: buckets.admin        || 0.0001, color:'var(--accent)' }
+        ],
+        centerValue: String(state.users.length),
+        centerLabel: 'users'
+      });
+      const lg = $('#role-legend');
+      if (lg) {
+        lg.innerHTML = ['manufacturer','exporter','logistics','admin'].map(k => `
+          <div style="display:flex;justify-content:space-between;">
+            <span>${cap(k)}</span><span style="font-family:var(--font-mono);">${buckets[k]}</span>
+          </div>`).join('');
+      }
+    }
 
-    const ae = $('#overview-activity');
-    if (!activity.length) {
-      ae.innerHTML = '<div class="admin-activity-empty">No activity yet. New events will appear here in real time.</div>';
-    } else {
-      ae.innerHTML = activity.map(a => `
-        <div class="admin-activity-row">
-          <span class="dot" aria-hidden="true"></span>
-          <span>${a.text}</span>
-          <span class="when">${fmtAgo(a.when)}</span>
-        </div>`).join('');
+    /* Activity feed */
+    const items = [
+      ...state.rfqs.slice(0, 5).map(r => ({ ts:r.created_at, html:`New RFQ — <span class="ent">${esc(r.product||'')}</span> by ${esc(r._by.company || r._by.email || '—')} → ${esc(r.destination||'')}`, kind:'rfq' })),
+      ...state.quotes.slice(0, 5).map(q => ({ ts:q.created_at, html:`Quote on <span class="ent">${esc((q._rfq||{}).product||'RFQ')}</span> by ${esc(q._by.company || q._by.email || '—')} — ${fmtMoney(q.unit_price)}`, kind:'quote' })),
+      ...state.users.slice(0, 5).map(u => ({ ts:u.created_at, html:`New ${esc(u.role||'user')} signed up — ${esc(u.company || u.full_name || u.email)}`, kind:'signup' }))
+    ].sort((a, b) => (b.ts||'').localeCompare(a.ts||'')).slice(0, 10);
+    const af = $('#overview-activity');
+    if (af) {
+      af.innerHTML = !items.length
+        ? `<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet.</div>`
+        : items.map(it => `
+          <div class="feed-item">
+            <div class="feed-dot" style="color:${it.kind === 'quote' ? 'var(--success)' : it.kind === 'signup' ? 'var(--accent)' : 'var(--text-mid)'};">
+              ${it.kind === 'quote' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>' :
+                it.kind === 'signup' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>' :
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>'}
+            </div>
+            <div class="feed-text">${it.html}</div>
+            <div class="feed-time">${fmtAgo(it.ts)}</div>
+          </div>`).join('');
     }
   }
 
-  function stat(label, value, sub, mod = '') {
-    return `
-      <div class="admin-stat ${mod}">
-        <span class="admin-stat-label">${esc(label)}</span>
-        <span class="admin-stat-value">${value == null ? '—' : fmtNum(value)}</span>
-        ${sub ? `<span class="admin-stat-sub">${esc(sub)}</span>` : ''}
-      </div>`;
+  function setKpi(sel, value) {
+    const el = $(sel); if (!el) return;
+    if (window.NX && NX.animateCounter) NX.animateCounter(el, value, { duration: 800 });
+    else el.textContent = Math.floor(value).toLocaleString();
+  }
+  function drawSpark(id, data) {
+    const wrap = document.getElementById(id);
+    if (!wrap || !window.NX || !NX.sparkline || !data) return;
+    wrap.innerHTML = NX.sparkline(data, { width: 96, height: 32, color: 'var(--accent)' });
+  }
+  function bucketize(items) {
+    const buckets = 8, now = Date.now(), spanMs = 7 * 86_400_000;
+    const arr = new Array(buckets).fill(0);
+    items.forEach(it => {
+      const t = new Date(it.created_at).getTime();
+      if (!t) return;
+      const idx = buckets - 1 - Math.floor((now - t) / spanMs);
+      if (idx >= 0 && idx < buckets) arr[idx]++;
+    });
+    if (arr.every(v => v === 0)) return arr.map((_, i) => i);
+    return arr;
   }
 
-  /* ════════════════════════════════════════
-     RENDER — Users
-  ════════════════════════════════════════ */
+  /* ── Users ─── */
   function renderUsers() {
-    const tbody = $('#users-tbody');
-    if (!tbody) return;
-    const q = state.search;
-    const f = state.filter.users;
+    const tbody = $('#users-tbody'); if (!tbody) return;
+    const q = state.search; const f = state.filter.users;
     let rows = state.users;
     if (f === 'manufacturer') rows = rows.filter(u => u.role === 'manufacturer');
     if (f === 'exporter')     rows = rows.filter(u => u.role === 'exporter');
     if (f === 'pending')      rows = rows.filter(u => u.role === 'manufacturer' && !u.verified_status);
     if (f === 'admin')        rows = rows.filter(u => u.is_admin);
     if (q) rows = rows.filter(u =>
-      (u.email || '').toLowerCase().includes(q) ||
-      (u.full_name || '').toLowerCase().includes(q) ||
-      (u.company || '').toLowerCase().includes(q) ||
-      (u.role || '').toLowerCase().includes(q) ||
-      (u.location || '').toLowerCase().includes(q));
+      (u.email||'').toLowerCase().includes(q) ||
+      (u.full_name||'').toLowerCase().includes(q) ||
+      (u.company||'').toLowerCase().includes(q));
 
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td class="empty-row" colspan="6">No users match.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = rows.map(u => userRow(u)).join('');
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--text-muted);">No users match.</td></tr>`; return; }
+    tbody.innerHTML = rows.map(userRow).join('');
     bindRowActions(tbody);
   }
-
   function userRow(u) {
-    const display = u.company || u.full_name || u.email || '—';
-    const status = u.is_admin ? 'admin' : (u.verified_status ? 'verified' : 'pending');
+    const display = u.company || u.full_name || u.email;
+    const status = u.is_admin ? 'admin' : (u.verified_status ? 'won' : 'open');
+    const statusLabel = u.is_admin ? 'Admin' : (u.verified_status ? 'Verified' : 'Pending');
     const isMe = me && u.id === me.user.id;
     return `
       <tr data-id="${esc(u.id)}">
-        <td>
-          <span class="cell-name">${esc(display)}</span>
-          <span class="cell-sub">${esc(u.email)}${isMe ? ' · <em>you</em>' : ''}</span>
-        </td>
-        <td><span class="role-pill ${esc(u.role || '')}">${esc(u.role || '—')}</span></td>
-        <td>${u.industry ? esc(u.industry) : '<span class="cell-sub">—</span>'}</td>
-        <td><span class="status-pill ${status}">${cap(status)}</span></td>
-        <td>${fmtAgo(u.created_at)}</td>
+        <td><div class="ti">${esc(display)}</div><div class="su">${esc(u.email)}${isMe ? ' · you' : ''}</div></td>
+        <td><span class="chip">${esc(u.role || '—')}</span></td>
+        <td>${u.industry ? esc(u.industry) : '—'}</td>
+        <td><span class="chip chip--${status}">${statusLabel}</span></td>
+        <td class="col-mono" style="color:var(--text-muted);">${fmtAgo(u.created_at)}</td>
         <td class="ta-right">
           <div class="row-actions">
             ${u.role === 'manufacturer' && !u.verified_status
-              ? `<button class="row-action is-primary" data-action="verify"      data-id="${esc(u.id)}">Verify</button>`
+              ? `<button class="row-action is-primary" data-action="verify" data-id="${esc(u.id)}">Verify</button>`
               : u.verified_status
-                ? `<button class="row-action"          data-action="unverify"    data-id="${esc(u.id)}">Unverify</button>`
+                ? `<button class="row-action" data-action="unverify" data-id="${esc(u.id)}">Unverify</button>`
                 : ''}
             ${u.is_admin
-              ? `<button class="row-action"          data-action="demote"      data-id="${esc(u.id)}" ${isMe ? 'disabled title="You can\'t demote yourself"' : ''}>Demote</button>`
-              : `<button class="row-action"          data-action="promote"     data-id="${esc(u.id)}">Make admin</button>`}
-            <button class="row-action is-danger"   data-action="delete-user" data-id="${esc(u.id)}" ${isMe ? 'disabled title="Use the profile page to delete your own account"' : ''}>Delete</button>
+              ? `<button class="row-action" data-action="demote" data-id="${esc(u.id)}" ${isMe?'disabled':''}>Demote</button>`
+              : `<button class="row-action" data-action="promote" data-id="${esc(u.id)}">Make admin</button>`}
+            <button class="row-action is-danger" data-action="delete-user" data-id="${esc(u.id)}" ${isMe?'disabled':''}>Delete</button>
           </div>
         </td>
       </tr>`;
   }
 
-  /* ════════════════════════════════════════
-     RENDER — RFQs
-  ════════════════════════════════════════ */
+  /* ── RFQs ─── */
   function renderRfqs() {
-    const tbody = $('#rfqs-tbody');
-    if (!tbody) return;
-    const q = state.search;
-    const f = state.filter.rfqs;
+    const tbody = $('#rfqs-tbody'); if (!tbody) return;
+    const q = state.search; const f = state.filter.rfqs;
     let rows = state.rfqs;
     if (f !== 'all') rows = rows.filter(r => r.status === f);
     if (q) rows = rows.filter(r =>
-      (r.product || '').toLowerCase().includes(q) ||
-      (r.destination || '').toLowerCase().includes(q) ||
-      (r.industry || '').toLowerCase().includes(q) ||
-      ((r.profiles||{}).email || '').toLowerCase().includes(q) ||
-      ((r.profiles||{}).company || '').toLowerCase().includes(q));
+      (r.product||'').toLowerCase().includes(q) ||
+      (r.destination||'').toLowerCase().includes(q) ||
+      (r._by.company||'').toLowerCase().includes(q));
 
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td class="empty-row" colspan="8">No RFQs match.</td></tr>`;
-      return;
-    }
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--text-muted);">No RFQs match.</td></tr>`; return; }
     tbody.innerHTML = rows.map(r => `
       <tr data-id="${esc(r.id)}">
-        <td>
-          <span class="cell-name truncate">${esc(r.product)}</span>
-          <span class="cell-sub cell-id">${esc((r.id||'').slice(0, 8))}</span>
-        </td>
-        <td>
-          <span class="truncate">${esc((r.profiles||{}).company || (r.profiles||{}).full_name || '—')}</span>
-          <span class="cell-sub">${esc((r.profiles||{}).email || '')}</span>
-        </td>
+        <td><div class="ti">${esc(r.product || '—')}</div><div class="su" style="font-family:var(--font-mono);">${esc((r.id||'').slice(0,8))}</div></td>
+        <td><div>${esc(r._by.company || r._by.full_name || '—')}</div><div class="su">${esc(r._by.email || '')}</div></td>
         <td>${esc(r.industry || '—')}</td>
         <td>${esc(r.destination || '—')}</td>
-        <td>${fmtNum(r.quantity)} ${esc(r.unit || '')}</td>
-        <td><span class="status-pill ${esc(r.status || 'open')}">${cap(r.status || 'open')}</span></td>
-        <td>${fmtAgo(r.created_at)}</td>
-        <td class="ta-right">
-          <div class="row-actions">
-            <button class="row-action is-danger" data-action="delete-rfq" data-id="${esc(r.id)}">Delete</button>
-          </div>
-        </td>
+        <td class="ta-right col-mono">${fmtNum(r.quantity)}</td>
+        <td><span class="chip chip--${r.status === 'won' ? 'won' : r.status === 'quoted' ? 'quoted' : 'open'}">${cap(r.status || 'open')}</span></td>
+        <td class="col-mono" style="color:var(--text-muted);">${fmtAgo(r.created_at)}</td>
+        <td class="ta-right"><div class="row-actions"><button class="row-action is-danger" data-action="delete-rfq" data-id="${esc(r.id)}">Delete</button></div></td>
       </tr>`).join('');
     bindRowActions(tbody);
   }
 
-  /* ════════════════════════════════════════
-     RENDER — Quotes
-  ════════════════════════════════════════ */
+  /* ── Quotes ─── */
   function renderQuotes() {
-    const tbody = $('#quotes-tbody');
-    if (!tbody) return;
-    const q = state.search;
-    const f = state.filter.quotes;
+    const tbody = $('#quotes-tbody'); if (!tbody) return;
+    const q = state.search; const f = state.filter.quotes;
     let rows = state.quotes;
     if (f !== 'all') rows = rows.filter(x => x.status === f);
     if (q) rows = rows.filter(x =>
-      ((x.rfqs||{}).product || '').toLowerCase().includes(q) ||
-      ((x.profiles||{}).company || '').toLowerCase().includes(q) ||
-      ((x.profiles||{}).email || '').toLowerCase().includes(q) ||
-      (x.id || '').toLowerCase().includes(q));
+      ((x._rfq||{}).product || '').toLowerCase().includes(q) ||
+      (x._by.company || '').toLowerCase().includes(q));
 
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td class="empty-row" colspan="7">No quotes match.</td></tr>`;
-      return;
-    }
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text-muted);">No quotes match.</td></tr>`; return; }
     tbody.innerHTML = rows.map(x => `
       <tr data-id="${esc(x.id)}">
-        <td>
-          <span class="cell-name truncate">${esc((x.rfqs||{}).product || '—')}</span>
-          <span class="cell-sub cell-id">${esc((x.rfq_id||'').slice(0, 8))}</span>
-        </td>
-        <td>
-          <span class="truncate">${esc((x.profiles||{}).company || (x.profiles||{}).full_name || '—')}</span>
-          <span class="cell-sub">${esc((x.profiles||{}).email || '')}</span>
-        </td>
-        <td>${fmtMoney(x.unit_price)}</td>
+        <td><div class="ti">${esc((x._rfq||{}).product || '—')}</div><div class="su" style="font-family:var(--font-mono);">${esc((x.rfq_id||'').slice(0,8))}</div></td>
+        <td><div>${esc(x._by.company || x._by.full_name || '—')}</div><div class="su">${esc(x._by.email || '')}</div></td>
+        <td class="ta-right col-mono">${fmtMoney(x.unit_price)}</td>
         <td>${esc(x.lead_time || '—')}</td>
-        <td><span class="status-pill ${esc(x.status || 'sent')}">${cap(x.status || 'sent')}</span></td>
-        <td>${fmtAgo(x.created_at)}</td>
-        <td class="ta-right">
-          <div class="row-actions">
-            <button class="row-action is-danger" data-action="delete-quote" data-id="${esc(x.id)}">Delete</button>
-          </div>
-        </td>
+        <td><span class="chip chip--${x.status === 'accepted' ? 'won' : x.status === 'rejected' ? 'open' : 'quoted'}">${cap(x.status || 'sent')}</span></td>
+        <td class="col-mono" style="color:var(--text-muted);">${fmtAgo(x.created_at)}</td>
+        <td class="ta-right"><div class="row-actions"><button class="row-action is-danger" data-action="delete-quote" data-id="${esc(x.id)}">Delete</button></div></td>
       </tr>`).join('');
     bindRowActions(tbody);
   }
 
-  /* ════════════════════════════════════════
-     RENDER — Threads
-  ════════════════════════════════════════ */
+  /* ── Threads ─── */
   function renderThreads() {
-    const tbody = $('#threads-tbody');
-    if (!tbody) return;
+    const tbody = $('#threads-tbody'); if (!tbody) return;
     const q = state.search;
     let rows = state.threads;
     if (q) rows = rows.filter(t =>
-      ((t.exporter||{}).email || '').toLowerCase().includes(q) ||
-      ((t.mfg||{}).email || '').toLowerCase().includes(q) ||
-      ((t.rfqs||{}).product || '').toLowerCase().includes(q) ||
-      (t.last_preview || '').toLowerCase().includes(q));
-
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td class="empty-row" colspan="7">No conversations.</td></tr>`;
-      return;
-    }
+      (t._ex.email||'').toLowerCase().includes(q) ||
+      (t._mfg.email||'').toLowerCase().includes(q) ||
+      ((t._rfq||{}).product||'').toLowerCase().includes(q) ||
+      (t.last_preview||'').toLowerCase().includes(q));
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text-muted);">No conversations.</td></tr>`; return; }
     tbody.innerHTML = rows.map(t => `
       <tr data-id="${esc(t.id)}">
-        <td><span class="cell-id">${esc((t.id||'').slice(0, 8))}</span></td>
-        <td><span class="truncate">${esc((t.exporter||{}).company || (t.exporter||{}).email || '—')}</span></td>
-        <td><span class="truncate">${esc((t.mfg||{}).company || (t.mfg||{}).email || '—')}</span></td>
-        <td><span class="truncate">${esc((t.rfqs||{}).product || '—')}</span></td>
-        <td><span class="truncate">${esc(t.last_preview || '—')}</span></td>
-        <td>${fmtAgo(t.last_at)}</td>
-        <td class="ta-right">
-          <div class="row-actions">
-            <button class="row-action is-danger" data-action="delete-thread" data-id="${esc(t.id)}">Delete</button>
-          </div>
-        </td>
+        <td style="font-family:var(--font-mono);">${esc((t.id||'').slice(0,8))}</td>
+        <td>${esc(t._ex.company || t._ex.email || '—')}</td>
+        <td>${esc(t._mfg.company || t._mfg.email || '—')}</td>
+        <td>${esc((t._rfq||{}).product || '—')}</td>
+        <td>${esc(t.last_preview || '—')}</td>
+        <td class="col-mono" style="color:var(--text-muted);">${fmtAgo(t.last_at)}</td>
+        <td class="ta-right"><div class="row-actions"><button class="row-action is-danger" data-action="delete-thread" data-id="${esc(t.id)}">Delete</button></div></td>
       </tr>`).join('');
     bindRowActions(tbody);
   }
 
-  /* ════════════════════════════════════════
-     RENDER — Notifications
-  ════════════════════════════════════════ */
+  /* ── Notifications ─── */
   function renderNotifications() {
-    const tbody = $('#notifications-tbody');
-    if (!tbody) return;
+    const tbody = $('#notifications-tbody'); if (!tbody) return;
     const q = state.search;
     let rows = state.notifications;
     if (q) rows = rows.filter(n =>
-      ((n.profiles||{}).email || '').toLowerCase().includes(q) ||
-      (n.kind || '').toLowerCase().includes(q) ||
-      (n.body_html || '').toLowerCase().includes(q));
-
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td class="empty-row" colspan="6">No notifications.</td></tr>`;
-      return;
-    }
+      (n._to.email||'').toLowerCase().includes(q) ||
+      (n.kind||'').toLowerCase().includes(q) ||
+      (n.body_html||'').toLowerCase().includes(q));
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--text-muted);">No notifications.</td></tr>`; return; }
     tbody.innerHTML = rows.map(n => `
       <tr data-id="${esc(n.id)}">
-        <td>
-          <span class="cell-name truncate">${esc((n.profiles||{}).company || (n.profiles||{}).email || '—')}</span>
-        </td>
-        <td><span class="status-pill ${esc(n.kind)}">${esc(n.kind)}</span></td>
-        <td><span class="truncate">${n.body_html /* trusted DB-generated */ || esc(n.body || '')}</span></td>
-        <td><span class="status-pill ${n.read_at ? 'verified' : 'pending'}">${n.read_at ? 'Read' : 'Unread'}</span></td>
-        <td>${fmtAgo(n.created_at)}</td>
-        <td class="ta-right">
-          <div class="row-actions">
-            <button class="row-action is-danger" data-action="delete-notif" data-id="${esc(n.id)}">Delete</button>
-          </div>
-        </td>
+        <td>${esc(n._to.company || n._to.email || '—')}</td>
+        <td><span class="chip">${esc(n.kind || '—')}</span></td>
+        <td style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.body_html || esc(n.body || '')}</td>
+        <td><span class="chip chip--${n.read_at ? 'won' : 'open'}">${n.read_at ? 'Read' : 'Unread'}</span></td>
+        <td class="col-mono" style="color:var(--text-muted);">${fmtAgo(n.created_at)}</td>
+        <td class="ta-right"><div class="row-actions"><button class="row-action is-danger" data-action="delete-notif" data-id="${esc(n.id)}">Delete</button></div></td>
       </tr>`).join('');
     bindRowActions(tbody);
   }
 
-  /* ════════════════════════════════════════
-     ROW ACTIONS — bind & dispatch
-  ════════════════════════════════════════ */
+  /* ── Row actions ─── */
   function bindRowActions(scope) {
-    scope.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener('click', () => handleAction(btn.dataset.action, btn.dataset.id, btn));
-    });
+    scope.querySelectorAll('[data-action]').forEach(b =>
+      b.addEventListener('click', e => { e.stopPropagation(); handleAction(b.dataset.action, b.dataset.id); })
+    );
   }
-
-  async function handleAction(action, id, btn) {
+  async function handleAction(action, id) {
     if (!id) return;
-    const target = findTargetByAction(action, id);
-    const label  = describeTarget(action, target);
+    const u = state.users.find(x => x.id === id);
+    const r = state.rfqs.find(x => x.id === id);
+    const qt = state.quotes.find(x => x.id === id);
+    const t = state.threads.find(x => x.id === id);
+    const n = state.notifications.find(x => x.id === id);
+    const desc = u ? (u.company || u.email)
+               : r ? `RFQ — ${r.product}`
+               : qt ? `Quote on ${(qt._rfq||{}).product || 'RFQ'}`
+               : t ? `Conversation ${id.slice(0,8)}`
+               : n ? 'Notification' : '';
 
-    switch (action) {
-      case 'verify':       return confirmAndRun('Verify this manufacturer?', label, () => updateProfile(id, { verified_status: true }));
-      case 'unverify':     return confirmAndRun('Revoke verification?',      label, () => updateProfile(id, { verified_status: false }));
-      case 'promote':      return confirmAndRun('Promote to admin?',         label, () => updateProfile(id, { is_admin: true }));
-      case 'demote':       return confirmAndRun('Revoke admin status?',      label, () => updateProfile(id, { is_admin: false }));
-      case 'delete-user':  return confirmAndRun('Permanently delete this user?', label, () => deleteUser(id), { danger: true });
-      case 'delete-rfq':   return confirmAndRun('Delete this RFQ?', label, () => deleteRow('rfqs', id),   { danger: true });
-      case 'delete-quote': return confirmAndRun('Delete this quote?', label, () => deleteRow('quotes', id), { danger: true });
-      case 'delete-thread':return confirmAndRun('Delete this conversation?', label, () => deleteRow('threads', id), { danger: true });
-      case 'delete-notif': return confirmAndRun('Delete this notification?', label, () => deleteRow('notifications', id), { danger: false });
-    }
+    if (action === 'verify')        return confirmRun('Verify this manufacturer?', desc, () => updateProfile(id, { verified_status: true }));
+    if (action === 'unverify')      return confirmRun('Revoke verification?', desc, () => updateProfile(id, { verified_status: false }));
+    if (action === 'promote')       return confirmRun('Promote to admin?', desc, () => updateProfile(id, { is_admin: true }));
+    if (action === 'demote')        return confirmRun('Revoke admin status?', desc, () => updateProfile(id, { is_admin: false }));
+    if (action === 'delete-user')   return confirmRun('Permanently delete this user?', desc, () => deleteUser(id), true);
+    if (action === 'delete-rfq')    return confirmRun('Delete this RFQ?', desc, () => deleteRow('rfqs', id), true);
+    if (action === 'delete-quote')  return confirmRun('Delete this quote?', desc, () => deleteRow('quotes', id), true);
+    if (action === 'delete-thread') return confirmRun('Delete this conversation?', desc, () => deleteRow('threads', id), true);
+    if (action === 'delete-notif')  return confirmRun('Delete this notification?', desc, () => deleteRow('notifications', id), true);
   }
 
-  function findTargetByAction(action, id) {
-    if (action === 'verify' || action === 'unverify' || action === 'promote' || action === 'demote' || action === 'delete-user')
-      return state.users.find(u => u.id === id);
-    if (action === 'delete-rfq')   return state.rfqs.find(r => r.id === id);
-    if (action === 'delete-quote') return state.quotes.find(q => q.id === id);
-    if (action === 'delete-thread')return state.threads.find(t => t.id === id);
-    if (action === 'delete-notif') return state.notifications.find(n => n.id === id);
-    return null;
-  }
-  function describeTarget(action, t) {
-    if (!t) return '';
-    if (action === 'verify' || action === 'unverify' || action === 'promote' || action === 'demote' || action === 'delete-user')
-      return t.company || t.full_name || t.email || '';
-    if (action === 'delete-rfq')   return `RFQ — ${t.product}`;
-    if (action === 'delete-quote') return `Quote on ${(t.rfqs||{}).product || 'RFQ'}`;
-    if (action === 'delete-thread')return `Conversation ${(t.id||'').slice(0,8)}`;
-    if (action === 'delete-notif') return 'Notification';
-    return '';
-  }
-
-  /* ════════════════════════════════════════
-     CONFIRM MODAL
-  ════════════════════════════════════════ */
-  function confirmAndRun(title, sub, runner, opts = {}) {
-    $('#ac-title').textContent = title;
-    $('#ac-sub').textContent   = sub || '';
+  /* ── Confirm modal ─── */
+  function confirmRun(title, sub, runner, danger) {
+    setText('#ac-title', title); setText('#ac-sub', sub || '');
     const go = $('#ac-go');
-    go.textContent = opts.danger ? 'Delete' : 'Confirm';
-    go.className   = 'btn-danger';
+    go.textContent = danger ? 'Delete' : 'Confirm';
     go.onclick = async () => {
       go.disabled = true;
       try {
@@ -618,56 +499,28 @@
         await loadEverything();
         rerenderAll();
       } catch (err) {
-        console.warn('admin action failed', err);
+        console.warn(err);
         Auth.toast(err.message || 'Action failed.', 'error');
         go.disabled = false;
       }
     };
-    openConfirm();
+    $('#admin-confirm-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
-  function openConfirm()  { $('#admin-confirm-modal').classList.add('show'); document.body.style.overflow = 'hidden'; }
   function closeConfirm() {
     $('#admin-confirm-modal').classList.remove('show');
     document.body.style.overflow = '';
-    const go = $('#ac-go');
-    if (go) { go.disabled = false; go.onclick = null; }
+    const go = $('#ac-go'); if (go) { go.disabled = false; go.onclick = null; }
   }
 
-  /* ════════════════════════════════════════
-     WRITES — use the admin RLS override + RPC
-  ════════════════════════════════════════ */
+  /* ── Writes ─── */
   async function updateProfile(id, patch) {
-    const { error } = await sb.from('profiles').update(patch).eq('id', id);
-    if (error) throw error;
+    const { error } = await sb.from('profiles').update(patch).eq('id', id); if (error) throw error;
   }
   async function deleteRow(table, id) {
-    const { error } = await sb.from(table).delete().eq('id', id);
-    if (error) throw error;
+    const { error } = await sb.from(table).delete().eq('id', id); if (error) throw error;
   }
   async function deleteUser(id) {
-    const { error } = await sb.rpc('nexora_admin_delete_user', { target: id });
-    if (error) throw error;
+    const { error } = await sb.rpc('nexora_admin_delete_user', { target: id }); if (error) throw error;
   }
-
-  /* ════════════════════════════════════════
-     HELPERS
-  ════════════════════════════════════════ */
-  function esc(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[c]));
-  }
-  function fmtNum(n)   { return Number(n ?? 0).toLocaleString('en-US'); }
-  function fmtMoney(n) { return n == null ? '—' : '$' + Number(n).toFixed(2); }
-  function fmtAgo(iso) {
-    if (!iso) return '—';
-    const min = (Date.now() - new Date(iso).getTime()) / 60_000;
-    if (min < 1)   return 'just now';
-    if (min < 60)  return Math.floor(min) + 'm ago';
-    const h = min / 60;
-    if (h < 24)    return Math.floor(h) + 'h ago';
-    return Math.floor(h / 24) + 'd ago';
-  }
-  function cap(s) { return String(s || '').replace(/^./, c => c.toUpperCase()); }
-  function setText(sel, v) { const el = $(sel); if (el) el.textContent = v; }
 })();
