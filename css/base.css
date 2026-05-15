@@ -82,28 +82,26 @@ p { color: var(--text-mid); }
   font-weight: 600;
 }
 
-/* ── Grain overlay — physical "paper" texture over everything ─── */
+/* ── Grain overlay — physical "paper" texture over everything ───
+   PERF: opacity-only render. No mix-blend-mode (which forced the
+   compositor to re-blend the entire viewport on every scroll
+   frame), and no drift animation (which periodically forced a
+   full-viewport repaint every 400ms). The static low-opacity
+   noise is visually equivalent against the cream background.
+   `transform: translateZ(0)` promotes the grain to its own GPU
+   layer once, so it never repaints while the page scrolls. */
 #grain {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 1500;
-  opacity: 0.18;
+  opacity: 0.06;
   background-image: var(--grain-url);
   background-size: 180px 180px;
-  mix-blend-mode: multiply;
-  /* Subtle drift so the grain doesn't feel frozen */
-  animation: grainDrift 1.6s steps(4) infinite;
-}
-@keyframes grainDrift {
-  0%   { transform: translate(0, 0); }
-  25%  { transform: translate(-4px, 3px); }
-  50%  { transform: translate(3px, -2px); }
-  75%  { transform: translate(-2px, -4px); }
-  100% { transform: translate(0, 0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  #grain { animation: none; }
+  transform: translateZ(0);
+  contain: strict;
+  width: 100vw;
+  height: 100vh;
 }
 
 /* ── RTL (Urdu) ─── */
