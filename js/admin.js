@@ -8,8 +8,11 @@
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
+  /* Declared early to dodge TDZ when onReady's sync path runs boot() inline. */
+  let sb, me, state;
+
   function onReady(fn) {
-    if (!document.body.classList.contains('auth-pending')) return fn();
+    if (!document.body.classList.contains('auth-pending')) return setTimeout(fn, 0);
     const obs = new MutationObserver(() => {
       if (!document.body.classList.contains('auth-pending')) { obs.disconnect(); fn(); }
     });
@@ -33,8 +36,7 @@
   const cap = s => String(s || '').replace(/^./, c => c.toUpperCase());
   const setText = (sel, v) => { const el = $(sel); if (el) el.textContent = String(v); };
 
-  /* ── State ─── */
-  let sb, me, state;
+  /* ── State (sb/me/state declared near top to dodge TDZ) ─── */
   const VIEWS = { overview:'Overview', users:'Users', rfqs:'RFQs', quotes:'Quotes', threads:'Conversations', notifications:'Notifications' };
 
   async function boot() {
@@ -220,6 +222,11 @@
 
   /* ── Overview ─── */
   function renderOverview() {
+    /* Reveal every .rev / .stagger block immediately — the design's
+       intersection-observer reveal is overkill inside a SPA where the
+       view is already on-screen and just got re-rendered. */
+    document.querySelectorAll('.rev, .stagger').forEach(el => el.classList.add('in'));
+
     /* ─ Hero eye + sub ─ */
     const now = new Date();
     const stamp = now.toLocaleString('en-US', { month:'short', day:'numeric' }).toUpperCase()

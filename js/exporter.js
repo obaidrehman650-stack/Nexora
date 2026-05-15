@@ -7,16 +7,17 @@
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
+  /* Declared early to dodge TDZ when onReady's sync path runs boot() inline. */
+  let sb, me, state;
+
   function onReady(fn) {
-    if (!document.body.classList.contains('auth-pending')) return fn();
+    if (!document.body.classList.contains('auth-pending')) return setTimeout(fn, 0);
     const obs = new MutationObserver(() => {
       if (!document.body.classList.contains('auth-pending')) { obs.disconnect(); fn(); }
     });
     obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
   }
   onReady(boot);
-
-  let sb, me, state;
 
   async function boot() {
     sb = Auth.client();
@@ -256,6 +257,11 @@
   }
 
   function renderOverview() {
+    /* Reveal every .rev / .stagger block immediately — the design's
+       intersection-observer reveal is overkill inside a SPA where the
+       view is already on-screen and just got re-rendered. */
+    document.querySelectorAll('.rev, .stagger').forEach(el => el.classList.add('in'));
+
     const rfqs = state.myRfqs || [];
     const allQuotes = Object.values(state.responsesByRfq || {}).flat();
     const scope = state.scope || 'week';
