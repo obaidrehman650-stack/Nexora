@@ -16,10 +16,7 @@
 }
 .lifecycle.is-ready { /* visible flag for JS */ }
 
-/* The pin wrapper is the viewport-sized canvas.
-   PERF: `contain: strict` scopes layout/paint inside the pin so
-   nothing outside affects it (cheaper recalc), and translateZ
-   forces a single GPU layer for the whole stage. */
+/* The pin wrapper is the viewport-sized canvas */
 .lc-pin {
   position: relative;
   height: 100vh;
@@ -28,8 +25,6 @@
   isolation: isolate;
   background: #0d0c0a;
   color: var(--text-on-dark);
-  contain: layout paint;
-  transform: translateZ(0);
 }
 
 /* ──────────────────────────────────────────
@@ -72,10 +67,6 @@
 
 /* ──────────────────────────────────────────
    Chapter caption — fixed bottom right
-   PERF: backdrop-filter blur(12px) was running on every scroll
-   frame with the dark stages moving beneath. Replaced with a
-   solid translucent bg — visually almost identical against a
-   dark backdrop, but eliminates the per-frame blur pass.
 ─────────────────────────────────────────── */
 .lc-caption {
   position: absolute;
@@ -83,7 +74,9 @@
   z-index: 60;
   display: flex; align-items: center; gap: 14px;
   padding: 10px 14px 10px 12px;
-  background: rgba(13,12,10,0.78);
+  background: rgba(13,12,10,0.55);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
   border: 1px solid rgba(245,244,237,0.14);
   border-radius: var(--radius-pill);
   font-family: var(--font-body);
@@ -129,7 +122,7 @@
   isolation: isolate;
 }
 .lc-stage--leather  { z-index: 1; }
-.lc-stage--sports   { z-index: 2; will-change: opacity; }
+.lc-stage--sports   { z-index: 2; }
 .lc-stage--surgical { z-index: 3; }
 
 /* Surgical stage is split into two horizontal halves
@@ -200,15 +193,14 @@
     radial-gradient(ellipse 90% 60% at 50% 100%, rgba(0,0,0,0.20), transparent 70%);
   pointer-events: none;
 }
-/* Subtle paper-grain to keep texture editorial.
-   PERF: opacity-only — mix-blend-mode: overlay forced a per-frame
-   compositor blend across the full stage during scroll. */
+/* Subtle paper-grain to keep texture editorial */
 .lc-bg--steel::after {
   content: "";
   position: absolute; inset: 0;
   background-image: var(--grain-url);
   background-size: 220px 220px;
-  opacity: 0.14;
+  mix-blend-mode: overlay;
+  opacity: 0.32;
   pointer-events: none;
 }
 
@@ -249,7 +241,8 @@
   position: absolute; inset: 0;
   background-image: var(--grain-url);
   background-size: 200px 200px;
-  opacity: 0.18;
+  mix-blend-mode: overlay;
+  opacity: 0.4;
 }
 
 /* ──────────────────────────────────────────
@@ -269,12 +262,10 @@
   position: absolute; inset: 0;
   background-image: var(--grain-url);
   background-size: 180px 180px;
-  opacity: 0.22;
+  mix-blend-mode: overlay;
+  opacity: 0.6;
 }
-/* Pebbled leather pattern via overlapping radial dots.
-   PERF: dropped mix-blend-mode: multiply (forced per-frame
-   compositor pass). The radial dots already darken the
-   underlying gradient since they use rgba(0,0,0,...). */
+/* Pebbled leather pattern via overlapping radial dots */
 .lc-bg--hide::after {
   content: "";
   position: absolute; inset: 0;
@@ -287,7 +278,8 @@
     radial-gradient(circle at 76% 88%, rgba(0,0,0,0.16) 0%, transparent 7%);
   background-size: 220px 220px;
   background-repeat: repeat;
-  opacity: 0.32;
+  mix-blend-mode: multiply;
+  opacity: 0.45;
 }
 
 /* ──────────────────────────────────────────
@@ -301,10 +293,7 @@
   display: grid;
   gap: 18px;
   color: var(--text-on-dark);
-  /* PERF: smaller blur radius. 24px text-shadow forced expensive
-     repaints over the whole text block. 8px is plenty against the
-     dark stage backgrounds. */
-  text-shadow: 0 1px 8px rgba(0,0,0,0.45);
+  text-shadow: 0 1px 24px rgba(0,0,0,0.35);
 }
 .lc-eyebrow {
   display: inline-flex; align-items: center; gap: 12px;
@@ -621,12 +610,6 @@
     radial-gradient(ellipse 70% 60% at 50% 40%, rgba(30,15,5,0.05) 0%, rgba(30,15,5,0.50) 100%),
     linear-gradient(180deg, rgba(45,22,10,0.35) 0%, rgba(20,10,4,0.65) 100%);
 }
-/* PERF: paper-filter was the worst offender — `mix-blend-mode: overlay`
-   on the grain plus a second `mix-blend-mode: soft-light` ::after layer
-   forced TWO compositor blends per stage per scroll frame. The pinned
-   section runs for 520% of viewport scroll, so this fired thousands of
-   times. Replaced with single opacity-only grain — visually almost
-   identical against the dark stage backgrounds. */
 .lc-paper-filter {
   position: absolute;
   inset: 0;
@@ -634,7 +617,14 @@
   pointer-events: none;
   background-image: var(--grain-url);
   background-size: 240px 240px;
-  opacity: 0.10;
+  mix-blend-mode: overlay;
+  opacity: 0.22;
+}
+.lc-paper-filter::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: rgba(245,244,237,0.04);
+  mix-blend-mode: soft-light;
 }
 /* Push content above the photo + tint + paper stack */
 .lc-stage .lc-content { z-index: 5; }
