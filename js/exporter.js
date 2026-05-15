@@ -170,13 +170,40 @@
     setKpi('#kpi-avg',  avg, 1);
     setKpi('#kpi-pipe', pipelineK, 0);
 
-    drawSpark('spark-rfqs', bucketize(state.myRfqs));
-    drawSpark('spark-resp', bucketize(state.allResponses));
-    drawSpark('spark-avg',  bucketize(state.myRfqs).map((v, i, a) => v + (state.allResponses.length / Math.max(state.myRfqs.length, 1))));
-    drawSpark('spark-pipe', bucketize(state.allResponses, q => {
+    /* Mirrored strips on My RFQs / Responses views */
+    const avgPrice = resp ? state.allResponses.reduce((s,q) => s + (Number(q.unit_price)||0), 0) / resp : 0;
+    const suppliers = new Set(state.allResponses.map(q => q.manufacturer_id)).size;
+    setAllKpi('.kv-rfqs', open);
+    setAllKpi('.kv-resp', resp);
+    setAllKpi('.kv-avg',  avg, 1);
+    setAllKpi('.kv-pipe', pipelineK);
+    setAllKpi('.kv-avg-price', Math.round(avgPrice));
+    setAllKpi('.kv-suppliers', suppliers);
+
+    const sparkRfqs = bucketize(state.myRfqs);
+    const sparkResp = bucketize(state.allResponses);
+    const sparkPipe = bucketize(state.allResponses, q => {
       const r = state.myRfqs.find(x => x.id === q.rfq_id);
       return ((r && r.quantity) || 0) * (Number(q.unit_price) || 0) / 1000;
-    }));
+    });
+    drawSpark('spark-rfqs', sparkRfqs);
+    drawSpark('spark-resp', sparkResp);
+    drawSpark('spark-avg',  sparkRfqs.map(v => v + (resp / Math.max(state.myRfqs.length, 1))));
+    drawSpark('spark-pipe', sparkPipe);
+    drawSparkAll('.sp-rfqs', sparkRfqs);
+    drawSparkAll('.sp-resp', sparkResp);
+    drawSparkAll('.sp-pipe', sparkPipe);
+    drawSparkAll('.sp-avg',  sparkRfqs);
+  }
+  function setAllKpi(selector, value, decimals) {
+    $$(selector).forEach(el => {
+      if (window.NX && NX.animateCounter) NX.animateCounter(el, value, { decimals: decimals || 0, duration: 800 });
+      else el.textContent = (decimals ? Number(value).toFixed(decimals) : Math.floor(value)).toLocaleString();
+    });
+  }
+  function drawSparkAll(selector, data) {
+    if (!window.NX || !NX.sparkline || !data || !data.length) return;
+    $$(selector).forEach(wrap => { wrap.innerHTML = NX.sparkline(data, { width: 96, height: 32, color: 'var(--accent)' }); });
   }
 
   function setKpi(sel, value, decimals) {

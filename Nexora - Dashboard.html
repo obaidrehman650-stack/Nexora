@@ -392,6 +392,35 @@
 
       <!-- ═══════ LIVE RFQs VIEW (full table) ═══════ -->
       <section class="view" data-view="rfqs">
+
+        <!-- KPI strip (mirrored from overview so analytics stay visible) -->
+        <div class="kpi-row stagger" style="margin-bottom:18px;">
+          <div class="kpi">
+            <div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></span>Open RFQs</div>
+            <div class="kpi-value"><span class="kv-open">0</span></div>
+            <div class="kpi-foot"><span class="delta">in your industry</span></div>
+            <div class="kpi-spark sp-open"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>Quotes sent</div>
+            <div class="kpi-value"><span class="kv-quotes">0</span></div>
+            <div class="kpi-foot"><span class="delta">by you</span></div>
+            <div class="kpi-spark sp-quotes"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg></span>Pipeline (k)</div>
+            <div class="kpi-value">$<span class="kv-pipe">0</span><span class="unit">k</span></div>
+            <div class="kpi-foot"><span class="delta">open quotes</span></div>
+            <div class="kpi-spark sp-pipe"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>Win rate</div>
+            <div class="kpi-value"><span class="kv-win">0</span><span class="unit">%</span></div>
+            <div class="kpi-foot"><span class="delta">of quotes won</span></div>
+            <div class="kpi-spark sp-win"></div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-head">
             <div>
@@ -429,6 +458,35 @@
 
       <!-- ═══════ MY QUOTES VIEW ═══════ -->
       <section class="view" data-view="quotes">
+
+        <!-- KPI strip -->
+        <div class="kpi-row stagger" style="margin-bottom:18px;">
+          <div class="kpi">
+            <div class="kpi-label">Quotes sent</div>
+            <div class="kpi-value"><span class="kv-quotes">0</span></div>
+            <div class="kpi-foot"><span class="delta">total</span></div>
+            <div class="kpi-spark sp-quotes"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Pipeline (k)</div>
+            <div class="kpi-value">$<span class="kv-pipe">0</span><span class="unit">k</span></div>
+            <div class="kpi-foot"><span class="delta">outstanding</span></div>
+            <div class="kpi-spark sp-pipe"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Win rate</div>
+            <div class="kpi-value"><span class="kv-win">0</span><span class="unit">%</span></div>
+            <div class="kpi-foot"><span class="delta">of quotes won</span></div>
+            <div class="kpi-spark sp-win"></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Avg unit price</div>
+            <div class="kpi-value">$<span class="kv-avg">0</span></div>
+            <div class="kpi-foot"><span class="delta">across quotes</span></div>
+            <div class="kpi-spark"></div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-head">
             <div>

@@ -383,6 +383,16 @@
     setKpi('#kpi-pipeline', pipelineK,0);
     setKpi('#kpi-winrate',  winRate,  1);
 
+    /* Mirrored strips on Live RFQs and My Quotes views */
+    setAllKpi('.kv-open',   open);
+    setAllKpi('.kv-quotes', sent);
+    setAllKpi('.kv-pipe',   pipelineK);
+    setAllKpi('.kv-win',    winRate, 0);
+    const avgPrice = sent
+      ? state.myQuotes.reduce((s, q) => s + (Number(q.unit_price) || 0), 0) / sent
+      : 0;
+    setAllKpi('.kv-avg', Math.round(avgPrice));
+
     $('#kpi-open-delta').textContent = state.profile.industry
       ? `▶ ${cap(state.profile.industry)}`
       : '▶ All industries';
@@ -397,6 +407,17 @@
     drawSpark('spark-quotes',   sparkSeries.quotes);
     drawSpark('spark-pipeline', sparkSeries.pipeline);
     drawSpark('spark-win',      sparkSeries.win);
+    /* Mirror onto the duplicated strips (class-based) */
+    drawSparkAll('.sp-open',   sparkSeries.rfqs);
+    drawSparkAll('.sp-quotes', sparkSeries.quotes);
+    drawSparkAll('.sp-pipe',   sparkSeries.pipeline);
+    drawSparkAll('.sp-win',    sparkSeries.win);
+  }
+  function drawSparkAll(selector, data) {
+    if (!window.NX || !NX.sparkline || !data || !data.length) return;
+    $$(selector).forEach(wrap => {
+      wrap.innerHTML = NX.sparkline(data, { width: 96, height: 32, color: 'var(--accent)' });
+    });
   }
 
   function setKpi(sel, value, decimals) {
@@ -409,6 +430,18 @@
     } else {
       el.textContent = decimals ? value.toFixed(decimals) : Math.floor(value).toLocaleString();
     }
+  }
+
+  /* Update every span matching a class with the same value (used for the
+     duplicated KPI strips on Live RFQs and My Quotes views). */
+  function setAllKpi(selector, value, decimals) {
+    $$(selector).forEach(el => {
+      if (window.NX && NX.animateCounter) {
+        NX.animateCounter(el, value, { decimals: decimals || 0, duration: 800 });
+      } else {
+        el.textContent = (decimals ? Number(value).toFixed(decimals) : Math.floor(value)).toLocaleString();
+      }
+    });
   }
 
   function drawSpark(id, data) {
