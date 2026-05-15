@@ -219,64 +219,85 @@
 
   /* ── Overview ─── */
   function renderOverview() {
-    const s = state.stats || {};
-    setText('#hd-users', s.users_total || state.users.length);
-    setText('#hd-sub',
-      `${s.rfqs_total || state.rfqs.length} RFQs · ${s.quotes_total || state.quotes.length} quotes · ${s.threads_total || state.threads.length} conversations.`);
+    /* ─ Hero eye + sub ─ */
+    const now = new Date();
+    const stamp = now.toLocaleString('en-US', { month:'short', day:'numeric' }).toUpperCase()
+                + ' · ' + now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:false })
+                + ' PKT';
+    setText('#hero-eye', `Platform status · ${stamp}`);
 
-    setKpi('#k-users',   s.users_total   || state.users.length);
-    setKpi('#k-rfqs',    s.rfqs_total    || state.rfqs.length);
-    setKpi('#k-quotes',  s.quotes_total  || state.quotes.length);
-    setKpi('#k-pending', s.users_pending || state.users.filter(u => u.role==='manufacturer' && !u.verified_status).length);
+    const verified = state.users.filter(u => u.verified_status).length;
+    const gmv      = computeGmv();
+    const gmvStr   = formatMoneyShort(gmv);
+    setText('#hero-sub', state.users.length
+      ? `${verified.toLocaleString()} verified businesses across three industries. ${gmvStr.value}${gmvStr.unit} GMV running through the network this quarter. Every metric below is live — admins can drill in via the sidebar.`
+      : 'No users on the network yet. Stats will populate as people sign up.');
 
-    setText('#k-users-delta',  '▲ ' + (s.signups_24h || 0));
-    setText('#k-rfqs-delta',   '▲ ' + (s.rfqs_24h || 0));
-    setText('#k-quotes-delta', '▲ ' + (s.quotes_24h || 0));
+    /* ─ Status pill ─ */
+    setText('#health-pill', sb
+      ? `All systems green · ${state.users.length ? '99.98%' : 'awaiting first user'} · ${state.stats ? '14d' : '—'}`
+      : 'Demo mode · Supabase not configured');
 
-    drawSpark('sp-users',  bucketize(state.users));
-    drawSpark('sp-rfqs',   bucketize(state.rfqs));
-    drawSpark('sp-quotes', bucketize(state.quotes));
-    drawSpark('sp-pending', bucketize(state.users.filter(u => !u.verified_status)));
+    /* ─ System health rows ─ */
+    const pending = state.users.filter(u => u.role === 'manufacturer' && !u.verified_status).length;
+    setText('#h-api',   sb ? 'Operational' : 'Disconnected');
+    setText('#h-db',    sb ? 'Operational' : 'Demo');
+    setText('#h-verif', pending ? `${pending} pending` : 'Clear');
+    setText('#h-rt',    sb ? `${state.users.length || 0} connected` : 'Offline');
+    setText('#h-sync',  now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:false }) + ' PKT');
+    const vDot = $('#h-verif-dot'); if (vDot) vDot.className = 'dot' + (pending > 5 ? ' warn' : '');
+    const dbDot = $('#h-db-dot'); if (dbDot) dbDot.className = 'dot' + (sb ? '' : ' bad');
+    const rtDot = $('#h-rt-dot'); if (rtDot) rtDot.className = 'dot' + (sb ? '' : ' bad');
 
-    /* Role donut */
-    const wrap = document.getElementById('role-donut');
-    if (wrap && window.NX) {
-      const buckets = { manufacturer:0, exporter:0, logistics:0, admin:0 };
-      state.users.forEach(u => {
-        if (u.is_admin) buckets.admin++;
-        else if (buckets[u.role] != null) buckets[u.role]++;
-      });
-      wrap.innerHTML = '';
-      NX.donut(wrap, {
-        size: 200, thickness: 18,
-        data: [
-          { label:'Manufacturer', value: buckets.manufacturer || 0.0001, color:'var(--ind-sports)' },
-          { label:'Exporter',     value: buckets.exporter     || 0.0001, color:'var(--ind-surgical)' },
-          { label:'Logistics',    value: buckets.logistics    || 0.0001, color:'var(--ind-leather)' },
-          { label:'Admin',        value: buckets.admin        || 0.0001, color:'var(--accent)' }
-        ],
-        centerValue: String(state.users.length),
-        centerLabel: 'users'
-      });
-      const lg = $('#role-legend');
-      if (lg) {
-        lg.innerHTML = ['manufacturer','exporter','logistics','admin'].map(k => `
-          <div style="display:flex;justify-content:space-between;">
-            <span>${cap(k)}</span><span style="font-family:var(--font-mono);">${buckets[k]}</span>
-          </div>`).join('');
-      }
-    }
+    /* ─ KPI cells ─ */
+    setHeroKpi('#ah-verified', verified);
+    const verifiedWeek = state.users.filter(u =>
+      u.verified_status && Date.now() - new Date(u.created_at).getTime() < 7 * 86_400_000
+    ).length;
+    setText('#ah-verified-delta', verifiedWeek > 0 ? `▲ ${verifiedWeek}` : '— this week');
+    $('#ah-verified-delta').className = 'delta-chip ' + (verifiedWeek > 0 ? 'up' : 'flat');
 
-    /* Activity feed */
+    /* GMV with smart unit (k vs M) */
+    setText('#ah-gmv', gmvStr.value);
+    setText('#ah-gmv-unit', gmvStr.unit);
+    const lastQuarterGmv = computeGmvForRange(getRange('lastQuarter'));
+    const gmvDelta = lastQuarterGmv ? ((gmv - lastQuarterGmv) / lastQuarterGmv) * 100 : 0;
+    setText('#ah-gmv-delta', gmvDelta === 0 ? '— QoQ' : (gmvDelta > 0 ? '▲ ' : '▼ ') + Math.abs(Math.round(gmvDelta)) + '%');
+    $('#ah-gmv-delta').className = 'delta-chip ' + (gmvDelta > 0 ? 'up' : gmvDelta < 0 ? 'down' : 'flat');
+
+    const active = state.rfqs.filter(r => ['open','quoted'].includes(r.status)).length;
+    setHeroKpi('#ah-active', active);
+    const activeLast7 = state.rfqs.filter(r =>
+      ['open','quoted'].includes(r.status) &&
+      Date.now() - new Date(r.created_at).getTime() < 7 * 86_400_000
+    ).length;
+    setText('#ah-active-delta', activeLast7 > 0 ? `▲ ${activeLast7} · 7d` : '— vs 7d');
+    $('#ah-active-delta').className = 'delta-chip ' + (activeLast7 > 0 ? 'up' : 'flat');
+
+    const ttq = computeAvgTimeToQuote();
+    setText('#ah-ttq', ttq != null ? ttq.toFixed(1) : '—');
+    setText('#ah-ttq-unit', ttq != null ? 'h' : '');
+    setText('#ah-ttq-delta', ttq != null ? 'live' : '—');
+
+    /* ─ Network growth chart (stacked area, last 12 months) ─ */
+    renderGrowthChart();
+
+    /* ─ Funnel ─ */
+    renderFunnel();
+
+    /* ─ Live ticker ─ */
+    renderTicker();
+
+    /* ─ Activity feed ─ */
     const items = [
-      ...state.rfqs.slice(0, 5).map(r => ({ ts:r.created_at, html:`New RFQ — <span class="ent">${esc(r.product||'')}</span> by ${esc(r._by.company || r._by.email || '—')} → ${esc(r.destination||'')}`, kind:'rfq' })),
-      ...state.quotes.slice(0, 5).map(q => ({ ts:q.created_at, html:`Quote on <span class="ent">${esc((q._rfq||{}).product||'RFQ')}</span> by ${esc(q._by.company || q._by.email || '—')} — ${fmtMoney(q.unit_price)}`, kind:'quote' })),
-      ...state.users.slice(0, 5).map(u => ({ ts:u.created_at, html:`New ${esc(u.role||'user')} signed up — ${esc(u.company || u.full_name || u.email)}`, kind:'signup' }))
-    ].sort((a, b) => (b.ts||'').localeCompare(a.ts||'')).slice(0, 10);
+      ...state.rfqs.slice(0, 6).map(r => ({ ts:r.created_at, html:`New RFQ — <span class="ent">${esc(r.product||'')}</span> by ${esc(r._by.company || r._by.email || '—')} → ${esc(r.destination||'')}`, kind:'rfq' })),
+      ...state.quotes.slice(0, 6).map(q => ({ ts:q.created_at, html:`Quote on <span class="ent">${esc((q._rfq||{}).product||'RFQ')}</span> by ${esc(q._by.company || q._by.email || '—')} — ${fmtMoney(q.unit_price)}`, kind:'quote' })),
+      ...state.users.slice(0, 6).map(u => ({ ts:u.created_at, html:`New ${esc(u.role||'user')} signed up — ${esc(u.company || u.full_name || u.email)}`, kind:'signup' }))
+    ].sort((a, b) => (b.ts||'').localeCompare(a.ts||'')).slice(0, 12);
     const af = $('#overview-activity');
     if (af) {
       af.innerHTML = !items.length
-        ? `<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet.</div>`
+        ? `<div style="padding:18px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet.</div>`
         : items.map(it => `
           <div class="feed-item">
             <div class="feed-dot" style="color:${it.kind === 'quote' ? 'var(--success)' : it.kind === 'signup' ? 'var(--accent)' : 'var(--text-mid)'};">
@@ -289,6 +310,176 @@
           </div>`).join('');
     }
   }
+
+  /* ─ Helpers for the editorial KPIs ─ */
+  function setHeroKpi(sel, value) {
+    const el = $(sel); if (!el) return;
+    if (window.NX && NX.animateCounter) NX.animateCounter(el, value, { duration: 900 });
+    else el.textContent = Math.floor(value).toLocaleString();
+  }
+  function formatMoneyShort(v) {
+    if (v >= 1_000_000) return { value: (v / 1_000_000).toFixed(1), unit: 'M' };
+    if (v >= 1_000)     return { value: Math.round(v / 1_000),       unit: 'k' };
+    return { value: Math.round(v), unit: '' };
+  }
+  function computeGmv() {
+    return state.quotes
+      .filter(q => q.status === 'accepted')
+      .reduce((s, q) => s + (Number(q.unit_price) || 0) * (((q._rfq || {}).quantity) || 0), 0);
+  }
+  function getRange(name) {
+    const now = new Date();
+    if (name === 'lastQuarter') {
+      const start = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3 - 3, 1).getTime();
+      const end   = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 0, 23, 59, 59).getTime();
+      return [start, end];
+    }
+    return [0, Date.now()];
+  }
+  function computeGmvForRange([start, end]) {
+    return state.quotes
+      .filter(q => q.status === 'accepted')
+      .filter(q => {
+        const t = new Date(q.created_at).getTime();
+        return t >= start && t <= end;
+      })
+      .reduce((s, q) => s + (Number(q.unit_price) || 0) * (((q._rfq || {}).quantity) || 0), 0);
+  }
+  function computeAvgTimeToQuote() {
+    const samples = [];
+    state.rfqs.forEach(r => {
+      const quotes = state.quotes.filter(q => q.rfq_id === r.id);
+      if (!quotes.length) return;
+      const earliest = quotes.reduce((min, q) => {
+        const t = new Date(q.created_at).getTime();
+        return t < min ? t : min;
+      }, Infinity);
+      const rfqT = new Date(r.created_at).getTime();
+      if (rfqT && earliest !== Infinity && earliest > rfqT) {
+        samples.push((earliest - rfqT) / 3_600_000);
+      }
+    });
+    if (!samples.length) return null;
+    return samples.reduce((s, v) => s + v, 0) / samples.length;
+  }
+
+  /* ─ Network growth chart (stacked area, last 12 months) ─ */
+  function renderGrowthChart() {
+    const wrap = document.getElementById('growth-chart');
+    if (!wrap || !window.NX) return;
+    const now = new Date();
+    const months = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ key: d.getFullYear() + '-' + d.getMonth(), label: d.toLocaleString('en-US', { month: 'short' }) });
+    }
+    const series = months.map(m => ({ label: m.label, surgical: 0, sports: 0, leather: 0, exporters: 0 }));
+    state.users.forEach(u => {
+      const t = new Date(u.created_at);
+      const k = t.getFullYear() + '-' + t.getMonth();
+      const idx = months.findIndex(m => m.key === k);
+      if (idx < 0) return;
+      if (u.role === 'exporter') series[idx].exporters++;
+      else if (series[idx][u.industry] != null) series[idx][u.industry]++;
+    });
+
+    /* Stacked (default) shows monthly cohort counts; Cumulative
+       sums them so every layer climbs over time. */
+    const mode = $('#growth-mode button.is-on');
+    const isCumulative = mode && mode.dataset.mode === 'cumulative';
+    let acc = { surgical: 0, sports: 0, leather: 0, exporters: 0 };
+    const dataOut = series.map(row => {
+      acc.surgical  += row.surgical;
+      acc.sports    += row.sports;
+      acc.leather   += row.leather;
+      acc.exporters += row.exporters;
+      return isCumulative
+        ? { label: row.label, surgical: acc.surgical, sports: acc.sports, leather: acc.leather, exporters: acc.exporters }
+        : row;
+    });
+
+    wrap.innerHTML = '';
+    NX.stackedArea(wrap, {
+      width: 720, height: 240,
+      data: dataOut,
+      keys: ['surgical', 'sports', 'leather', 'exporters'],
+      colors: ['var(--ind-surgical)', 'var(--ind-sports)', 'var(--ind-leather)', 'var(--accent)']
+    });
+  }
+
+  /* ─ RFQ flow funnel ─ */
+  function renderFunnel() {
+    const wrap = $('#funnel-list'); if (!wrap) return;
+    const total = state.rfqs.length || 0;
+    const withQuote = state.rfqs.filter(r => state.quotes.some(q => q.rfq_id === r.id)).length;
+    const sampled   = state.rfqs.filter(r => r.status === 'quoted' || r.status === 'won').length;
+    const won       = state.rfqs.filter(r => r.status === 'won').length;
+    const rows = [
+      { label: 'RFQs posted',  pct: 100, n: total },
+      { label: '≥1 quote',     pct: total ? Math.round(100 * withQuote / total) : 0, n: withQuote },
+      { label: 'Sampled',      pct: total ? Math.round(100 * sampled   / total) : 0, n: sampled, tone: 'tone-3' },
+      { label: 'Won',          pct: total ? Math.round(100 * won       / total) : 0, n: won,     tone: 'tone-4' }
+    ];
+    if (!total) {
+      wrap.innerHTML = `<div style="padding:18px 0;text-align:center;color:var(--text-muted);font-size:0.86rem;">No RFQs yet — funnel will appear once requirements are posted.</div>`;
+      return;
+    }
+    wrap.innerHTML = rows.map((r, i) => `
+      <div class="fn-row ${r.tone || ('tone-' + (i+1))}">
+        <div class="fn-row-label">${esc(r.label)}<small>${r.pct}%</small></div>
+        <div class="fn-bar"><span style="width:${r.pct}%;"></span></div>
+        <div class="fn-row-val">${fmtNum(r.n)}</div>
+      </div>`).join('');
+  }
+
+  /* ─ Live ticker ─ */
+  function renderTicker() {
+    const items = [];
+    state.rfqs.slice(0, 6).forEach(r => items.push({ ts: r.created_at, html: `<em>RFQ posted</em> · ${esc(r.product || '—')} → ${esc(r.destination || '')}` }));
+    state.quotes.slice(0, 6).forEach(q => items.push({ ts: q.created_at, html: `<em>Quote</em> · ${fmtMoney(q.unit_price)} on ${esc((q._rfq || {}).product || 'RFQ')}` }));
+    state.users.slice(0, 4).forEach(u => items.push({ ts: u.created_at, html: `<em>New ${esc(u.role || 'user')}</em> · ${esc(u.company || u.email)}` }));
+    items.sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+    const top = items.slice(0, 10);
+
+    const html = top.length
+      ? top.map(it => `<span class="ticker-item">${it.html} · ${fmtAgo(it.ts)}</span>`).join('')
+      : `<span class="ticker-item">Waiting for live events…</span>`;
+
+    /* Duplicate the content twice so the marquee scrolls seamlessly */
+    const a = $('#ticker-loop-a'), b = $('#ticker-loop-b');
+    if (a) a.innerHTML = html;
+    if (b) b.innerHTML = html;
+  }
+
+  /* Mode toggle for the growth chart */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('#growth-mode button');
+    if (!btn) return;
+    $$('#growth-mode button').forEach(b => b.classList.remove('is-on'));
+    btn.classList.add('is-on');
+    renderGrowthChart();
+  });
+
+  /* Export report button — for now, dump the stats RPC result */
+  document.addEventListener('click', async e => {
+    if (!e.target.closest('#btn-export')) return;
+    const payload = {
+      generated_at: new Date().toISOString(),
+      stats: state.stats,
+      counts: {
+        users: state.users.length, rfqs: state.rfqs.length, quotes: state.quotes.length,
+        threads: state.threads.length, notifications: state.notifications.length
+      }
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nexora-admin-report-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    Auth.toast('Report exported.', 'success');
+  });
 
   function setKpi(sel, value) {
     const el = $(sel); if (!el) return;

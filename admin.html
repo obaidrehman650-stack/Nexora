@@ -31,6 +31,318 @@
   @keyframes nx-guard-spin { to { transform: rotate(360deg); } }
   .canvas .view { display: none; }
   .canvas .view.is-active { display: block; }
+  /* ════════════════════════════════════════
+     ADMIN OVERVIEW — editorial command layout
+  ══════════════════════════════════════ */
+  .admin-status-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-bottom: 14px;
+  }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 7px 16px;
+    background: rgba(90,125,79,0.08);
+    border: 1px solid rgba(90,125,79,0.22);
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: 0.84rem;
+    color: var(--text);
+  }
+  .status-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgba(90,125,79,0.18); }
+  .status-actions { display: flex; gap: 8px; }
+  .btn-window, .btn-export {
+    appearance: none;
+    font-family: var(--font-body);
+    font-size: 0.86rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    padding: 9px 14px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-window {
+    background: var(--surface);
+    border: 1px solid var(--border-mid);
+    color: var(--text);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-window:hover { background: var(--bg-elevated); border-color: var(--border-strong); }
+  .btn-export {
+    background: #1a1612; color: #fff; border: 0;
+    padding: 9px 18px;
+    font-weight: 500;
+  }
+  .btn-export:hover { background: #000; }
+
+  /* LIVE ticker */
+  .admin-ticker {
+    display: flex; align-items: center; gap: 18px;
+    padding: 11px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .live-tag {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--font-body);
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+    color: var(--danger);
+    flex-shrink: 0;
+  }
+  .live-tag .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--danger);
+    animation: livePulse 1.6s ease-in-out infinite;
+  }
+  @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.3;transform:scale(0.85);} }
+  .ticker-track {
+    flex: 1; display: flex; gap: 36px;
+    white-space: nowrap; overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    color: var(--text-mid);
+  }
+  .ticker-track > .ticker-loop {
+    display: inline-flex; gap: 36px;
+    animation: tickerScroll 40s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+  .ticker-item em {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fraunces-soft);
+    font-style: italic;
+    color: var(--text);
+    font-size: 0.94rem;
+  }
+
+  /* Hero status panel — dark editorial */
+  .admin-hero {
+    background: #1a1612;
+    color: #f0e1d8;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 18px;
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.04),
+      0 8px 24px rgba(0,0,0,0.18);
+    position: relative;
+  }
+  .admin-hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: var(--grain-url);
+    background-size: 220px 220px;
+    opacity: 0.16;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  .admin-hero-top {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    padding: 38px 40px 32px;
+    gap: 40px;
+    position: relative;
+  }
+  .admin-hero-eye {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: var(--font-body);
+    font-size: 0.7rem; letter-spacing: 0.18em;
+    color: #d97a4f; font-weight: 700; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .admin-hero-eye::after {
+    content: ""; display: block;
+    width: 96px; height: 1px;
+    background: rgba(245,244,237,0.18);
+  }
+  .admin-hero-title {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fraunces-display);
+    font-size: clamp(2rem, 3.8vw, 3.4rem);
+    font-weight: 380;
+    line-height: 1.04;
+    letter-spacing: -0.028em;
+    color: #f5f4ed;
+    margin: 0 0 18px;
+  }
+  .admin-hero-title em {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 80, "WONK" 1;
+    color: #d97a4f;
+  }
+  .admin-hero-sub {
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: rgba(245,244,237,0.66);
+    max-width: 50ch;
+  }
+  .admin-hero-sub strong { color: #f0e1d8; font-weight: 500; }
+
+  .admin-hero-health {
+    display: flex; flex-direction: column; gap: 0;
+    font-family: var(--font-body);
+  }
+  .health-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(245,244,237,0.10);
+    font-size: 0.9rem;
+    color: rgba(245,244,237,0.78);
+  }
+  .health-row:first-child { padding-top: 0; }
+  .health-row:last-child  { border-bottom: 0; padding-bottom: 0; }
+  .health-value {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: #f5f4ed;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+  }
+  .health-value .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+  .health-value .dot.warn { background: var(--warning); }
+  .health-value .dot.bad  { background: var(--danger); }
+
+  /* KPI cells inside hero (or on cream below) */
+  .admin-hero-kpis {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    padding: 28px 40px 36px;
+    border-top: 1px solid rgba(245,244,237,0.08);
+    background: rgba(0,0,0,0.18);
+    position: relative;
+  }
+  .ah-kpi { padding-right: 24px; border-right: 1px solid rgba(245,244,237,0.08); }
+  .ah-kpi:last-child { border-right: 0; }
+  .ah-kpi-label {
+    font-family: var(--font-body);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgba(245,244,237,0.55);
+    margin-bottom: 14px;
+  }
+  .ah-kpi-value {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fraunces-display);
+    font-weight: 380;
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    color: #f5f4ed;
+    line-height: 0.96;
+    letter-spacing: -0.03em;
+    margin-bottom: 14px;
+  }
+  .ah-kpi-value em { font-style: italic; color: #d97a4f; font-variation-settings: "opsz" 144, "SOFT" 80, "WONK" 1; }
+  .ah-kpi-value .small { font-size: 0.5em; color: rgba(245,244,237,0.6); margin-left: 2px; vertical-align: baseline; font-style: normal; }
+  .ah-kpi-delta {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.84rem;
+    color: rgba(245,244,237,0.66);
+  }
+  .ah-kpi-delta .delta-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono); font-weight: 600; font-size: 0.74rem;
+    letter-spacing: 0.02em;
+  }
+  .ah-kpi-delta .delta-chip.up   { background: rgba(90,125,79,0.18); color: #b8d4ad; }
+  .ah-kpi-delta .delta-chip.down { background: rgba(184,71,58,0.20); color: #f4a89e; }
+  .ah-kpi-delta .delta-chip.flat { background: rgba(245,244,237,0.10); color: rgba(245,244,237,0.7); }
+
+  /* Charts row */
+  .admin-charts-row {
+    display: grid; grid-template-columns: 1.65fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .admin-charts-row .card-head { padding: 18px 22px 8px; align-items: flex-start; }
+  .admin-charts-row .ch-eye {
+    font-family: var(--font-body);
+    font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 4px;
+  }
+  .admin-charts-row .ch-title {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fraunces-soft);
+    font-size: 1.4rem; font-weight: 460; letter-spacing: -0.018em;
+    color: var(--text); margin: 0 0 4px;
+  }
+  .admin-charts-row .ch-sub {
+    font-size: 0.84rem; color: var(--text-muted);
+  }
+  .seg-tabs {
+    display: inline-flex; padding: 3px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .seg-tabs button {
+    appearance: none; border: 0; background: transparent;
+    padding: 5px 14px; border-radius: 999px;
+    font-family: var(--font-body); font-size: 0.78rem; font-weight: 500;
+    color: var(--text-muted); cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .seg-tabs button.is-on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+  /* Stacked chart wrapper has its own padding */
+  .growth-wrap { padding: 6px 22px 22px; }
+  .growth-legend {
+    display: flex; gap: 18px; padding: 14px 22px 18px;
+    font-size: 0.82rem; color: var(--text-mid);
+    border-top: 1px solid var(--rule);
+  }
+  .growth-legend .sw {
+    display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+    margin-right: 6px; vertical-align: middle;
+  }
+
+  /* Funnel rows */
+  .fn-list { padding: 6px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
+  .fn-row { display: grid; grid-template-columns: 130px 1fr 80px; gap: 14px; align-items: center; }
+  .fn-row-label {
+    font-family: var(--font-body); font-size: 0.86rem; color: var(--text);
+    display: flex; flex-direction: column;
+  }
+  .fn-row-label small {
+    font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;
+  }
+  .fn-bar {
+    height: 28px; background: var(--bg-elevated); border-radius: var(--radius-sm); overflow: hidden;
+  }
+  .fn-bar > span {
+    display: block; height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+    border-radius: var(--radius-sm);
+    transition: width 0.5s ease;
+  }
+  .fn-row.tone-2 .fn-bar > span { background: linear-gradient(90deg, #d27a52, #a04a30); }
+  .fn-row.tone-3 .fn-bar > span { background: linear-gradient(90deg, #b66442, #803922); }
+  .fn-row.tone-4 .fn-bar > span { background: linear-gradient(90deg, #3d6b7c, #284a55); }
+  .fn-row-val {
+    text-align: right;
+    font-family: var(--font-display);
+    font-variation-settings: var(--fraunces-soft);
+    font-size: 1.25rem;
+    color: var(--text);
+  }
+
+  @media (max-width: 1100px) {
+    .admin-hero-top { grid-template-columns: 1fr; }
+    .admin-hero-kpis { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .ah-kpi:nth-child(2) { border-right: 0; }
+    .admin-charts-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .admin-hero-top { padding: 24px; }
+    .admin-hero-kpis { grid-template-columns: 1fr; padding: 22px 24px; }
+    .ah-kpi { border-right: 0; padding-right: 0; padding-bottom: 14px; border-bottom: 1px solid rgba(245,244,237,0.08); }
+    .admin-status-bar { flex-direction: column; align-items: stretch; }
+  }
+
   /* Row action buttons (admin) */
   .row-actions { display:inline-flex; gap:6px; justify-content:flex-end; }
   .row-action {
@@ -145,37 +457,126 @@
       <!-- ═══════ OVERVIEW ═══════ -->
       <section class="view is-active" data-view="overview">
 
-        <div class="page-head rev">
-          <div>
-            <h1>Platform health · <em id="hd-users">0</em> users active.</h1>
-            <p class="page-head-sub" id="hd-sub">All RFQs, quotes, and conversations across the network — searchable and editable from this console.</p>
+        <!-- Status bar -->
+        <div class="admin-status-bar">
+          <div class="status-pill ok">
+            <span class="dot"></span>
+            <span id="health-pill">All systems green · 99.98% · 14d</span>
+          </div>
+          <div class="status-actions">
+            <button class="btn-window" id="btn-window">Last 24h
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <button class="btn-export" id="btn-export">Export report</button>
           </div>
         </div>
 
-        <!-- KPI row: 8 cards, two rows -->
-        <div class="kpi-row stagger" id="kpi-stack">
-          <div class="kpi"><div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>Users · total</div><div class="kpi-value"><span id="k-users">0</span></div><div class="kpi-foot"><span class="delta up" id="k-users-delta">—</span><span>signups · 24h</span></div><div class="kpi-spark" id="sp-users"></div></div>
-          <div class="kpi"><div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></span>RFQs · total</div><div class="kpi-value"><span id="k-rfqs">0</span></div><div class="kpi-foot"><span class="delta" id="k-rfqs-delta">—</span><span>posted · 24h</span></div><div class="kpi-spark" id="sp-rfqs"></div></div>
-          <div class="kpi"><div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>Quotes · total</div><div class="kpi-value"><span id="k-quotes">0</span></div><div class="kpi-foot"><span class="delta" id="k-quotes-delta">—</span><span>sent · 24h</span></div><div class="kpi-spark" id="sp-quotes"></div></div>
-          <div class="kpi"><div class="kpi-label"><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1l9 4v7c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/></svg></span>Pending verification</div><div class="kpi-value"><span id="k-pending">0</span></div><div class="kpi-foot"><span class="delta">—</span><span>action needed</span></div><div class="kpi-spark" id="sp-pending"></div></div>
+        <!-- Live ticker -->
+        <div class="admin-ticker">
+          <span class="live-tag"><span class="dot"></span>LIVE</span>
+          <div class="ticker-track" id="ticker-track">
+            <div class="ticker-loop" id="ticker-loop-a">
+              <span class="ticker-item">Waiting for live events…</span>
+            </div>
+            <div class="ticker-loop" id="ticker-loop-b">
+              <span class="ticker-item">Waiting for live events…</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Composition + activity -->
-        <div class="chart-row rev">
+        <!-- Hero — dark editorial platform status -->
+        <div class="admin-hero">
+          <div class="admin-hero-top">
+            <div class="admin-hero-main">
+              <div class="admin-hero-eye"><span id="hero-eye">Platform status</span></div>
+              <h1 class="admin-hero-title">The platform's <em>pulse</em>, in one frame.</h1>
+              <p class="admin-hero-sub" id="hero-sub">Loading platform stats…</p>
+            </div>
+            <div class="admin-hero-health">
+              <div class="health-row"><span>API latency · p95</span><span class="health-value"><span class="dot"></span><span id="h-api">Operational</span></span></div>
+              <div class="health-row"><span>Database health</span><span class="health-value"><span class="dot" id="h-db-dot"></span><span id="h-db">Operational</span></span></div>
+              <div class="health-row"><span>Verification queue</span><span class="health-value"><span class="dot" id="h-verif-dot"></span><span id="h-verif">— pending</span></span></div>
+              <div class="health-row"><span>Realtime channels</span><span class="health-value"><span class="dot" id="h-rt-dot"></span><span id="h-rt">Connected</span></span></div>
+              <div class="health-row"><span>Last refresh</span><span class="health-value"><span class="dot"></span><span id="h-sync">—</span></span></div>
+            </div>
+          </div>
+
+          <!-- KPI cells -->
+          <div class="admin-hero-kpis">
+            <div class="ah-kpi">
+              <div class="ah-kpi-label">Verified businesses</div>
+              <div class="ah-kpi-value" id="ah-verified">0</div>
+              <div class="ah-kpi-delta"><span class="delta-chip up" id="ah-verified-delta">▲ —</span> <span>new this week</span></div>
+            </div>
+            <div class="ah-kpi">
+              <div class="ah-kpi-label">GMV · this quarter</div>
+              <div class="ah-kpi-value"><em>$</em><span id="ah-gmv">0</span><span class="small" id="ah-gmv-unit">k</span></div>
+              <div class="ah-kpi-delta"><span class="delta-chip up" id="ah-gmv-delta">▲ —</span> <span>QoQ</span></div>
+            </div>
+            <div class="ah-kpi">
+              <div class="ah-kpi-label">Active RFQs</div>
+              <div class="ah-kpi-value" id="ah-active">0</div>
+              <div class="ah-kpi-delta"><span class="delta-chip flat" id="ah-active-delta">— vs 7d</span> <span>open + quoted</span></div>
+            </div>
+            <div class="ah-kpi">
+              <div class="ah-kpi-label">Avg time-to-quote</div>
+              <div class="ah-kpi-value"><span id="ah-ttq">—</span><span class="small" id="ah-ttq-unit">h</span></div>
+              <div class="ah-kpi-delta"><span class="delta-chip flat" id="ah-ttq-delta">—</span> <span>across all RFQs</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts row -->
+        <div class="admin-charts-row">
           <div class="card">
-            <div class="card-head"><div><div class="card-title"><span class="card-title-eyebrow">By role</span>Account composition</div></div></div>
-            <div class="card-body" style="display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;">
-              <div class="chart-wrap" id="role-donut" style="width:200px;"></div>
-              <div id="role-legend" style="display:flex;flex-direction:column;gap:10px;font-size:0.85rem;"></div>
+            <div class="card-head">
+              <div>
+                <div class="ch-eye">Network growth · 12 months</div>
+                <h3 class="ch-title">Users by industry, stacked</h3>
+                <div class="ch-sub">Verified onboarded businesses, monthly cohorts</div>
+              </div>
+              <div class="seg-tabs" id="growth-mode">
+                <button class="is-on" data-mode="stacked">Stacked</button>
+                <button data-mode="cumulative">Cumulative</button>
+              </div>
+            </div>
+            <div class="growth-wrap">
+              <div class="chart-wrap" id="growth-chart" style="height:240px;"></div>
+            </div>
+            <div class="growth-legend">
+              <span><span class="sw" style="background:var(--ind-surgical);"></span>Surgical</span>
+              <span><span class="sw" style="background:var(--ind-sports);"></span>Sports</span>
+              <span><span class="sw" style="background:var(--ind-leather);"></span>Leather</span>
+              <span><span class="sw" style="background:var(--accent);"></span>Exporters</span>
             </div>
           </div>
 
           <div class="card">
-            <div class="card-head"><div><div class="card-title"><span class="card-title-eyebrow">Live</span>Recent activity</div></div></div>
-            <div class="card-body">
-              <div class="feed" id="overview-activity">
-                <div style="padding:24px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet.</div>
+            <div class="card-head">
+              <div>
+                <div class="ch-eye">RFQ flow</div>
+                <h3 class="ch-title">Quote conversion</h3>
+                <div class="ch-sub">Platform-wide funnel · last 30 days</div>
               </div>
+            </div>
+            <div class="fn-list" id="funnel-list">
+              <div class="fn-row"><div class="fn-row-label">RFQs posted<small>100%</small></div><div class="fn-bar"><span style="width:100%;"></span></div><div class="fn-row-val">0</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity feed below -->
+        <div class="card" style="margin-bottom:18px;">
+          <div class="card-head">
+            <div>
+              <div class="ch-eye">Live feed</div>
+              <h3 class="ch-title">Recent activity</h3>
+              <div class="ch-sub">Newest events across all tables</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="feed" id="overview-activity">
+              <div style="padding:18px;text-align:center;color:var(--text-muted);font-size:0.88rem;">No activity yet.</div>
             </div>
           </div>
         </div>
